@@ -1,0 +1,30 @@
+{
+  "name": "otoqol-backend",
+  "version": "1.0.0",
+  "description": "Otoqol driving-school SaaS backend",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "admin": "node scripts/admin.js",
+    "backup": "node scripts/admin.js backup",
+    "test": "node scripts/api-test.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "better-sqlite3": "^13.2.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "express": "^5.3.0",
+    "express-rate-limit": "^8.7.5",
+    "helmet": "^8.3.0",
+    "jsonwebtoken": "^9.0.3"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "private": true
+}

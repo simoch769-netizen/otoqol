@@ -1,0 +1,8 @@
+services:
+  otoqol:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment: { DATA_DIR: /data, HOST: 0.0.0.0 }
+    ports: ["127.0.0.1:3000:3000"]
+    volumes: ["./data:/data"]

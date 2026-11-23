@@ -1,0 +1,34 @@
+# Render Blueprint — New > Blueprint > pick this repo.
+# FREE plan: no persistent disk => the SQLite data is wiped on every redeploy/restart (fine for a demo).
+# To keep data: change plan to "starter" and uncomment the disk block + DATA_DIR below.
+services:
+  - type: web
+    name: otoqol
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node src/server.js
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NODE_ENV
+        value: production
+      - key: TRUST_PROXY
+        value: "1"
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ADMIN_TOKEN
+        generateValue: true
+      - key: SEED_SCHOOL_CODE
+        value: demo
+      - key: SEED_SCHOOL_NAME
+        value: Otoqol Demo
+      - key: SEED_SCHOOL_PASSWORD
+        sync: false          # Render asks you to type it when creating the Blueprint
+      # - key: DATA_DIR      # only with the paid disk below
+      #   value: /var/data
+    # disk:                  # needs plan: starter (paid)
+    #   name: otoqol-data
+    #   mountPath: /var/data
+    #   sizeGB: 1
