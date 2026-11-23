@@ -75,7 +75,7 @@ function auth(req, res, next) {
     const s = store.getSchoolById(p.sid);
     if (!s || s.token_gen !== p.gen) return res.status(401).json({ error: 'session_revoked' });
     if (!s.active) return res.status(403).json({ error: 'school_inactive' });
-    req.school = s; next();
+    req.school = s; req.appUser = p.u || null; next();
   } catch (e) { return res.status(401).json({ error: 'bad_session' }); }
 }
 const pub = s => ({ id: s.id, code: s.code, name: s.name });
@@ -94,10 +94,68 @@ app.post('/api/login', loginLimiter, (req, res) => {
   res.cookie(COOKIE, token, cookieOpts);
   res.json({ school: pub(s), token: req.body.wantToken ? token : undefined });
 });
+// ---------- single sign-in: school code + in-app username/password ----------
+// Same normalisation as the app's own login(): trim, Arabic-Indic digits -> 0-9, username case-insensitive.
+const nz = v => String(v == null ? '' : v).trim().replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
+const pwTag = p => crypto.createHash('sha256').update('otq:' + nz(p)).digest('base64url').slice(0, 12);
+const isOff = x => x && (x.active === false || x.disabled === true);
+function parseData(schoolId) {
+  const d = store.getData(schoolId);
+  if (!d || d.data == null) return null;
+  try { return JSON.parse(d.data); } catch (e) { return null; }
+}
+/** Find the in-app account the app itself would accept (users first, then monitors). */
+function findAppUser(data, username, password) {
+  if (!data) return null;
+  const un = nz(username).toLowerCase(), pw = nz(password);
+  const a = (data.users || []).find(x => x && nz(x.username).toLowerCase() === un && nz(x.password) === pw && !isOff(x));
+  if (a) return { id: a.id, name: a.name, role: a.role, tag: pwTag(a.password) };
+  const m = (data.monitors || []).find(x => x && nz(x.username).toLowerCase() === un && nz(x.password) === pw && !isOff(x));
+  if (m) return { id: m.id, name: m.name, role: 'monitor', tag: pwTag(m.password) };
+  return null;
+}
+const hasUsername = (data, un) => !!data && [...(data.users || []), ...(data.monitors || [])].some(x => x && nz(x.username).toLowerCase() === un);
+/** Is the session's app user still valid (exists, same password, not disabled)? */
+function appUserStillValid(data, u) {
+  if (!data) return u.id === 'u1';          // fresh school: only the setup owner
+  const list = u.role === 'monitor' ? (data.monitors || []) : (data.users || []);
+  const x = list.find(y => y && y.id === u.id);
+  if (!x || isOff(x)) return false;
+  return u.owner ? true : pwTag(x.password) === u.tag;
+}
+const signUser = (s, u) => jwt.sign({ sid: s.id, gen: s.token_gen, u }, JWT_SECRET, { expiresIn: SESSION_DAYS + 'd' });
+const pubUser = u => u && ({ id: u.id, name: u.name, role: u.role });
+
+app.post('/api/signin', loginLimiter, (req, res) => {
+  const { school, username, password } = req.body || {};
+  if (typeof school !== 'string' || typeof username !== 'string' || typeof password !== 'string' ||
+      !school.trim() || !username.trim() || school.length > 100 || username.length > 100 || password.length > 200)
+    return res.status(400).json({ error: 'bad_request' });
+  const s = store.findSchool(school);
+  if (!s) { store.checkPassword({ password_hash: DUMMY_HASH }, password); return res.status(401).json({ error: 'bad_credentials' }); }
+  const data = parseData(s.id);
+  let user = findAppUser(data, username, password), setup = false;
+  // Owner fallback: username "admin" + the SCHOOL password, only while no in-app account is called "admin"
+  // (fresh school, or the admin account was renamed/deleted). Logs in as the first manager (or the default u1 on a fresh school).
+  if (!user && nz(username).toLowerCase() === 'admin' && !hasUsername(data, 'admin') && store.checkPassword(s, password)) {
+    if (!data) { user = { id: 'u1', name: 'المدير', role: 'manager', owner: true }; setup = true; }
+    else { const m = (data.users || []).find(x => x && x.role === 'manager' && !isOff(x)); if (m) user = { id: m.id, name: m.name, role: 'manager', owner: true }; }
+  } else if (!user) store.checkPassword({ password_hash: DUMMY_HASH }, password); // keep timing similar
+  if (!user) return res.status(401).json({ error: 'bad_credentials' });
+  if (!s.active) return res.status(403).json({ error: 'school_inactive' });
+  res.cookie(COOKIE, signUser(s, user), cookieOpts);
+  res.json({ school: pub(s), user: pubUser(user), setup });
+});
+
 app.post('/api/logout', (req, res) => { res.clearCookie(COOKIE, { ...cookieOpts, maxAge: undefined }); res.json({ ok: true }); });
 app.get('/api/me', auth, (req, res) => {
   const d = store.getData(req.school.id);
-  res.json({ school: pub(req.school), version: d.version, empty: d.data == null, updated_at: d.updated_at });
+  // single sign-in sessions carry the app user; if that account was removed / its password changed, the session ends
+  if (req.appUser && !appUserStillValid(parseData(req.school.id), req.appUser)) {
+    res.clearCookie(COOKIE, { ...cookieOpts, maxAge: undefined });
+    return res.status(401).json({ error: 'user_changed' });
+  }
+  res.json({ school: pub(req.school), user: pubUser(req.appUser), version: d.version, empty: d.data == null, updated_at: d.updated_at });
 });
 
 // ---------- data ----------
