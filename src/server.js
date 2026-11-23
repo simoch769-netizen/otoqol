@@ -123,15 +123,22 @@ function appUserStillValid(data, u) {
   if (!x || isOff(x)) return false;
   return u.owner ? true : pwTag(x.password) === u.tag;
 }
+/** The deployment's school: DEFAULT_SCHOOL_CODE, else SEED_SCHOOL_CODE, else the first active school. */
+function defaultSchool() {
+  const code = process.env.DEFAULT_SCHOOL_CODE || process.env.SEED_SCHOOL_CODE;
+  if (code) return store.findSchool(code);
+  return store.db.prepare('SELECT * FROM schools WHERE active = 1 ORDER BY id LIMIT 1').get();
+}
 const signUser = (s, u) => jwt.sign({ sid: s.id, gen: s.token_gen, u }, JWT_SECRET, { expiresIn: SESSION_DAYS + 'd' });
 const pubUser = u => u && ({ id: u.id, name: u.name, role: u.role });
 
 app.post('/api/signin', loginLimiter, (req, res) => {
   const { school, username, password } = req.body || {};
-  if (typeof school !== 'string' || typeof username !== 'string' || typeof password !== 'string' ||
-      !school.trim() || !username.trim() || school.length > 100 || username.length > 100 || password.length > 200)
+  // one install per school: `school` is optional, default = this deployment's school
+  if ((school !== undefined && school !== null && typeof school !== 'string') || typeof username !== 'string' || typeof password !== 'string' ||
+      !username.trim() || (school && school.length > 100) || username.length > 100 || password.length > 200)
     return res.status(400).json({ error: 'bad_request' });
-  const s = store.findSchool(school);
+  const s = school && school.trim() ? store.findSchool(school) : defaultSchool();
   if (!s) { store.checkPassword({ password_hash: DUMMY_HASH }, password); return res.status(401).json({ error: 'bad_credentials' }); }
   const data = parseData(s.id);
   let user = findAppUser(data, username, password), setup = false;
