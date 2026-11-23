@@ -52,14 +52,17 @@ const arabicLeft = page => page.evaluate(() => {
     page.on('dialog', dlg => dlg.dismiss());
     await page.addInitScript(l => { try { localStorage.setItem('ae_lang', l); } catch (e) {} }, lang);
     const leftovers = {}; let scanned = 0; const add = (where, arr) => { scanned++; arr = arr.filter(x => x !== 'مدرسة الديمو'); /* school name = data */ if (lang !== 'ar' && arr.length) leftovers[where] = arr; };
-    await page.goto(B + '/'); await page.waitForSelector('.login input', { timeout: 30000 });
+    await page.goto(B + '/'); await page.waitForSelector('[data-oq-signin]', { timeout: 30000 });
     t(`[${lang}] dir=${lang === 'ar' ? 'rtl' : 'ltr'}`, (await page.evaluate(() => document.documentElement.dir)) === (lang === 'ar' ? 'rtl' : 'ltr'));
-    add('school-login', await arabicLeft(page)); await page.screenshot({ path: SHOTS + `i18n-${lang}-0-school-login.png` });
-    let inp = page.locator('.login input'); await inp.nth(0).fill(SC); await inp.nth(1).fill(SP); await page.click('.login button.b.pri');
-    await page.waitForSelector('.login input[type=checkbox]', { timeout: 15000 });
-    add('app-login', await arabicLeft(page)); await page.screenshot({ path: SHOTS + `i18n-${lang}-1-login.png` });
-    inp = page.locator('.login input:not([type=checkbox])'); await inp.nth(0).fill('admin'); await inp.nth(1).fill('1234'); await page.click('.login button.b.pri');
+    add('sign-in', await arabicLeft(page)); await page.screenshot({ path: SHOTS + `i18n-${lang}-0-signin.png` });
+    const signIn = async (u, p) => { await page.waitForSelector('[data-oq-signin]', { timeout: 30000 });
+      if (await page.locator('[data-oq-signin] input[name=school]').count()) await page.fill('[data-oq-signin] input[name=school]', SC);
+      await page.fill('[data-oq-signin] input[name=username]', u); await page.fill('[data-oq-signin] input[name=password]', p); await page.click('[data-oq-signin] button.b.pri'); };
+    // wrong password: error message on the single screen must be translated too
+    await signIn('admin', 'wrong'); await page.waitForSelector('[data-oq-signin] .al.bad'); add('sign-in error', await arabicLeft(page));
+    await signIn('admin', '1234');
     await page.waitForSelector('.nav'); await page.waitForTimeout(300);
+    t(`[${lang}] one sign-in goes straight to the app`, (await page.locator('.login').count()) === 0);
     const navCount = await page.locator('.nav button').count();
     for (let i = 0; i < navCount; i++) {
       const b = page.locator('.nav button').nth(i); const name = (await b.innerText()).trim();
@@ -95,8 +98,9 @@ const arabicLeft = page => page.evaluate(() => {
     if (lang !== 'ar') { const bad = msgs.filter(m => AR.test(m)); if (bad.length) leftovers['whatsapp'] = bad; } else t('[ar] WhatsApp templates in Arabic', msgs.every(m => AR.test(m)));
     console.log(`--- [${lang}] sample WhatsApp: ` + JSON.stringify(msgs[0]));
     // monitor role
-    await page.evaluate(() => { sessionStorage.removeItem('ae_user'); localStorage.removeItem('ae_user'); }); await page.reload();
-    await page.waitForSelector('.login input[type=checkbox]'); inp = page.locator('.login input:not([type=checkbox])'); await inp.nth(0).fill('karim'); await inp.nth(1).fill('1234'); await page.click('.login button.b.pri');
+    await page.evaluate(() => OQ.logoutSchool(true)); await page.waitForSelector('[data-oq-signin]', { timeout: 15000 });
+    add('sign-in (school remembered)', await arabicLeft(page)); await page.screenshot({ path: SHOTS + `i18n-${lang}-1-signin-remembered.png` });
+    await signIn('karim', '1234');
     await page.waitForSelector('.nav'); const mn = await page.locator('.nav button').count();
     for (let i = 0; i < mn; i++) { const b = page.locator('.nav button').nth(i); const name = (await b.innerText()).trim(); await b.click(); await page.waitForTimeout(150); add('monitor ' + name, await arabicLeft(page));
       const tabs = page.locator('.wrap .tabs button'); const tc = await tabs.count(); for (let k = 0; k < tc; k++) { await tabs.nth(k).click(); await page.waitForTimeout(100); add('monitor ' + name + ' / tab ' + k, await arabicLeft(page)); } }
