@@ -56,13 +56,13 @@ const arabicLeft = page => page.evaluate(() => {
     t(`[${lang}] dir=${lang === 'ar' ? 'rtl' : 'ltr'}`, (await page.evaluate(() => document.documentElement.dir)) === (lang === 'ar' ? 'rtl' : 'ltr'));
     add('sign-in', await arabicLeft(page)); await page.screenshot({ path: SHOTS + `i18n-${lang}-0-signin.png` });
     const signIn = async (u, p) => { await page.waitForSelector('[data-oq-signin]', { timeout: 30000 });
-      if (await page.locator('[data-oq-signin] input[name=school]').count()) await page.fill('[data-oq-signin] input[name=school]', SC);
       await page.fill('[data-oq-signin] input[name=username]', u); await page.fill('[data-oq-signin] input[name=password]', p); await page.click('[data-oq-signin] button.b.pri'); };
     // wrong password: error message on the single screen must be translated too
     await signIn('admin', 'wrong'); await page.waitForSelector('[data-oq-signin] .al.bad'); add('sign-in error', await arabicLeft(page));
     await signIn('admin', '1234');
     await page.waitForSelector('.nav'); await page.waitForTimeout(300);
     t(`[${lang}] one sign-in goes straight to the app`, (await page.locator('.login').count()) === 0);
+    t(`[${lang}] header logout button translated`, (await page.locator('[data-oq-logout]').innerText()).includes({ ar: 'تسجيل الخروج', fr: 'Déconnexion', en: 'Log out' }[lang]));
     const navCount = await page.locator('.nav button').count();
     for (let i = 0; i < navCount; i++) {
       const b = page.locator('.nav button').nth(i); const name = (await b.innerText()).trim();
@@ -99,7 +99,7 @@ const arabicLeft = page => page.evaluate(() => {
     console.log(`--- [${lang}] sample WhatsApp: ` + JSON.stringify(msgs[0]));
     // monitor role
     await page.evaluate(() => OQ.logoutSchool(true)); await page.waitForSelector('[data-oq-signin]', { timeout: 15000 });
-    add('sign-in (school remembered)', await arabicLeft(page)); await page.screenshot({ path: SHOTS + `i18n-${lang}-1-signin-remembered.png` });
+    add('sign-in (after logout)', await arabicLeft(page));
     await signIn('karim', '1234');
     await page.waitForSelector('.nav'); const mn = await page.locator('.nav button').count();
     for (let i = 0; i < mn; i++) { const b = page.locator('.nav button').nth(i); const name = (await b.innerText()).trim(); await b.click(); await page.waitForTimeout(150); add('monitor ' + name, await arabicLeft(page));

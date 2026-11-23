@@ -30,6 +30,8 @@ async function req(m, u, body, h = {}) {
 
   // ---------- single sign-in (/api/signin): school code + in-app username/password ----------
   const si = (u, p, sc = S) => req('POST', '/api/signin', { school: sc, username: u, password: p });
+  t('signin WITHOUT school -> default school of this install', (await req('POST', '/api/signin', { username: 'admin', password: '1234' })).j?.school?.code === S.toLowerCase()); cookie = '';
+  t('signin without school, wrong password -> 401', (await req('POST', '/api/signin', { username: 'admin', password: 'nope' })).s === 401);
   let r = await si('admin', '1234');
   t('signin admin/1234 -> 200 + cookie + manager', r.s === 200 && r.j.user.role === 'manager' && r.j.user.id === 'u1' && /otq_sess/.test(cookie), JSON.stringify(r.j));
   let me2 = await req('GET', '/api/me'); t('/api/me returns the app user', me2.s === 200 && me2.j.user && me2.j.user.id === 'u1', JSON.stringify(me2.j));
