@@ -35,7 +35,8 @@ const waitSaved = page => page.waitForSelector('[data-oq-sync=ok]', { timeout: 1
   t('logout button visible in the header', await pa.locator('.top [data-oq-logout]').isVisible());
   await waitSaved(pa); await pa.screenshot({ path: SHOTS + '2-app-dashboard.png' });
   const ca = await cookieOf(A); let s = await api('/api/db', ca);
-  t('setup: default DB pushed, admin password = school password', s.version >= 1 && s.data.users.find(u => u.id === 'u1').password === 'Demo2026!', 'v' + s.version);
+  const chk = await fetch(B + '/api/signin', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Otoqol': '1' }, body: JSON.stringify({ username: 'admin', password: 'Demo2026!' }) });
+  t('setup: default DB pushed, admin password = school password (and never sent back)', s.version >= 1 && chk.status === 200 && s.data.users.every(u => u.password === ''), 'v' + s.version);
   t('logged in as manager (all manager pages)', (await pa.locator('.nav button:has-text("المونيتورات")').count()) === 1);
   await setSchoolName(pa, 'مدرسة النجاح'); await pa.waitForTimeout(300); await waitSaved(pa);
   s = await api('/api/db', ca); t('UI edit saved to server', s.data.settings.school === 'مدرسة النجاح', 'v' + s.version);
