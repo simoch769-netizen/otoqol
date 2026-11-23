@@ -7,7 +7,9 @@
     "start": "node src/server.js",
     "admin": "node scripts/admin.js",
     "backup": "node scripts/admin.js backup",
-    "test": "node scripts/api-test.js"
+    "test": "node scripts/api-test.js",
+    "test:security": "node scripts/security-test.js",
+    "test:load": "node scripts/load-test.js"
   },
   "keywords": [],
   "author": "",
