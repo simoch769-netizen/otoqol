@@ -29,13 +29,18 @@ const plainDB = () => ({ settings: { school: 'Sec', absLimit: 3 },
   try {
     // ---- headers
     const home = await req('GET', '/');
+    const appPage = await req('GET', '/app');
+    t('/ = landing page, /app = the app (security headers on both)', /data-login/.test(home.text) && !/SchoolGate/.test(home.text) && /SchoolGate/.test(appPage.text)
+      && (appPage.h.get('content-security-policy') || '') === (home.h.get('content-security-policy') || '') && appPage.h.get('x-frame-options') === 'DENY');
+    t('/app deep refresh (e.g. /app/settings) serves the app', /SchoolGate/.test((await req('GET', '/app/settings')).text));
+    t('landing has no external scripts', !/<script[^>]+src=/i.test(home.text));
     const hh = k => home.h.get(k) || '';
     t('CSP present, no framing (frame-ancestors none)', /frame-ancestors 'none'/.test(hh('content-security-policy')) && /object-src 'none'/.test(hh('content-security-policy')));
     t('X-Frame-Options DENY', hh('x-frame-options') === 'DENY');
     t('nosniff + Referrer-Policy + Permissions-Policy', hh('x-content-type-options') === 'nosniff' && hh('referrer-policy') === 'no-referrer' && /camera=\(\)/.test(hh('permissions-policy')));
     t('HSTS in production', /max-age=31536000/.test(hh('strict-transport-security')));
     t('no X-Powered-By', !home.h.get('x-powered-by'));
-    t('CDN scripts pinned with SRI', (home.text.match(/integrity="sha384-/g) || []).length === 3 && !/unpkg\.com\/react@18\//.test(home.text));
+    t('CDN scripts pinned with SRI', (appPage.text.match(/integrity="sha384-/g) || []).length === 3 && !/unpkg\.com\/react@18\//.test(appPage.text));
 
     // ---- store plain-text passwords directly in the DB = how the live DB looks before this release
     const Database = require('better-sqlite3'); const raw = new Database(path.join(DIR, 'otoqol.sqlite'));
@@ -154,7 +159,7 @@ const plainDB = () => ({ settings: { school: 'Sec', absLimit: 3 },
       const ctx = await br.newContext(); const page = await ctx.newPage(); page.on('dialog', d => d.dismiss());
       const fresh = await signin('admin', '1234', nextIp());
       await ctx.addCookies([{ name: 'otq_sess', value: fresh.ck.split('=')[1], url: B, httpOnly: true, sameSite: 'Strict' }]);
-      await page.goto(B + '/'); await page.waitForSelector('.nav', { timeout: 30000 });
+      await page.goto(B + '/app'); await page.waitForSelector('.nav', { timeout: 30000 });
       await page.click('.nav button:has-text("المترشحون")'); await page.waitForTimeout(400);
       const shown = await page.locator('text=<img src=x').count();
       await page.locator('tr.cl').first().click(); await page.waitForTimeout(200);

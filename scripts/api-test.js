@@ -9,6 +9,8 @@ async function req(m, u, body, h = {}) {
   return { s: r.status, j, h: r.headers };
 }
 (async () => {
+  const home = await fetch(B + '/').then(r => r.text()), appHtml = await fetch(B + '/app').then(r => r.text());
+  t('GET / = landing page, GET /app = app', /data-login/.test(home) && /href="\/app"/.test(home) && /SchoolGate/.test(appHtml));
   t('unauth GET /api/db -> 401', (await req('GET', '/api/db')).s === 401);
   t('bad password -> 401', (await req('POST', '/api/login', { school: S, password: 'nope' })).s === 401);
   const l = await req('POST', '/api/login', { school: S, password: P });

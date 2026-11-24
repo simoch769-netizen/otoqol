@@ -10,7 +10,7 @@ const api = async (u, cookie) => (await fetch(B + u, { headers: { Cookie: cookie
 async function cookieOf(ctx) { const c = (await ctx.cookies()).find(x => x.name === 'otq_sess'); return c ? 'otq_sess=' + c.value : ''; }
 /** The single sign-in screen: username + password only (one install = one school). */
 async function signIn(page, base, user, pass, opts = {}) {
-  if (!opts.noGoto) await page.goto(base + '/');
+  if (!opts.noGoto) await page.goto(base + '/app');
   await page.waitForSelector('[data-oq-signin]', { timeout: 30000 });
   await page.fill('[data-oq-signin] input[name=username]', user); await page.fill('[data-oq-signin] input[name=password]', pass);
   if (opts.shot) await page.screenshot({ path: SHOTS + opts.shot });
@@ -27,6 +27,12 @@ const waitSaved = page => page.waitForSelector('[data-oq-sync=ok]', { timeout: 1
   const errs = [];
   const A = await browser.newContext({ viewport: { width: 1280, height: 800 } }); const pa = await A.newPage();
   pa.on('pageerror', e => errs.push(e.message)); pa.on('console', m => { if (m.type() === 'error' && !/40[13]/.test(m.text())) errs.push(m.text()); });
+
+  // landing page at / -> "log in" button opens the app at /app
+  await pa.goto(B + '/'); await pa.waitForSelector('a[data-login]', { timeout: 15000 });
+  t('landing at / (no sign-in form there)', (await pa.locator('[data-oq-signin]').count()) === 0 && (await pa.locator('#features').count()) === 1);
+  await pa.locator('header a[data-login]').click(); await pa.waitForSelector('[data-oq-signin]', { timeout: 30000 });
+  t('landing "تسجيل الدخول" button -> app sign-in at /app', new URL(pa.url()).pathname === '/app');
 
   // fresh school: admin + school password = first-time setup, straight into the app (one screen only)
   await signIn(pa, B, 'admin', 'Demo2026!', { shot: '1-signin.png' });
@@ -61,7 +67,7 @@ const waitSaved = page => page.waitForSelector('[data-oq-sync=ok]', { timeout: 1
   // header logout button, from a non-home screen -> back to the single screen
   await pa.click('.nav button:has-text("المالية")'); await waitSaved(pa);
   await pa.click('.top [data-oq-logout]'); await pa.waitForSelector('[data-oq-signin]', { timeout: 15000 });
-  t('header logout (from Finance) -> sign-in screen', true);
+  t('header logout (from Finance) -> sign-in screen, still at /app', new URL(pa.url()).pathname === '/app');
   t('sign-in screen: no school field', (await pa.locator('[data-oq-signin] input').count()) === 2);
   t('logout cleared the session cookie', !(await cookieOf(A)));
   await signIn(pa, B, 'admin', 'wrong', { noGoto: true });
@@ -80,7 +86,7 @@ const waitSaved = page => page.waitForSelector('[data-oq-sync=ok]', { timeout: 1
   for (let i = 0; i < 50; i++) { try { if ((await fetch(B2 + '/healthz')).ok) break; } catch (e) {} await new Promise(r => setTimeout(r, 200)); }
   try {
     const C = await browser.newContext(); const pc = await C.newPage();
-    await pc.goto(B2 + '/'); await pc.evaluate(() => localStorage.setItem('autoecole_db_v1', JSON.stringify({ settings: { school: 'Old', absLimit: 3 },
+    await pc.goto(B2 + '/app'); await pc.evaluate(() => localStorage.setItem('autoecole_db_v1', JSON.stringify({ settings: { school: 'Old', absLimit: 3 },
       users: [{ id: 'u1', name: 'المدير', role: 'manager', username: 'admin', password: '1234' }], monitors: [], vehicles: [],
       candidates: [{ id: 'old1', name: 'مترشح قديم' }, { id: 'old2', name: 'مترشح 2' }], sessions: [], payments: [], expenses: [], notifs: [], requests: [], notes: [], log: [] })));
     await signIn(pc, B2, 'admin', 'Import2026!');

@@ -52,7 +52,19 @@ const arabicLeft = page => page.evaluate(() => {
     page.on('dialog', dlg => dlg.dismiss());
     await page.addInitScript(l => { try { localStorage.setItem('ae_lang', l); } catch (e) {} }, lang);
     const leftovers = {}; let scanned = 0; const add = (where, arr) => { scanned++; arr = arr.filter(x => x !== 'مدرسة الديمو'); /* school name = data */ if (lang !== 'ar' && arr.length) leftovers[where] = arr; };
-    await page.goto(B + '/'); await page.waitForSelector('[data-oq-signin]', { timeout: 30000 });
+    // landing page (/) in this language
+    await page.goto(B + '/'); await page.waitForSelector('a[data-login]');
+    t(`[${lang}] landing dir`, (await page.evaluate(() => document.documentElement.dir)) === (lang === 'ar' ? 'rtl' : 'ltr'));
+    t(`[${lang}] landing login button`, (await page.locator('header a[data-login]').innerText()).trim() === { ar: 'تسجيل الدخول', fr: 'Connexion', en: 'Log in' }[lang]);
+    t(`[${lang}] landing has no pricing`, !/درهم|\bMAD\b|\bDH\b|\bprix\b|tarif|\bprices?\b|pricing/i.test(await page.evaluate(() => document.body.innerText)));
+    add('landing', (await arabicLeft(page)).filter(x => !/^(العربية)$/.test(x)));
+    t(`[${lang}] landing: no horizontal overflow`, (await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)) <= 1);
+    await page.screenshot({ path: SHOTS + `landing-${lang}-desktop.png`, fullPage: true });
+    await page.setViewportSize({ width: 390, height: 844 });
+    t(`[${lang}] landing mobile: no horizontal overflow`, (await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)) <= 1);
+    await page.screenshot({ path: SHOTS + `landing-${lang}-mobile.png`, fullPage: true });
+    await page.setViewportSize({ width: 1280, height: 820 });
+    await page.goto(B + '/app'); await page.waitForSelector('[data-oq-signin]', { timeout: 30000 });
     t(`[${lang}] dir=${lang === 'ar' ? 'rtl' : 'ltr'}`, (await page.evaluate(() => document.documentElement.dir)) === (lang === 'ar' ? 'rtl' : 'ltr'));
     add('sign-in', await arabicLeft(page)); await page.screenshot({ path: SHOTS + `i18n-${lang}-0-signin.png` });
     const signIn = async (u, p) => { await page.waitForSelector('[data-oq-signin]', { timeout: 30000 });
