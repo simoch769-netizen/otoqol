@@ -80,15 +80,21 @@ html[dir=rtl] .sh .k{letter-spacing:0}
 html[dir=rtl] .cbox:after{inset:-120px auto auto -90px}
 .cbox h2{font-size:36px;margin-bottom:12px}
 .cbox p{color:rgba(255,255,255,.85);font-size:18px}
-.cbox .cta{display:flex;flex-direction:column;gap:12px;align-items:flex-start;position:relative;z-index:1}
-.btn.ig{background:#fff;color:var(--deep)}.btn.ig:hover{background:var(--mint)}
+.cbox .cta{display:flex;flex-direction:column;gap:12px;align-items:stretch;position:relative;z-index:1}
 .btn.gh{border-color:rgba(255,255,255,.45);color:#fff}.btn.gh:hover{background:rgba(255,255,255,.1)}
-.handle{font-size:14px;color:rgba(255,255,255,.8);direction:ltr}
+.cl{display:flex;align-items:center;gap:14px;background:#fff;color:var(--deep);border-radius:16px;padding:12px 18px;width:100%;transition:.2s}
+.cl:hover{background:var(--mint)}
+.ci{flex:none;width:40px;height:40px;border-radius:12px;background:rgba(15,118,110,.1);color:var(--teal);display:flex;align-items:center;justify-content:center}
+.ci svg{width:22px;height:22px}
+.ct{display:flex;flex-direction:column;min-width:0}.ct small{font-size:13px;color:var(--slate)}.ct b{font-size:16px;overflow-wrap:anywhere;text-align:start}
+html[dir=rtl] .ct b{unicode-bidi:isolate}
 .accent{height:5px;background:linear-gradient(90deg,var(--teal),var(--aqua),var(--sand))}
 footer{background:var(--ink);color:#CBD5E1;padding:36px 0;font-size:14px}
 .ft{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
 .ft img{height:26px}
 .ft nav{display:flex;gap:22px}.ft a:hover{color:#fff}
+.fc{display:flex;gap:18px;flex-wrap:wrap;width:100%;order:3;padding-top:18px;border-top:1px solid rgba(255,255,255,.1)}
+.fc a{display:inline-flex;align-items:center;gap:8px}.fc svg{width:18px;height:18px;flex:none;color:var(--aqua)}
 /* responsive */
 @media (max-width:980px){
   .hg{grid-template-columns:1fr;gap:40px;padding:48px 0 64px}
@@ -112,6 +118,7 @@ footer{background:var(--ink);color:#CBD5E1;padding:36px 0;font-size:14px}
   .cbox h2{font-size:28px}
   .cbox .cta,.cbox .cta .btn{width:100%}
   .ft{flex-direction:column;text-align:center}
+  .fc{justify-content:center;gap:12px 18px}
 }
 </style>
 </head>
@@ -176,10 +183,11 @@ footer{background:var(--ink);color:#CBD5E1;padding:36px 0;font-size:14px}
 <section class="contact" id="contact">
   <div class="wrap">
     <div class="cbox">
-      <div style="position:relative;z-index:1"><h2 data-t="c_h">بغيتي Otoqol فالمدرسة ديالك؟</h2><p data-t="c_p">صيفط لينا ميساج فإنستغرام ونجاوبوك على كاع الأسئلة ديالك.</p></div>
+      <div style="position:relative;z-index:1"><h2 data-t="c_h">بغيتي Otoqol فالمدرسة ديالك؟</h2><p data-t="c_p">تواصل معانا فواتساب، إنستغرام ولا الإيميل، ونجاوبوك على كاع الأسئلة ديالك.</p></div>
       <div class="cta">
-        <a class="btn ig lgx" href="https://www.instagram.com/otoqol_officiel/" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".8" fill="currentColor"/></svg><span data-t="ig">تواصل معنا فإنستغرام</span></a>
-        <span class="handle">@otoqol_officiel</span>
+        <a class="cl" href="https://wa.me/212716396333" target="_blank" rel="noopener noreferrer" data-c="wa"><span class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.6 7.4L3 20.5l1.6-5.2A8.5 8.5 0 1 1 21 11.5z"/><path d="M9.2 8.6c.2-.4.5-.4.7-.4h.5c.2 0 .4.1.5.4l.6 1.5c.1.2 0 .5-.1.6l-.5.6c.6 1.1 1.4 1.9 2.5 2.5l.6-.5c.2-.1.4-.2.6-.1l1.5.6c.3.1.4.3.4.5v.5c0 .2 0 .5-.4.7-.5.3-1.2.5-1.9.3-2.3-.7-4.2-2.6-4.9-4.9-.2-.7 0-1.4.3-1.9z"/></svg></span><span class="ct"><small data-t="c_wa">واتساب</small><b dir="ltr">+212 716-396333</b></span></a>
+        <a class="cl" href="https://www.instagram.com/otoqol_officiel/" target="_blank" rel="noopener noreferrer" data-c="ig"><span class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".8" fill="currentColor"/></svg></span><span class="ct"><small data-t="c_ig">إنستغرام</small><b dir="ltr">@otoqol_officiel</b></span></a>
+        <a class="cl" href="mailto:contact.otoqol@gmail.com" data-c="em"><span class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m4 7 8 6 8-6"/></svg></span><span class="ct"><small data-t="c_em">الإيميل</small><b dir="ltr">contact.otoqol@gmail.com</b></span></a>
       </div>
     </div>
   </div>
@@ -191,6 +199,7 @@ footer{background:var(--ink);color:#CBD5E1;padding:36px 0;font-size:14px}
   <div class="wrap ft">
     <img src="/assets/otoqol-logo-white.svg" alt="Otoqol" width="86" height="26">
     <nav><a href="#features" data-t="nav_features">المميزات</a><a href="#contact" data-t="nav_contact">تواصل معنا</a><a href="/app" data-t="login">تسجيل الدخول</a></nav>
+    <div class="fc"><a href="https://wa.me/212716396333" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.6 7.4L3 20.5l1.6-5.2A8.5 8.5 0 1 1 21 11.5z"/><path d="M9.2 8.6c.2-.4.5-.4.7-.4h.5c.2 0 .4.1.5.4l.6 1.5c.1.2 0 .5-.1.6l-.5.6c.6 1.1 1.4 1.9 2.5 2.5l.6-.5c.2-.1.4-.2.6-.1l1.5.6c.3.1.4.3.4.5v.5c0 .2 0 .5-.4.7-.5.3-1.2.5-1.9.3-2.3-.7-4.2-2.6-4.9-4.9-.2-.7 0-1.4.3-1.9z"/></svg><span dir="ltr">+212 716-396333</span></a><a href="https://www.instagram.com/otoqol_officiel/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".8" fill="currentColor"/></svg><span dir="ltr">@otoqol_officiel</span></a><a href="mailto:contact.otoqol@gmail.com" aria-label="Email"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m4 7 8 6 8-6"/></svg><span dir="ltr">contact.otoqol@gmail.com</span></a></div>
     <span>© <span id="yr">2026</span> Otoqol · <span data-t="rights">جميع الحقوق محفوظة</span></span>
   </div>
 </footer>
@@ -211,7 +220,7 @@ footer{background:var(--ink);color:#CBD5E1;padding:36px 0;font-size:14px}
       r1_t:"Gérant",r1_h:"Voit tout",r1_a:"Tableau de bord et rapports",r1_b:"Utilisateurs et moniteurs",r1_c:"Finances et paramètres",
       r2_t:"Secrétaire",r2_h:"Le quotidien",r2_a:"Candidats et séances",r2_b:"Paiements et reçus",r2_c:"Véhicules et demandes",
       r3_t:"Moniteur",r3_h:"Son planning",r3_a:"Ses séances",r3_b:"Saisie des présences",r3_c:"Ses candidats et statistiques",
-      c_h:"Otoqol pour votre auto-école ?",c_p:"Envoyez-nous un message sur Instagram, nous répondons à toutes vos questions.",ig:"Nous écrire sur Instagram",rights:"Tous droits réservés"},
+      c_h:"Otoqol pour votre auto-école ?",c_p:"Contactez-nous sur WhatsApp, Instagram ou par e-mail, nous répondons à toutes vos questions.",c_wa:"WhatsApp",c_ig:"Instagram",c_em:"E-mail",rights:"Tous droits réservés"},
     en:{title:"Otoqol — Driving school management",nav_features:"Features",nav_roles:"Roles",nav_contact:"Contact",login:"Log in",kicker:"Driving school management",
       h1:"Run your driving school, <em>simply</em>",sub:"Students, lessons, instructors, vehicles and payments — all in one place, clear and organised.",
       contact_us:"Contact us",langs:"Available in:",f_k:"Features",f_h:"Everything you need, on one screen",f_p:"Simple tools that keep your school’s day-to-day work organised.",
@@ -225,7 +234,7 @@ footer{background:var(--ink);color:#CBD5E1;padding:36px 0;font-size:14px}
       r1_t:"Manager",r1_h:"Sees everything",r1_a:"Dashboard and reports",r1_b:"Users and instructors",r1_c:"Finance and settings",
       r2_t:"Secretary",r2_h:"Day-to-day work",r2_a:"Students and lessons",r2_b:"Payments and receipts",r2_c:"Vehicles and requests",
       r3_t:"Instructor",r3_h:"Their schedule",r3_a:"Their lessons",r3_b:"Attendance",r3_c:"Their students and stats",
-      c_h:"Want Otoqol for your school?",c_p:"Send us a message on Instagram and we’ll answer all your questions.",ig:"Message us on Instagram",rights:"All rights reserved"}
+      c_h:"Want Otoqol for your school?",c_p:"Reach us on WhatsApp, Instagram or by email and we’ll answer all your questions.",c_wa:"WhatsApp",c_ig:"Instagram",c_em:"Email",rights:"All rights reserved"}
   };
   var AR={title:document.title};
   document.querySelectorAll('[data-t]').forEach(function(el){AR[el.getAttribute('data-t')]=el.hasAttribute('data-html')?el.innerHTML:el.textContent;});
