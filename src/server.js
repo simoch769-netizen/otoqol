@@ -347,7 +347,11 @@ app.use('/api/admin', admin);
 
 app.get('/healthz', (req, res) => res.json({ ok: true }));
 app.use('/api', (req, res) => res.status(404).json({ error: 'not_found' }));
-app.use(express.static(path.join(__dirname, '..', 'public'), { index: 'index.html', maxAge: 0 }));
+const PUBLIC = path.join(__dirname, '..', 'public');
+// the app lives at /app (any /app/... path too, so a refresh never 404s); the landing page is /
+const sendApp = (req, res) => { res.set('Cache-Control', 'no-cache'); res.sendFile(path.join(PUBLIC, 'app', 'index.html')); };
+app.get(['/app', '/app/', '/app/{*rest}'], sendApp);
+app.use(express.static(PUBLIC, { index: 'index.html', maxAge: 0, redirect: false }));
 
 app.use((err, req, res, next) => {
   if (err.type === 'entity.too.large') return res.status(413).json({ error: 'too_large' });
