@@ -54,13 +54,17 @@ node scripts/admin.js backup [dir]                         # نسخة كاملة
 - الجواب ديال السيرفر **دائما عام** (`POST /api/forgot-password` → `{ok:true}`): ما كيبينش واش الحساب ولا الإيميل موجودين.
 - الرموز كيتحفظو مشفرين (hash)، وفي حد للطلبات لكل IP ولكل حساب (`FORGOT_PER_15MIN` / `FORGOT_PER_ACCOUNT_15MIN`).
 - الإيميل اختياري، والمدير كيزيدو من **الإعدادات → حسابات الفريق** (للمدير/السكريتيرة) ومن صفحة **المونيتورات**. خاص الإيميل يكون بصيغة صحيحة.
-- الإرسال بـ SMTP عبر `nodemailer`. المتغيرات:
-  - `SMTP_HOST` (الافتراضي `smtp.gmail.com`)
+- الإرسال كيتمرّ عبر HTTPS ديال **Brevo** إلا كان `BREVO_API_KEY` مضبوط (هذا هو المسار ديال الإنتاج، حيت Railway غالبا كيحبس SMTP). إلا ما كانش المفتاح، كيبقى الإرسال بـ SMTP عبر `nodemailer` (مفيد فالاختبارات المحلية و`SMTP_HOST=capture`).
+- `POST /api/forgot-password` كيرجع الرسالة العامة **دغيا** وما كيستناش الإرسال يسالي. الإرسال عندو مهلة تقريبا 10 ثواني (`MAIL_TIMEOUT_MS`).
+- المتغيرات:
+  - `BREVO_API_KEY` (مفتاح API ديال Brevo — تحطّو فـ Railway بنفسك، ما كيتكتبش هنا)
+  - `SMTP_HOST` (الافتراضي `smtp.gmail.com`) — الاحتياطي إلا ما كانش Brevo
   - `SMTP_PORT` (الافتراضي `465`)
   - `SMTP_USER` (الافتراضي `contact.otoqol@gmail.com`)
-  - `SMTP_PASS` (Gmail App Password — تحطّو فـ Railway بنفسك، ما كيتكتبش هنا)
-  - `MAIL_FROM` (الافتراضي `Otoqol <contact.otoqol@gmail.com>`)
-- إلا ما كانش `SMTP_PASS`، السيرفر **ما كيطّحش**: كيسجّل فاللوج وكيرجع نفس الرسالة العامة، بلا إيميل.
+  - `SMTP_PASS` (Gmail App Password — للاحتياطي SMTP فقط)
+  - `MAIL_FROM` (الافتراضي `Otoqol <contact.otoqol@gmail.com>`؛ المرسل فـ Brevo: الاسم Otoqol والإيميل contact.otoqol@gmail.com)
+  - `MAIL_TIMEOUT_MS` (الافتراضي `10000`)
+- إلا ما كانش لا `BREVO_API_KEY` ولا `SMTP_PASS`، السيرفر **ما كيطّحش**: كيسجّل فاللوج وكيرجع نفس الرسالة العامة، بلا إيميل.
 - الرسالة بالعربية الفصحى والفرنسية، موقعة «فريق Otoqol»، وفي التذييل واتساب `+212 716-396333`، إنستغرام `@otoqol_officiel`، و`contact.otoqol@gmail.com`.
 - إلا ما كانش إيميل مسجّل للحساب، ولا نسا المدير كلمة السر وما قدرش يسترجعها: دير export، بدل `password` ديال الحساب فالملف، ودير import.
 
