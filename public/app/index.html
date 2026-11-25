@@ -140,7 +140,7 @@ const counted=a=>a.status==='present'||a.status==='late';
 
 const defaultDB=()=>({
   settings:{school:'Otoqol',absLimit:3},
-  users:[{id:'u1',name:'المدير',role:'manager',username:'admin',password:'1234'},{id:'u2',name:'السكريتيرة',role:'secretary',username:'secretary',password:'1234'}],
+  users:[{id:'u1',name:'المدير',role:'manager',username:'admin',password:''},{id:'u2',name:'السكريتيرة',role:'secretary',username:'secretary',password:''}],
   monitors:[],vehicles:[],candidates:[],sessions:[],payments:[],expenses:[],notifs:[],requests:[],notes:[],log:[]
 });
 const load=()=>{try{const r=localStorage.getItem(KEY);if(r){const o=Object.assign(defaultDB(),JSON.parse(r));if(!o.settings||!o.settings.school||o.settings.school==='مدرسة السياقة'||o.settings.school==='مدرسة الأمل')o.settings=Object.assign({},o.settings,{school:'Otoqol'});return o;}}catch(e){}return defaultDB();};
