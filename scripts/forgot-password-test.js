@@ -30,6 +30,19 @@ function readCapture() {
   return fs.readFileSync(CAPTURE, 'utf8').split('\n').filter(Boolean).map(l => JSON.parse(l));
 }
 function lastMail() { const all = readCapture(); return all[all.length - 1] || null; }
+async function waitForMail(prevLen, ms = 2000) {
+  const t0 = Date.now();
+  while (Date.now() - t0 < ms) {
+    const all = readCapture();
+    if (all.length > prevLen) return all[all.length - 1];
+    await new Promise(r => setTimeout(r, 20));
+  }
+  return lastMail();
+}
+async function settleNoMail(prevLen, ms = 150) {
+  await new Promise(r => setTimeout(r, ms));
+  return readCapture().length === prevLen;
+}
 function codeFrom(mail) {
   if (!mail) return null;
   const m = String(mail.text || '').match(/(?:^|\n)(\d{6})(?:\n|$)/);
@@ -61,6 +74,7 @@ function startServer(extraEnv = {}) {
     SEED_SCHOOL_NAME: 'Demo',
     SEED_SCHOOL_PASSWORD: SCHOOL_PW,
     DEFAULT_SCHOOL_CODE: 'demo',
+    BREVO_API_KEY: '',
     SMTP_HOST: 'capture',
     SMTP_PORT: '465',
     SMTP_USER: 'contact.otoqol@gmail.com',
@@ -121,14 +135,14 @@ function kill(srv) {
     const before = readCapture().length;
     const unk = await forgot('no-such-user');
     t('unknown username -> generic 200 {ok:true}', unk.s === 200 && unk.j && unk.j.ok === true && !('email' in (unk.j || {})) && !('code' in (unk.j || {})));
-    t('unknown username does not send mail', readCapture().length === before);
+    t('unknown username does not send mail', await settleNoMail(before));
 
     const noem = await forgot('secretary');
-    t('account without email -> generic 200, no mail', noem.s === 200 && noem.j.ok === true && readCapture().length === before);
+    t('account without email -> generic 200, no mail', noem.s === 200 && noem.j.ok === true && await settleNoMail(before));
 
     const fp = await forgot('admin');
     t('known username+email -> generic 200 (no code in body)', fp.s === 200 && fp.j.ok === true && !JSON.stringify(fp.j).includes('@') && !/\d{6}/.test(JSON.stringify(fp.j)));
-    const mail1 = lastMail();
+    const mail1 = await waitForMail(before);
     const code1 = codeFrom(mail1);
     t('capture transport received a bilingual branded email', !!(mail1 && code1 && mail1.to === 'admin@example.com'
       && /فريق Otoqol/.test(mail1.text) && /Réinitialisation/.test(mail1.text)
@@ -155,16 +169,19 @@ function kill(srv) {
     t('other accounts unchanged (secretary still signs in)', (await signin('secretary', 'SecPass1')).s === 200);
 
     // monitor reset
+    const beforeM = readCapture().length;
     const fm = await forgot('karim');
-    const codeM = codeFrom(lastMail());
-    t('monitor request sends mail to monitor email', fm.s === 200 && lastMail().to === 'karim@example.com' && !!codeM);
+    const mailM = await waitForMail(beforeM);
+    const codeM = codeFrom(mailM);
+    t('monitor request sends mail to monitor email', fm.s === 200 && mailM && mailM.to === 'karim@example.com' && !!codeM);
     t('Arabic-Indic digits accepted for the code', (await reset('karim', codeM.replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]), 'MonPass2')).s === 200);
     t('monitor logs in with new password', (await signin('karim', 'MonPass2')).s === 200);
     t('monitor old password fails', (await signin('karim', 'MonPass1')).s === 401);
 
     // 5 attempts then lock
+    const beforeLock = readCapture().length;
     await forgot('admin');
-    const codeLock = codeFrom(lastMail());
+    const codeLock = codeFrom(await waitForMail(beforeLock));
     let lastAttempt;
     for (let i = 0; i < 5; i++) lastAttempt = await reset('admin', '111111', 'Whatever1');
     t('5 wrong attempts return invalid_code', lastAttempt.s === 400 && lastAttempt.j.error === 'invalid_code');
@@ -192,9 +209,10 @@ function kill(srv) {
     srv = startServer({ RESET_CODE_TTL_MS: '1' });
     t('server restarts with 1ms code TTL', await waitUp(), srv.logs());
     // re-seed is not needed: same DATA_DIR, passwords already updated
+    const beforeExp = readCapture().length;
     const fpExp = await forgot('admin');
     t('forgot still generic after restart', fpExp.s === 200 && fpExp.j.ok === true);
-    const codeExp = codeFrom(lastMail());
+    const codeExp = codeFrom(await waitForMail(beforeExp));
     await new Promise(r => setTimeout(r, 30));
     t('expired code is rejected', !!(codeExp) && (await reset('admin', codeExp, 'Another9')).s === 400);
     t('password still the current one after expiry', (await signin('admin', 'NewPass9')).s === 200);
@@ -217,6 +235,7 @@ function kill(srv) {
       DATA_DIR: unconfDir, DB_FILE: path.join(unconfDir, 'otoqol.sqlite'),
       JWT_SECRET: SECRET, ADMIN_TOKEN: ADMIN, COOKIE_SECURE: 'false',
       SEED_SCHOOL_CODE: 'demo', SEED_SCHOOL_PASSWORD: SCHOOL_PW, DEFAULT_SCHOOL_CODE: 'demo',
+      BREVO_API_KEY: '',
       SMTP_HOST: 'smtp.gmail.com', SMTP_PORT: '465', SMTP_USER: 'contact.otoqol@gmail.com',
       SMTP_PASS: '', MAIL_FROM: 'Otoqol <contact.otoqol@gmail.com>',
       SMTP_CAPTURE_FILE: unconfCap,
@@ -240,7 +259,7 @@ function kill(srv) {
     const j2 = await r2.json();
     t('unconfigured SMTP still returns generic 200', r2.status === 200 && j2.ok === true);
     t('unconfigured SMTP sends no mail', !fs.existsSync(unconfCap) || !fs.readFileSync(unconfCap, 'utf8').trim());
-    t('unconfigured SMTP is logged, process still alive', /SMTP not configured/.test(logs2) && (await fetch(B2 + '/healthz')).ok);
+    t('unconfigured SMTP is logged, process still alive', /not configured/.test(logs2) && (await fetch(B2 + '/healthz')).ok);
   } finally {
     await new Promise(resolve => { srv2.on('exit', () => resolve()); srv2.kill('SIGTERM'); setTimeout(() => { try { srv2.kill('SIGKILL'); } catch (e) {} }, 2000); });
   }
