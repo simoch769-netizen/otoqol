@@ -84,6 +84,8 @@ tr.cl{cursor:pointer}tr.cl:hover{background:#f8fafc}
 .pick label{display:flex;gap:8px;align-items:center;padding:4px 0}
 .pick input{width:auto}
 .login{max-width:360px;margin:12vh auto;padding:0 14px}
+.fp-link{display:block;width:100%;margin-top:10px;padding:6px;border:0;background:none;color:var(--p);cursor:pointer;font-size:14px;text-decoration:underline;text-underline-offset:3px}
+.al.ok{background:#dcfce7}
 .empty{text-align:center;color:var(--m);padding:24px}
 h3{margin:4px 0 10px}
 .nt{padding:10px;border-bottom:1px solid var(--bd)}.nt.un{background:#f0fdfa}
@@ -104,6 +106,9 @@ Object.assign(DICT.en,{"wa:الكود": "theory (code)", "wa:السياقة": "d
 /* i18n: single sign-in strings */
 Object.assign(DICT.fr,{"عمر جميع الخانات":"Veuillez remplir tous les champs","تسجيل الخروج":"Déconnexion"});
 Object.assign(DICT.en,{"عمر جميع الخانات":"Please fill in all fields","تسجيل الخروج":"Log out"});
+/* i18n: forgot password + account email */
+Object.assign(DICT.fr,{"نسيت كلمة السر؟":"Mot de passe oublié ?","استرجاع كلمة السر":"Récupération du mot de passe","أرسل رمز التحقق":"Envoyer le code","رمز التحقق":"Code de vérification","كلمة السر الجديدة":"Nouveau mot de passe","تأكيد كلمة السر":"Confirmer le mot de passe","تغيير كلمة السر":"Changer le mot de passe","رجوع لتسجيل الدخول":"Retour à la connexion","إذا كان هذا الحساب مرتبطًا ببريد إلكتروني، فقد أرسلنا إليه رمز التحقق.":"Si ce compte est associé à une adresse e-mail, un code de vérification lui a été envoyé.","تم تغيير كلمة السر. يمكنك تسجيل الدخول الآن.":"Le mot de passe a été modifié. Vous pouvez vous connecter.","الرمز غير صالح أو منتهي الصلاحية.":"Le code est invalide ou a expiré.","كلمتا السر غير متطابقتين":"Les mots de passe ne correspondent pas","البريد الإلكتروني":"E-mail","البريد الإلكتروني غير صالح":"Adresse e-mail invalide","اختياري — لاسترجاع كلمة السر":"Facultatif — pour retrouver le mot de passe","حفظ البريد":"Enregistrer l’e-mail","تم الحفظ":"Enregistré","تحديث البريد الإلكتروني لـ ":"Mise à jour de l’e-mail de ","حسابات الفريق":"Comptes de l’équipe","أضف بريدًا إلكترونيًا لكل حساب حتى يتمكن من استرجاع كلمة السر.":"Ajoutez un e-mail à chaque compte pour permettre la réinitialisation du mot de passe.","إعادة إرسال الرمز":"Renvoyer le code","أدخل الرمز الذي وصلك في البريد وكلمة السر الجديدة.":"Saisissez le code reçu par e-mail et le nouveau mot de passe.","اطلب رمز التحقق":"Demander un code de vérification"});
+Object.assign(DICT.en,{"نسيت كلمة السر؟":"Forgot password?","استرجاع كلمة السر":"Password recovery","أرسل رمز التحقق":"Send the code","رمز التحقق":"Verification code","كلمة السر الجديدة":"New password","تأكيد كلمة السر":"Confirm password","تغيير كلمة السر":"Change password","رجوع لتسجيل الدخول":"Back to sign in","إذا كان هذا الحساب مرتبطًا ببريد إلكتروني، فقد أرسلنا إليه رمز التحقق.":"If this account has an email address, we have sent a verification code to it.","تم تغيير كلمة السر. يمكنك تسجيل الدخول الآن.":"Your password has been changed. You can log in now.","الرمز غير صالح أو منتهي الصلاحية.":"The code is invalid or has expired.","كلمتا السر غير متطابقتين":"The passwords do not match","البريد الإلكتروني":"Email","البريد الإلكتروني غير صالح":"Invalid email address","اختياري — لاسترجاع كلمة السر":"Optional — to recover the password","حفظ البريد":"Save email","تم الحفظ":"Saved","تحديث البريد الإلكتروني لـ ":"Email updated for ","حسابات الفريق":"Team accounts","أضف بريدًا إلكترونيًا لكل حساب حتى يتمكن من استرجاع كلمة السر.":"Add an email to each account so they can recover their password.","إعادة إرسال الرمز":"Resend the code","أدخل الرمز الذي وصلك في البريد وكلمة السر الجديدة.":"Enter the code you received by email and your new password.","اطلب رمز التحقق":"Request a verification code"});
 /* i18n: extra strings (school login, sync badge, punctuation) */
 Object.assign(DICT.fr,{"كاينين تغييرات مازال ما تسجلوش فالسيرفر. واش متأكد بغيتي تخرج؟": "Des modifications ne sont pas encore enregistrées sur le serveur. Quitter quand même ?", "محفوظ": "Enregistré", "كيتسجل…": "Enregistrement…", "بلا انترنت — محفوظ فالجهاز": "Hors ligne — gardé sur l’appareil", "خاص تعاود الدخول": "Reconnexion requise", "خروج من حساب المدرسة": "Déconnecter l’école", "كود المدرسة ولا كلمة السر غالطين": "Code école ou mot de passe incorrect", "هاد الحساب موقوف، تواصل معانا": "Ce compte est désactivé, contactez-nous", "بزاف ديال المحاولات، عاود من بعد شوية": "Trop de tentatives, réessayez plus tard", "ما قدرناش نتواصلو مع السيرفر": "Impossible de joindre le serveur", "ما قدرناش نرفعو الداتا، عاود جرب": "Échec de l’envoi, réessayez", "كنحملو…": "Chargement…", "لقينا داتا قديمة محفوظة فهاد الجهاز": "Des données existent déjà sur cet appareil", "مترشح": "candidats", "حصة": "séances", "بغيتي ترفعها لحساب المدرسة فالسيرفر؟": "Voulez-vous l’envoyer sur le compte de l’école ?", "⬆ رفع الداتا للسيرفر": "⬆ Envoyer les données", "الداتا القديمة غادي تتمسح من هاد الجهاز. كمل؟": "Les anciennes données seront effacées de cet appareil. Continuer ?", "بداية جديدة بلا الداتا القديمة": "Commencer à zéro", "دخول حساب المدرسة": "Connexion de l’auto-école", "كود المدرسة ولا رقم الترخيص": "Code école ou n° de licence", "كلمة السر ديال المدرسة": "Mot de passe de l’école", "…": "…", "دخول": "Connexion", "؟": " ?", "،": ","});
 Object.assign(DICT.en,{"كاينين تغييرات مازال ما تسجلوش فالسيرفر. واش متأكد بغيتي تخرج؟": "Some changes are not saved to the server yet. Log out anyway?", "محفوظ": "Saved", "كيتسجل…": "Saving…", "بلا انترنت — محفوظ فالجهاز": "Offline — kept on this device", "خاص تعاود الدخول": "Please log in again", "خروج من حساب المدرسة": "Log out school", "كود المدرسة ولا كلمة السر غالطين": "Wrong school code or password", "هاد الحساب موقوف، تواصل معانا": "This account is disabled, contact us", "بزاف ديال المحاولات، عاود من بعد شوية": "Too many attempts, try again later", "ما قدرناش نتواصلو مع السيرفر": "Cannot reach the server", "ما قدرناش نرفعو الداتا، عاود جرب": "Upload failed, try again", "كنحملو…": "Loading…", "لقينا داتا قديمة محفوظة فهاد الجهاز": "Existing data was found on this device", "مترشح": "candidates", "حصة": "sessions", "بغيتي ترفعها لحساب المدرسة فالسيرفر؟": "Upload it to the school account on the server?", "⬆ رفع الداتا للسيرفر": "⬆ Upload data", "الداتا القديمة غادي تتمسح من هاد الجهاز. كمل؟": "Old data on this device will be removed. Continue?", "بداية جديدة بلا الداتا القديمة": "Start fresh", "دخول حساب المدرسة": "School account login", "كود المدرسة ولا رقم الترخيص": "School code or licence key", "كلمة السر ديال المدرسة": "School password", "…": "…", "دخول": "Log in", "؟": "?", "،": ","});
@@ -124,6 +129,7 @@ const fmt=n=>(Number(n)||0).toLocaleString(LANG==='en'?'en-US':'fr-FR')+_t(' د.
 const nm=(arr,id)=>{const x=arr.find(y=>y.id===id);return x?(x.name||x.plate):'—';};
 const dayLbl=d=>new Date(d+'T00:00:00').toLocaleDateString(LANG==='ar'?'ar-MA':LANG==='fr'?'fr-FR':'en-GB',{weekday:'long',day:'numeric',month:'long'});
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+const emailOk=s=>{s=String(s||'').trim();return !s||(s.length<=120&&/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(s));};
 const wa=(phone,text)=>{let p=(phone||'').replace(/\D/g,'');if(p.startsWith('00'))p=p.slice(2);else if(p.startsWith('0'))p='212'+p.slice(1);else if(p.length===9&&/^[5-7]/.test(p))p='212'+p;return 'https://wa.me/'+p+'?text='+encodeURIComponent(text);};
 const statusLbl=lbl({planned:'مبرمجة',present:'حاضر',late:'متأخر',absent:'غائب'});
 const typeLbl=lbl({code:'كود (نظري)',conduite:'تطبيقي (سياقة)'});
@@ -439,6 +445,7 @@ function Monitors(){
   const set=(k,v)=>setF(Object.assign({},f,{[k]:v}));
   const save=()=>{
     if(!f.name.trim()||!f.username.trim()||(!f.id&&!String(f.password||'').trim()))return alert(_t('الاسم، اسم المستخدم وكلمة السر ضروريين')); // editing: blank password = unchanged (passwords stay on the server)
+    if(!emailOk(f.email))return alert(_t('البريد الإلكتروني غير صالح'));
     const unk=x=>String(x||'').trim().toLowerCase();const taken=db.users.concat(db.monitors).some(u=>unk(u.username)===unk(f.username)&&u.id!==f.id);
     if(taken)return alert(_t('اسم المستخدم مستعمل من قبل'));
     upd(n=>{if(f.id){Object.assign(n.monitors.find(m=>m.id===f.id),f);}else{n.monitors.push(Object.assign({},f,{id:uid()}));}L(n,_t('مونيتور: ')+f.name);});
@@ -446,7 +453,7 @@ function Monitors(){
   };
   const del=m=>{if(!confirm(_t('حيد المونيتور ')+m.name+_t('؟')))return;if(db.sessions.some(s=>s.monitorId===m.id))return alert(_t('عندو حصص مسجلة. بدل الحصص أولا.'));upd(n=>{n.monitors=n.monitors.filter(x=>x.id!==m.id);});};
   return <div>
-    <div className="bar"><button className="b pri" onClick={()=>setF({name:'',phone:'',licenseNo:'',username:'',password:''})}>{_t("+ مونيتور جديد")}</button></div>
+    <div className="bar"><button className="b pri" onClick={()=>setF({name:'',phone:'',licenseNo:'',username:'',password:'',email:''})}>{_t("+ مونيتور جديد")}</button></div>
     <div className="tw"><table><thead><tr><th>{_t("الاسم")}</th><th>{_t("الهاتف")}</th><th>{_t("الرخصة المهنية")}</th><th>{_t("ساعات الشهر")}</th><th>{_t("المترشحون")}</th><th>{_t("نسبة النجاح")}</th><th>{_t("اسم الدخول")}</th><th></th></tr></thead><tbody>
       {db.monitors.map(m=>{const s=monStats(db,m.id);return <tr key={m.id}><td><b>{m.name}</b></td><td>{m.phone}</td><td>{m.licenseNo}</td><td>{s.hoursMonth}</td><td>{s.cands}</td><td>{s.rate===null?'—':s.rate+'%'}</td><td>{m.username}</td><td style={{whiteSpace:'nowrap'}}><button className="b" onClick={()=>setF(Object.assign({},m))}>{_t("تعديل")}</button><button className="b del" onClick={()=>del(m)}>✕</button></td></tr>;})}
       {!db.monitors.length&&<tr><td colSpan="8" className="empty">{_t("زيد أول مونيتور")}</td></tr>}
@@ -457,6 +464,7 @@ function Monitors(){
       <F l={_t("رقم الرخصة المهنية")}><input value={f.licenseNo} onChange={e=>set('licenseNo',e.target.value)}/></F>
       <F l={_t("اسم المستخدم (للدخول)")}><input value={f.username} onChange={e=>set('username',e.target.value)}/></F>
       <F l={_t("كلمة السر")}><input value={f.password} onChange={e=>set('password',e.target.value)}/></F>
+      <F l={_t("البريد الإلكتروني")}><input type="email" dir="ltr" data-oq-monitor-email="" value={f.email||''} placeholder={_t("اختياري — لاسترجاع كلمة السر")} onChange={e=>set('email',e.target.value)}/></F>
       <div className="row"><button className="b pri" onClick={save}>{_t("حفظ")}</button></div>
     </Modal>}
   </div>;
@@ -649,7 +657,14 @@ function MyStats(){
 function PwRow({u}){
   const {upd,L}=useC();
   const [v,setV]=useState('');
-  return <div className="row" style={{alignItems:'center'}}><span style={{minWidth:90}}>{_t(u.name)} ({u.username})</span><input style={{maxWidth:200}} placeholder={_t("كلمة سر جديدة")} value={v} onChange={e=>setV(e.target.value)}/><button className="b" onClick={()=>{if(v.trim().length<4)return alert(_t('4 حروف على الأقل'));upd(n=>{n.users.find(x=>x.id===u.id).password=v.trim();L(n,_t('تغيير كلمة سر ')+u.name);});setV('');alert(_t('تبدلات'));}}>{_t("تغيير")}</button></div>;
+  const [em,setEm]=useState(u.email||'');
+  const saveEmail=()=>{if(!emailOk(em))return alert(_t('البريد الإلكتروني غير صالح'));upd(n=>{const x=n.users.find(y=>y.id===u.id);if(x)x.email=em.trim();L(n,_t('تحديث البريد الإلكتروني لـ ')+u.name);});alert(_t('تم الحفظ'));};
+  return <div style={{marginBottom:12,paddingBottom:12,borderBottom:'1px solid var(--bd)'}} data-oq-staff-row={u.username}>
+    <div className="row" style={{alignItems:'center'}}><span style={{minWidth:90}}>{_t(u.name)} ({u.username})</span></div>
+    <F l={_t("البريد الإلكتروني")}><input type="email" dir="ltr" data-oq-user-email={u.username} value={em} placeholder={_t("اختياري — لاسترجاع كلمة السر")} onChange={e=>setEm(e.target.value)}/></F>
+    <div className="row"><button type="button" className="b" data-oq-save-email={u.username} onClick={saveEmail}>{_t("حفظ البريد")}</button></div>
+    <div className="row" style={{alignItems:'center'}}><input style={{maxWidth:200}} placeholder={_t("كلمة سر جديدة")} value={v} onChange={e=>setV(e.target.value)}/><button className="b" onClick={()=>{if(v.trim().length<4)return alert(_t('4 حروف على الأقل'));upd(n=>{n.users.find(x=>x.id===u.id).password=v.trim();L(n,_t('تغيير كلمة سر ')+u.name);});setV('');alert(_t('تبدلات'));}}>{_t("تغيير")}</button></div>
+  </div>;
 }
 function AdminSettings(){
   const {db,upd,replace}=useC();
@@ -662,7 +677,7 @@ function AdminSettings(){
       <F l={_t("اسم المدرسة")}><input value={school} onChange={e=>setSchool(e.target.value)}/></F>
       <F l={_t("عدد الغيابات قبل التنبيه")}><input type="number" min="1" value={lim} onChange={e=>setLim(e.target.value)}/></F>
     </div><button className="b pri" onClick={()=>upd(n=>{n.settings.school=school||'Otoqol';n.settings.absLimit=Math.max(1,Number(lim)||3);})}>{_t("حفظ")}</button></div>
-    <div className="card"><h3>{_t("كلمات السر")}</h3>{db.users.map(u=><PwRow key={u.id} u={u}/>)}</div>
+    <div className="card" data-oq-team-accounts=""><h3>{_t("حسابات الفريق")}</h3><p className="meta">{_t("أضف بريدًا إلكترونيًا لكل حساب حتى يتمكن من استرجاع كلمة السر.")}</p>{db.users.map(u=><PwRow key={u.id} u={u}/>)}</div>
     <div className="card"><h3>{_t("النسخ الاحتياطي")}</h3>
       <p className="meta">{_t("الداتا كتتحفظ أوتوماتيكيا فهاد المتصفح. دير نسخة احتياطية بشكل منتظم (مرة فالأسبوع على الأقل).")}</p>
       <div className="row"><button className="b pri" onClick={exp}>{_t("⬇ تحميل نسخة احتياطية")}</button><label className="b">{_t("⬆ استرجاع من ملف")}<input type="file" accept=".json" onChange={imp} style={{display:'none'}}/></label><button className="b del" onClick={()=>{if(confirm(_t('غادي تمسح كل الداتا نهائيا!'))&&confirm(_t('متأكد؟')))replace(defaultDB());}}>{_t("مسح كل شيء")}</button></div></div>
@@ -898,6 +913,8 @@ function SchoolGate(){
   const [phase,setPhase]=useState('check');const [school,setSchool]=useState(null);const [server,setServer]=useState(null);
   const [un,setUn]=useState('');
   const [pw,setPw]=useState('');const [err,setErr]=useState('');const [busy,setBusy]=useState(false);
+  const [fpStep,setFpStep]=useState(null);const [fpUn,setFpUn]=useState('');const [fpCode,setFpCode]=useState('');
+  const [fpPw,setFpPw]=useState('');const [fpPw2,setFpPw2]=useState('');const [fpMsg,setFpMsg]=useState('');
   const [lang,setLangS]=useState(LANG);const [legacy,setLegacy]=useState(null);
   const pend=React.useRef({user:null,setupPw:null});
   const setLang=l=>{LANG=l;try{localStorage.setItem('ae_lang',l);}catch(e){}setLangS(l);};
@@ -942,6 +959,31 @@ function SchoolGate(){
       _t('ما قدرناش نتواصلو مع السيرفر'));}
     finally{setBusy(false);}
   };
+  const backToLogin=()=>{setFpStep(null);setFpCode('');setFpPw('');setFpPw2('');setFpMsg('');setErr('');};
+  const requestCode=async()=>{
+    if(busy)return;setErr('');setFpMsg('');
+    if(!fpUn.trim())return setErr(_t('عمر جميع الخانات'));
+    setBusy(true);
+    try{await OQ.api('POST','/api/forgot-password',{username:fpUn.trim()});
+      setFpMsg(_t('إذا كان هذا الحساب مرتبطًا ببريد إلكتروني، فقد أرسلنا إليه رمز التحقق.'));
+      setFpStep('code');}
+    catch(e){setErr(e.status===429?_t('بزاف ديال المحاولات، عاود من بعد شوية'):_t('ما قدرناش نتواصلو مع السيرفر'));}
+    finally{setBusy(false);}
+  };
+  const submitReset=async()=>{
+    if(busy)return;setErr('');setFpMsg('');
+    if(!fpUn.trim()||!fpCode.trim()||!fpPw)return setErr(_t('عمر جميع الخانات'));
+    if(fpPw!==fpPw2)return setErr(_t('كلمتا السر غير متطابقتين'));
+    if(fpPw.trim().length<4)return setErr(_t('4 حروف على الأقل'));
+    setBusy(true);
+    try{await OQ.api('POST','/api/reset-password',{username:fpUn.trim(),code:fpCode.trim(),password:fpPw});
+      setFpPw('');setFpPw2('');setFpCode('');setFpStep('done');}
+    catch(e){setErr(e.status===429?_t('بزاف ديال المحاولات، عاود من بعد شوية'):
+      e.body&&e.body.error==='weak_password'?_t('4 حروف على الأقل'):
+      e.status===400?_t('الرمز غير صالح أو منتهي الصلاحية.'):
+      _t('ما قدرناش نتواصلو مع السيرفر'));}
+    finally{setBusy(false);}
+  };
   const doImport=async up=>{
     setBusy(true);setErr('');
     try{let data;
@@ -963,6 +1005,30 @@ function SchoolGate(){
     <button type="button" className="b pri" style={{width:'100%',marginBottom:8}} disabled={busy} onClick={()=>doImport(true)}>{_t('⬆ رفع الداتا للسيرفر')}</button>
     <button type="button" className="b" style={{width:'100%'}} disabled={busy} onClick={()=>{if(confirm(_t('الداتا القديمة غادي تتمسح من هاد الجهاز. كمل؟')))doImport(false);}}>{_t('بداية جديدة بلا الداتا القديمة')}</button>
   </div></div>;
+  if(fpStep==='user'||fpStep==='code'||fpStep==='done')return <div className="login"><div className="card" data-oq-forgot={fpStep} onKeyDown={e=>{if(e.key==='Enter'){if(fpStep==='user')requestCode();else if(fpStep==='code')submitReset();}}}>
+    {LangSel}
+    <div className="lk"><Wordmark teal h={56}/><div className="tag">{_t('استرجاع كلمة السر')}</div></div>
+    {fpStep==='user'&&<div>
+      <F l={_t('اسم المستخدم')}><input name="username" value={fpUn} dir="ltr" autoComplete="username" autoCapitalize="none" autoCorrect="off" spellCheck="false" onChange={e=>setFpUn(e.target.value)} autoFocus/></F>
+      {err&&<div className="al bad">{err}</div>}
+      <button type="button" className="b pri" style={{width:'100%'}} disabled={busy} onClick={requestCode}>{busy?_t('…'):_t('أرسل رمز التحقق')}</button>
+    </div>}
+    {fpStep==='code'&&<div>
+      {fpMsg&&<div className="al ok">{fpMsg}</div>}
+      <p className="meta">{_t('أدخل الرمز الذي وصلك في البريد وكلمة السر الجديدة.')}</p>
+      <F l={_t('رمز التحقق')}><input name="code" value={fpCode} dir="ltr" inputMode="numeric" autoComplete="one-time-code" autoCapitalize="none" autoCorrect="off" onChange={e=>setFpCode(e.target.value)} autoFocus/></F>
+      <F l={_t('كلمة السر الجديدة')}><input name="new-password" type="password" dir="ltr" autoComplete="new-password" autoCapitalize="none" autoCorrect="off" value={fpPw} onChange={e=>setFpPw(e.target.value)}/></F>
+      <F l={_t('تأكيد كلمة السر')}><input name="confirm-password" type="password" dir="ltr" autoComplete="new-password" autoCapitalize="none" autoCorrect="off" value={fpPw2} onChange={e=>setFpPw2(e.target.value)}/></F>
+      {err&&<div className="al bad">{err}</div>}
+      <button type="button" className="b pri" style={{width:'100%',marginBottom:8}} disabled={busy} onClick={submitReset}>{busy?_t('…'):_t('تغيير كلمة السر')}</button>
+      <button type="button" className="b" style={{width:'100%'}} disabled={busy} onClick={requestCode}>{_t('إعادة إرسال الرمز')}</button>
+    </div>}
+    {fpStep==='done'&&<div data-oq-forgot-done="">
+      <div className="al ok">{_t('تم تغيير كلمة السر. يمكنك تسجيل الدخول الآن.')}</div>
+      <button type="button" className="b pri" style={{width:'100%'}} onClick={backToLogin}>{_t('رجوع لتسجيل الدخول')}</button>
+    </div>}
+    {fpStep!=='done'&&<button type="button" className="fp-link" onClick={backToLogin}>{_t('رجوع لتسجيل الدخول')}</button>}
+  </div></div>;
   return <div className="login"><div className="card" data-oq-signin="" onKeyDown={e=>{if(e.key==='Enter')go();}}>
     {LangSel}
     <div className="lk"><Wordmark teal h={56}/><div className="tag">{_t('تسيير مدارس السياقة')}</div></div>
@@ -970,6 +1036,7 @@ function SchoolGate(){
     <F l={_t('كلمة السر')}><input name="password" type="password" dir="ltr" autoComplete="current-password" autoCapitalize="none" autoCorrect="off" value={pw} onChange={e=>setPw(e.target.value)}/></F>
     {err&&<div className="al bad">{err}</div>}
     <button type="button" className="b pri" style={{width:'100%'}} disabled={busy} onClick={go}>{busy?_t('…'):_t('دخول')}</button>
+    <button type="button" className="fp-link" data-oq-forgot-link="" onClick={()=>{setFpStep('user');setFpUn(un);setErr('');setFpMsg('');setFpCode('');setFpPw('');setFpPw2('');}}>{_t('نسيت كلمة السر؟')}</button>
   </div></div>;
 }
 
