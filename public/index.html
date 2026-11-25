@@ -73,6 +73,11 @@ html[dir=rtl] .sh .k{letter-spacing:0}
 .roles ul{list-style:none;margin-top:14px;display:grid;gap:9px}
 .roles li{display:flex;gap:10px;color:var(--slate);font-size:15px;align-items:flex-start}
 .roles li:before{content:"";flex:none;width:18px;height:18px;margin-top:3px;border-radius:50%;background:var(--teal) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 12 4 4 8-8'/%3E%3C/svg%3E") center/12px no-repeat}
+/* stats */
+.stats{padding:36px 0 32px;background:#fff;border-bottom:1px solid var(--line)}
+.stat{text-align:center}
+.stat strong{display:block;font-family:Outfit,sans-serif;font-size:56px;font-weight:700;color:var(--teal);letter-spacing:-.03em;line-height:1;direction:ltr;unicode-bidi:isolate}
+.stat p{margin-top:8px;color:var(--slate);font-size:17px;font-weight:500}
 /* contact */
 .contact{padding:0 0 96px}
 .cbox{position:relative;overflow:hidden;border-radius:28px;background:linear-gradient(135deg,var(--deep),var(--teal) 60%,#14897F);color:#fff;padding:64px 56px;display:grid;grid-template-columns:1.4fr 1fr;gap:32px;align-items:center}
@@ -119,6 +124,9 @@ footer{background:var(--ink);color:#CBD5E1;padding:36px 0;font-size:14px}
   .cbox .cta,.cbox .cta .btn{width:100%}
   .ft{flex-direction:column;text-align:center}
   .fc{justify-content:center;gap:12px 18px}
+  .stats{padding:28px 0}
+  .stat strong{font-size:48px}
+  .stat p{font-size:16px}
 }
 </style>
 </head>
@@ -152,6 +160,15 @@ footer{background:var(--ink);color:#CBD5E1;padding:36px 0;font-size:14px}
       <div class="langs"><span data-t="langs">متوفر بـ:</span><b>العربية</b><b>Français</b><b>English</b></div>
     </div>
     <div class="shot"><div class="bar"><span></span><span></span><span></span></div><img id="shot" src="/assets/app-ar.jpg" alt="Otoqol" width="1280" height="800"></div>
+  </div>
+</section>
+
+<section class="stats">
+  <div class="wrap">
+    <div class="stat">
+      <strong>60</strong>
+      <p data-t="stat_p">مدرسة سياقة تثق في Otoqol</p>
+    </div>
   </div>
 </section>
 
@@ -209,7 +226,7 @@ footer{background:var(--ink);color:#CBD5E1;padding:36px 0;font-size:14px}
   var T={
     fr:{title:"Otoqol — Gestion d’auto-école",nav_features:"Fonctionnalités",nav_roles:"Rôles",nav_contact:"Contact",login:"Connexion",kicker:"Gestion d’auto‑école",
       h1:"Pilotez votre auto‑école, <em>simplement</em>",sub:"Candidats, séances, moniteurs, véhicules et paiements — tout au même endroit, clair et organisé.",
-      contact_us:"Nous contacter",langs:"Disponible en :",f_k:"Fonctionnalités",f_h:"Tout ce qu’il vous faut, sur un seul écran",f_p:"Des outils simples pour une gestion quotidienne organisée et maîtrisée.",
+      contact_us:"Nous contacter",langs:"Disponible en :",stat_p:"auto-écoles font confiance à Otoqol",f_k:"Fonctionnalités",f_h:"Tout ce qu’il vous faut, sur un seul écran",f_p:"Des outils simples pour une gestion quotidienne organisée et maîtrisée.",
       f1_h:"Candidats",f1_p:"Un dossier complet par candidat : étapes, examens et suivi de la progression.",
       f2_h:"Séances et présences",f2_p:"Planification des séances, présences et absences, avec détection des conflits entre moniteurs et véhicules.",
       f3_h:"Moniteurs",f3_p:"Un compte par moniteur, avec son planning, ses candidats et ses statistiques.",
@@ -223,7 +240,7 @@ footer{background:var(--ink);color:#CBD5E1;padding:36px 0;font-size:14px}
       c_h:"Otoqol pour votre auto-école ?",c_p:"Contactez-nous sur WhatsApp, Instagram ou par e-mail, nous répondons à toutes vos questions.",c_wa:"WhatsApp",c_ig:"Instagram",c_em:"E-mail",rights:"Tous droits réservés"},
     en:{title:"Otoqol — Driving school management",nav_features:"Features",nav_roles:"Roles",nav_contact:"Contact",login:"Log in",kicker:"Driving school management",
       h1:"Run your driving school, <em>simply</em>",sub:"Students, lessons, instructors, vehicles and payments — all in one place, clear and organised.",
-      contact_us:"Contact us",langs:"Available in:",f_k:"Features",f_h:"Everything you need, on one screen",f_p:"Simple tools that keep your school’s day-to-day work organised.",
+      contact_us:"Contact us",langs:"Available in:",stat_p:"driving schools trust Otoqol",f_k:"Features",f_h:"Everything you need, on one screen",f_p:"Simple tools that keep your school’s day-to-day work organised.",
       f1_h:"Students",f1_p:"A complete file for each student: stages, exams and progress tracking.",
       f2_h:"Lessons & attendance",f2_p:"Schedule lessons, record attendance and absences, with conflict detection for instructors and vehicles.",
       f3_h:"Instructors",f3_p:"An account for each instructor, with their schedule, students and stats.",
