@@ -8,6 +8,7 @@ const cookieParser = require('cookie-parser');
 const rateLimit = require('express-rate-limit');
 const jwt = require('jsonwebtoken');
 const store = require('./db');
+const mail = require('./mail');
 
 const PORT = Number(process.env.PORT || 3000);
 const HOST = process.env.HOST || '0.0.0.0';
@@ -241,6 +242,150 @@ app.post('/api/signin', loginLimiter, accountLimiter, (req, res) => {
   res.json({ school: pub(s), user: pubUser(user), setup });
 });
 
+
+const EMAIL_RE = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+const normEmail = v => String(v == null ? '' : v).trim();
+function validEmail(v) {
+  const e = normEmail(v);
+  if (!e) return true;
+  return e.length <= 120 && EMAIL_RE.test(e);
+}
+/** Optional email on staff / monitors. Empty is cleared; invalid format rejects the whole write. */
+function sanitizeEmails(data) {
+  for (const k of ['users', 'monitors']) {
+    for (const x of (data[k] || [])) {
+      if (!x || typeof x !== 'object') continue;
+      if (x.email == null || x.email === '') { delete x.email; continue; }
+      if (typeof x.email !== 'string' || !validEmail(x.email)) return false;
+      x.email = normEmail(x.email);
+    }
+  }
+  return true;
+}
+/** Find an in-app account by username only (users first, then monitors). Skips disabled accounts. */
+function findAccountByUsername(data, username) {
+  if (!data) return null;
+  const un = nz(username).toLowerCase();
+  const pick = (list, role) => {
+    const x = (list || []).find(y => y && typeof y === 'object' && nz(y.username).toLowerCase() === un && !isOff(y));
+    return x ? { rec: x, role: role || x.role } : null;
+  };
+  return pick(data.users) || pick(data.monitors, 'monitor');
+}
+
+const RESET_TTL_MS = Number(process.env.RESET_CODE_TTL_MS || 15 * 60_000);
+const RESET_MAX_ATTEMPTS = Number(process.env.RESET_MAX_ATTEMPTS || 5);
+const resetCodes = new Map(); // key: schoolId + ':' + usernameLower
+const hashResetCode = code => crypto.createHash('sha256').update('otq-reset:' + JWT_SECRET + ':' + String(code)).digest('hex');
+function resetKey(schoolId, username) { return String(schoolId) + ':' + nz(username).toLowerCase(); }
+function purgeResetCodes() {
+  const now = Date.now();
+  for (const [k, v] of resetCodes) if (!v || v.expires <= now) resetCodes.delete(k);
+}
+setInterval(purgeResetCodes, 60_000).unref();
+
+function genResetCode() { return String(crypto.randomInt(0, 1_000_000)).padStart(6, '0'); }
+function storeResetCode(schoolId, username, meta) {
+  const code = genResetCode();
+  resetCodes.set(resetKey(schoolId, username), {
+    hash: hashResetCode(code),
+    expires: Date.now() + RESET_TTL_MS,
+    attempts: 0,
+    userId: meta.userId,
+    role: meta.role,
+  });
+  return code;
+}
+function takeResetCode(schoolId, username, code) {
+  purgeResetCodes();
+  const key = resetKey(schoolId, username);
+  const rec = resetCodes.get(key);
+  if (!rec || rec.expires <= Date.now()) { resetCodes.delete(key); return { ok: false }; }
+  rec.attempts += 1;
+  const typed = nz(code);
+  const match = typed.length === 6 && /^\d{6}$/.test(typed)
+    && crypto.timingSafeEqual(Buffer.from(rec.hash, 'hex'), Buffer.from(hashResetCode(typed), 'hex'));
+  if (!match) {
+    if (rec.attempts >= RESET_MAX_ATTEMPTS) resetCodes.delete(key);
+    return { ok: false };
+  }
+  resetCodes.delete(key);
+  return { ok: true, userId: rec.userId, role: rec.role };
+}
+function updateAccountPassword(schoolId, role, userId, hashed) {
+  for (let i = 0; i < 5; i++) {
+    const cur = store.getData(schoolId);
+    if (!cur || cur.data == null) return false;
+    const data = JSON.parse(cur.data);
+    const list = role === 'monitor' ? data.monitors : data.users;
+    const rec = (list || []).find(x => x && x.id === userId);
+    if (!rec || isOff(rec)) return false;
+    rec.password = hashed;
+    const r = store.putData(schoolId, cur.version, JSON.stringify(data), 'password-reset');
+    if (r.ok) { dataCache.delete(schoolId); bodyCache.delete(schoolId); return true; }
+  }
+  return false;
+}
+
+const forgotIpLimiter = rateLimit({
+  windowMs: 15 * 60_000, limit: Number(process.env.FORGOT_PER_15MIN || 5),
+  standardHeaders: 'draft-7', legacyHeaders: false, message: { error: 'too_many_attempts' },
+});
+const forgotAccountLimiter = rateLimit({
+  windowMs: 15 * 60_000, limit: Number(process.env.FORGOT_PER_ACCOUNT_15MIN || 3),
+  keyGenerator: req => 'fp:' + String((req.body && req.body.username) || '').trim().toLowerCase().slice(0, 100),
+  validate: { keyGeneratorIpFallback: false },
+  standardHeaders: false, legacyHeaders: false, message: { error: 'too_many_attempts' },
+});
+const resetIpLimiter = rateLimit({
+  windowMs: 15 * 60_000, limit: Number(process.env.RESET_PER_15MIN || 10),
+  standardHeaders: 'draft-7', legacyHeaders: false, message: { error: 'too_many_attempts' },
+});
+
+const forgotGeneric = (res) => res.json({ ok: true });
+
+app.post('/api/forgot-password', forgotIpLimiter, forgotAccountLimiter, async (req, res) => {
+  const { school, username } = req.body || {};
+  if ((school !== undefined && school !== null && typeof school !== 'string') || typeof username !== 'string' ||
+      !username.trim() || (school && school.length > 100) || username.length > 100)
+    return res.status(400).json({ error: 'bad_request' });
+  const s = school && school.trim() ? store.findSchool(school) : defaultSchool();
+  // Always spend a comparable amount of work, then return the same payload.
+  const dummy = hashResetCode(genResetCode());
+  void dummy;
+  if (!s || !s.active) return forgotGeneric(res);
+  const data = parseData(s.id);
+  const acc = findAccountByUsername(data, username);
+  const email = acc ? normEmail(acc.rec.email) : '';
+  if (!acc || !email || !validEmail(email) || email === '') return forgotGeneric(res);
+  if (!mail.isConfigured()) {
+    console.warn('[mail] SMTP not configured — password reset email not sent');
+    return forgotGeneric(res);
+  }
+  const code = storeResetCode(s.id, username, { userId: acc.rec.id, role: acc.role });
+  try { await mail.sendResetEmail({ to: email, code }); }
+  catch (e) { console.error('[mail] forgot-password send error:', e && e.message); }
+  return forgotGeneric(res);
+});
+
+app.post('/api/reset-password', resetIpLimiter, (req, res) => {
+  const { school, username, code, password } = req.body || {};
+  if ((school !== undefined && school !== null && typeof school !== 'string') || typeof username !== 'string' ||
+      typeof code !== 'string' || typeof password !== 'string' ||
+      !username.trim() || (school && school.length > 100) || username.length > 100 || code.length > 20 || password.length > 200)
+    return res.status(400).json({ error: 'bad_request' });
+  const pw = nz(password);
+  if (pw.length < 4) return res.status(400).json({ error: 'weak_password' });
+  const s = school && school.trim() ? store.findSchool(school) : defaultSchool();
+  if (!s || !s.active) return res.status(400).json({ error: 'invalid_code' });
+  const got = takeResetCode(s.id, username, code);
+  if (!got.ok) return res.status(400).json({ error: 'invalid_code' });
+  const hashed = hashPw(pw);
+  if (!updateAccountPassword(s.id, got.role, got.userId, hashed))
+    return res.status(400).json({ error: 'invalid_code' });
+  res.json({ ok: true });
+});
+
 app.post('/api/logout', (req, res) => {
   // end the session on the server too (a copied token stops working)
   try { const p = verifyTok(tokenOf(req)); if (p.jti) store.delSession(p.jti); } catch (e) {}
@@ -294,6 +439,7 @@ app.put('/api/db', auth, (req, res) => {
     for (const k of locked) { if (stored[k] === undefined) delete data[k]; else data[k] = stored[k]; }
   }
   securePasswords(data, stored);
+  if (!sanitizeEmails(data)) return res.status(400).json({ error: 'invalid_email' });
   const r = store.putData(req.school.id, version, JSON.stringify(data), 'auto');
   if (!r.ok) return res.status(409).json({ error: 'version_conflict', version: r.version });
   // the signed-in user changed their own password: keep them signed in with a fresh session
@@ -335,6 +481,7 @@ admin.put('/schools/:code/import', wrap(req => {
   const s = need(req.params.code); const data = (req.body || {}).data;
   if (!validDB(data)) throw new Error('invalid_data');
   const cur = store.getData(s.id); securePasswords(data, cur.data == null ? null : JSON.parse(cur.data));
+  if (!sanitizeEmails(data)) throw new Error('invalid_email');
   return store.putData(s.id, null, JSON.stringify(data), 'before-admin-import');
 }));
 admin.get('/schools/:code/history', wrap(req => store.listHistory(need(req.params.code).id)));
