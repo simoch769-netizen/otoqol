@@ -7,12 +7,18 @@ const DEFAULT_FROM = 'Otoqol <contact.otoqol@gmail.com>';
 const DEFAULT_USER = 'contact.otoqol@gmail.com';
 const DEFAULT_HOST = 'smtp.gmail.com';
 const DEFAULT_PORT = 465;
+const BREVO_URL = 'https://api.brevo.com/v3/smtp/email';
 
 function isCapture() {
   return (process.env.SMTP_HOST || '') === 'capture';
 }
 
+function hasBrevo() {
+  return !!(process.env.BREVO_API_KEY && String(process.env.BREVO_API_KEY).trim());
+}
+
 function isConfigured() {
+  if (hasBrevo()) return true;
   if (isCapture()) return true;
   return !!process.env.SMTP_PASS;
 }
@@ -21,17 +27,39 @@ function fromAddr() {
   return process.env.MAIL_FROM || DEFAULT_FROM;
 }
 
+function mailTimeoutMs() {
+  const n = Number(process.env.MAIL_TIMEOUT_MS);
+  return Number.isFinite(n) && n > 0 ? n : 10_000;
+}
+
+/** Parse MAIL_FROM into Brevo's { name, email }. Defaults: Otoqol / contact.otoqol@gmail.com. */
+function senderFrom() {
+  const raw = String(fromAddr() || '').trim();
+  const m = raw.match(/^(?:"?([^"<]*)"?\s*)?<([^>]+)>\s*$/) || raw.match(/^(.+?)\s*<([^>]+)>\s*$/);
+  if (m) {
+    const name = String(m[1] || '').trim().replace(/^"|"$/g, '') || 'Otoqol';
+    const email = String(m[2] || '').trim();
+    if (email) return { name, email };
+  }
+  if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(raw)) return { name: 'Otoqol', email: raw };
+  return { name: 'Otoqol', email: DEFAULT_USER };
+}
+
 function makeTransport() {
   if (isCapture()) return nodemailer.createTransport({ jsonTransport: true });
   const host = process.env.SMTP_HOST || DEFAULT_HOST;
   const port = Number(process.env.SMTP_PORT || DEFAULT_PORT);
   const user = process.env.SMTP_USER || DEFAULT_USER;
   const pass = process.env.SMTP_PASS || '';
+  const ms = mailTimeoutMs();
   return nodemailer.createTransport({
     host,
     port,
     secure: port === 465,
     auth: { user, pass },
+    connectionTimeout: ms,
+    greetingTimeout: ms,
+    socketTimeout: ms,
   });
 }
 
@@ -112,39 +140,85 @@ function appendCapture(row) {
   }
 }
 
+function getFetch() {
+  return (typeof fetch === 'function' ? fetch : null);
+}
+
+async function sendViaBrevo({ to, subject, text, html }) {
+  const fetchFn = getFetch();
+  if (!fetchFn) throw new Error('fetch is not available');
+  const ctrl = new AbortController();
+  const ms = mailTimeoutMs();
+  const timer = setTimeout(() => ctrl.abort(), ms);
+  try {
+    const sender = senderFrom();
+    const res = await fetchFn(BREVO_URL, {
+      method: 'POST',
+      headers: {
+        accept: 'application/json',
+        'content-type': 'application/json',
+        'api-key': process.env.BREVO_API_KEY,
+      },
+      body: JSON.stringify({
+        sender,
+        to: [{ email: to }],
+        subject,
+        htmlContent: html,
+        textContent: text,
+      }),
+      signal: ctrl.signal,
+    });
+    if (!res.ok) {
+      let detail = '';
+      try { detail = (await res.text()).slice(0, 200); } catch (e) {}
+      throw new Error('Brevo HTTP ' + res.status + (detail ? ': ' + detail : ''));
+    }
+    return { sent: true, via: 'brevo' };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function sendViaSmtp({ to, subject, text, html }) {
+  const transport = makeTransport();
+  const info = await transport.sendMail({
+    from: fromAddr(),
+    to,
+    subject,
+    text,
+    html,
+  });
+  if (isCapture()) {
+    let parsed = null;
+    try { parsed = JSON.parse(info.message); } catch (e) {}
+    appendCapture({
+      at: new Date().toISOString(),
+      to,
+      from: fromAddr(),
+      subject,
+      text,
+      html,
+      envelope: parsed && parsed.envelope,
+    });
+  }
+  return { sent: true, via: isCapture() ? 'capture' : 'smtp' };
+}
+
 async function sendResetEmail({ to, code }) {
   if (!isConfigured()) {
-    console.warn('[mail] SMTP not configured — password reset email not sent');
+    console.warn('[mail] mail not configured — password reset email not sent');
     return { sent: false, reason: 'not_configured' };
   }
   const { subject, text, html } = buildEmail(code);
   try {
-    const transport = makeTransport();
-    const info = await transport.sendMail({
-      from: fromAddr(),
-      to,
-      subject,
-      text,
-      html,
-    });
-    if (isCapture()) {
-      let parsed = null;
-      try { parsed = JSON.parse(info.message); } catch (e) {}
-      appendCapture({
-        at: new Date().toISOString(),
-        to,
-        from: fromAddr(),
-        subject,
-        text,
-        html,
-        envelope: parsed && parsed.envelope,
-      });
-    }
-    return { sent: true };
+    // Prefer Brevo HTTPS when the key is set (SMTP is often blocked). Capture mode stays on SMTP for local tests.
+    if (hasBrevo() && !isCapture()) return await sendViaBrevo({ to, subject, text, html });
+    return await sendViaSmtp({ to, subject, text, html });
   } catch (e) {
+    const reason = e && (e.name === 'AbortError' || /aborted/i.test(String(e && e.message))) ? 'timeout' : 'send_failed';
     console.error('[mail] failed to send password reset email:', e && e.message);
-    return { sent: false, reason: 'send_failed' };
+    return { sent: false, reason };
   }
 }
 
-module.exports = { isConfigured, sendResetEmail, buildEmail };
+module.exports = { isConfigured, sendResetEmail, buildEmail, senderFrom, BREVO_URL };

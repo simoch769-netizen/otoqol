@@ -359,12 +359,15 @@ app.post('/api/forgot-password', forgotIpLimiter, forgotAccountLimiter, async (r
   const email = acc ? normEmail(acc.rec.email) : '';
   if (!acc || !email || !validEmail(email) || email === '') return forgotGeneric(res);
   if (!mail.isConfigured()) {
-    console.warn('[mail] SMTP not configured — password reset email not sent');
+    console.warn('[mail] mail not configured — password reset email not sent');
     return forgotGeneric(res);
   }
   const code = storeResetCode(s.id, username, { userId: acc.rec.id, role: acc.role });
-  try { await mail.sendResetEmail({ to: email, code }); }
-  catch (e) { console.error('[mail] forgot-password send error:', e && e.message); }
+  // Respond immediately; a blocked SMTP/API must not stall the login screen.
+  // sendResetEmail itself has a ~10s timeout so background work cannot hang forever.
+  void mail.sendResetEmail({ to: email, code }).catch((e) => {
+    console.error('[mail] forgot-password send error:', e && e.message);
+  });
   return forgotGeneric(res);
 });
 
