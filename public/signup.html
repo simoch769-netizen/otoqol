@@ -61,7 +61,6 @@ input:focus{outline:2px solid var(--aqua);border-color:var(--teal)}
       <label><span data-t="username">اسم المستخدم</span><input name="username" required maxlength="40" dir="ltr" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false"></label>
       <label><span data-t="password">كلمة السر</span><input name="password" type="password" required minlength="6" maxlength="200" dir="ltr" autocomplete="new-password"></label>
       <label><span data-t="password2">تأكيد كلمة السر</span><input name="password2" type="password" required minlength="6" maxlength="200" dir="ltr" autocomplete="new-password"></label>
-      <label><span data-t="code">رمز المدرسة (اختياري)</span><input name="code" maxlength="40" dir="ltr" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder=""><div class="hint" data-t="code_hint">إن تركته فارغًا يُنشأ الرمز تلقائيًا من اسم المدرسة.</div></label>
       <div class="al bad" id="err" hidden></div>
       <button type="submit" class="btn" id="go" data-t="submit">إرسال الطلب</button>
     </form>
@@ -70,27 +69,25 @@ input:focus{outline:2px solid var(--aqua);border-color:var(--teal)}
   <div class="card okbox" id="ok-card" hidden data-oq-signup-success="">
     <h1 data-t="ok_title">تم استلام طلبك</h1>
     <p class="sub" data-t="ok_sub">طلبك بانتظار الموافقة. ستتلقى رسالة على بريدك عند تفعيل الحساب.</p>
-    <p class="sub" data-t="ok_keep">رمز مدرستك هو التالي. احتفظ به؛ ستحتاجه لتسجيل الدخول بعد الموافقة.</p>
-    <div class="code" id="ok-code" data-oq-signup-code></div>
     <p class="links"><a href="/app" data-t="login">تسجيل الدخول</a> · <a href="/" data-t="home">الصفحة الرئيسية</a></p>
   </div>
 </div>
 <script>
 (function(){
   var T={
-    ar:{title:"إنشاء حساب لمدرستك",sub:"املأ البيانات التالية. سيُراجع الطلب قبل تفعيل الحساب.",name:"اسم المدرسة",city:"المدينة",manager:"الاسم الكامل للمدير",email:"البريد الإلكتروني",phone:"الهاتف",username:"اسم المستخدم",password:"كلمة السر",password2:"تأكيد كلمة السر",code:"رمز المدرسة (اختياري)",code_hint:"إن تركته فارغًا يُنشأ الرمز تلقائيًا من اسم المدرسة.",submit:"إرسال الطلب",login:"تسجيل الدخول",home:"الصفحة الرئيسية",ok_title:"تم استلام طلبك",ok_sub:"طلبك بانتظار الموافقة. ستتلقى رسالة على بريدك عند تفعيل الحساب.",ok_keep:"رمز مدرستك هو التالي. احتفظ به؛ ستحتاجه لتسجيل الدخول بعد الموافقة.",
+    ar:{title:"إنشاء حساب لمدرستك",sub:"املأ البيانات التالية. سيُراجع الطلب قبل تفعيل الحساب.",name:"اسم المدرسة",city:"المدينة",manager:"الاسم الكامل للمدير",email:"البريد الإلكتروني",phone:"الهاتف",username:"اسم المستخدم",password:"كلمة السر",password2:"تأكيد كلمة السر",code:"رمز المدرسة (اختياري)",code_hint:"إن تركته فارغًا يُنشأ الرمز تلقائيًا من اسم المدرسة.",submit:"إرسال الطلب",login:"تسجيل الدخول",home:"الصفحة الرئيسية",ok_title:"تم استلام طلبك",ok_sub:"طلبك بانتظار الموافقة. ستتلقى رسالة على بريدك عند تفعيل الحساب.",username_taken:"اسم المستخدم مستعمل، اختر اسمًا آخر",
       fill:"املأ جميع الخانات",mismatch:"كلمتا السر غير متطابقتين",weak:"كلمة السر يجب ألا تقل عن 6 أحرف",
       invalid_name:"اسم المدرسة غير صالح",invalid_city:"المدينة غير صالحة",invalid_manager_name:"اسم المدير غير صالح",
       invalid_email:"البريد الإلكتروني غير صالح",invalid_phone:"رقم الهاتف غير صالح",invalid_username:"اسم المستخدم غير صالح",
       weak_password:"كلمة السر يجب ألا تقل عن 6 أحرف",invalid_code:"رمز المدرسة غير صالح",code_taken:"رمز المدرسة مستعمل، اختر رمزًا آخر",
       email_used:"هذا البريد مرتبط بطلب أو حساب قائم",too_many:"محاولات كثيرة، أعد المحاولة بعد قليل",server:"تعذّر الاتصال بالخادم",doc:"Otoqol — إنشاء حساب"},
-    fr:{title:"Créer un compte pour votre école",sub:"Renseignez les informations ci-dessous. La demande sera examinée avant l’activation du compte.",name:"Nom de l’école",city:"Ville",manager:"Nom complet du responsable",email:"E-mail",phone:"Téléphone",username:"Identifiant",password:"Mot de passe",password2:"Confirmation du mot de passe",code:"Code de l’école (facultatif)",code_hint:"S’il est laissé vide, le code est généré automatiquement à partir du nom de l’école.",submit:"Envoyer la demande",login:"Connexion",home:"Accueil",ok_title:"Demande bien reçue",ok_sub:"Votre demande est en attente d’approbation. Vous recevrez un e-mail lorsque le compte sera activé.",ok_keep:"Voici le code de votre école. Conservez-le ; il vous servira à vous connecter après l’approbation.",
+    fr:{title:"Créer un compte pour votre école",sub:"Renseignez les informations ci-dessous. La demande sera examinée avant l’activation du compte.",name:"Nom de l’école",city:"Ville",manager:"Nom complet du responsable",email:"E-mail",phone:"Téléphone",username:"Identifiant",password:"Mot de passe",password2:"Confirmation du mot de passe",code:"Code de l’école (facultatif)",code_hint:"S’il est laissé vide, le code est généré automatiquement à partir du nom de l’école.",submit:"Envoyer la demande",login:"Connexion",home:"Accueil",ok_title:"Demande bien reçue",ok_sub:"Votre demande est en attente d’approbation. Vous recevrez un e-mail lorsque le compte sera activé.",username_taken:"Cet identifiant est déjà utilisé, choisissez-en un autre",
       fill:"Veuillez remplir tous les champs",mismatch:"Les mots de passe ne correspondent pas",weak:"Le mot de passe doit contenir au moins 6 caractères",
       invalid_name:"Nom de l’école invalide",invalid_city:"Ville invalide",invalid_manager_name:"Nom du responsable invalide",
       invalid_email:"E-mail invalide",invalid_phone:"Numéro de téléphone invalide",invalid_username:"Identifiant invalide",
       weak_password:"Le mot de passe doit contenir au moins 6 caractères",invalid_code:"Code d’école invalide",code_taken:"Ce code est déjà utilisé, choisissez-en un autre",
       email_used:"Cet e-mail est déjà lié à une demande ou un compte",too_many:"Trop de tentatives, réessayez plus tard",server:"Impossible de joindre le serveur",doc:"Otoqol — Créer un compte"},
-    en:{title:"Create an account for your school",sub:"Fill in the details below. The request will be reviewed before the account is activated.",name:"School name",city:"City",manager:"Manager’s full name",email:"Email",phone:"Phone",username:"Username",password:"Password",password2:"Confirm password",code:"School code (optional)",code_hint:"If left empty, the code is generated automatically from the school name.",submit:"Submit request",login:"Log in",home:"Home",ok_title:"Your request has been received",ok_sub:"Your request is awaiting approval. You will receive an email when the account is activated.",ok_keep:"This is your school code. Keep it; you will need it to log in after approval.",
+    en:{title:"Create an account for your school",sub:"Fill in the details below. The request will be reviewed before the account is activated.",name:"School name",city:"City",manager:"Manager’s full name",email:"Email",phone:"Phone",username:"Username",password:"Password",password2:"Confirm password",code:"School code (optional)",code_hint:"If left empty, the code is generated automatically from the school name.",submit:"Submit request",login:"Log in",home:"Home",ok_title:"Your request has been received",ok_sub:"Your request is awaiting approval. You will receive an email when the account is activated.",username_taken:"This username is already taken, choose another",
       fill:"Please fill in all fields",mismatch:"Passwords do not match",weak:"Password must be at least 6 characters",
       invalid_name:"Invalid school name",invalid_city:"Invalid city",invalid_manager_name:"Invalid manager name",
       invalid_email:"Invalid email",invalid_phone:"Invalid phone number",invalid_username:"Invalid username",
@@ -121,7 +118,7 @@ input:focus{outline:2px solid var(--aqua);border-color:var(--teal)}
     go.disabled=true;
     fetch('/api/signup',{method:'POST',headers:{'Content-Type':'application/json','X-Otoqol':'1'},credentials:'same-origin',body:JSON.stringify({
       name:f.name.value.trim(),city:f.city.value.trim(),managerName:f.managerName.value.trim(),email:f.email.value.trim(),
-      phone:f.phone.value.trim(),username:f.username.value.trim(),password:f.password.value,code:f.code.value.trim()
+      phone:f.phone.value.trim(),username:f.username.value.trim(),password:f.password.value
     })}).then(function(r){return r.json().then(function(j){return {ok:r.ok,s:r.status,j:j};});}).then(function(x){
       if(!x.ok){
         if(x.s===429)return showErr('too_many');
@@ -129,8 +126,6 @@ input:focus{outline:2px solid var(--aqua);border-color:var(--teal)}
       }
       document.getElementById('form-card').hidden=true;
       document.getElementById('ok-card').hidden=false;
-      document.getElementById('ok-code').textContent=x.j.code||'';
-      try{if(x.j.code)localStorage.setItem('oq_school_code',x.j.code);}catch(e){}
     }).catch(function(){showErr('server');}).then(function(){go.disabled=false;});
   });
 })();

@@ -91,7 +91,6 @@ code{direction:ltr;font-family:Consolas,Menlo,monospace;background:#f1f5f9;paddi
       <form id="add-form">
         <div class="grid2">
           <label><span data-t="name">اسم المدرسة</span><input name="name" required maxlength="80"></label>
-          <label><span data-t="code">رمز المدرسة</span><input name="code" required maxlength="40" dir="ltr" autocapitalize="none" autocomplete="off"></label>
           <label><span data-t="manager_user">اسم مستخدم المدير</span><input name="managerUsername" required maxlength="40" dir="ltr" autocapitalize="none" autocomplete="off"></label>
           <label><span data-t="manager_pass">كلمة سر المدير</span><input name="managerPassword" type="password" required minlength="6" maxlength="200" dir="ltr" autocomplete="new-password"></label>
         </div>
@@ -121,7 +120,7 @@ code{direction:ltr;font-family:Consolas,Menlo,monospace;background:#f1f5f9;paddi
       add_title:"إضافة مدرسة",name:"اسم المدرسة",code:"رمز المدرسة",manager_user:"اسم مستخدم المدير",manager_pass:"كلمة سر المدير",add_submit:"إنشاء الحساب",
       added:"تم إنشاء المدرسة وتفعيلها.",fill:"املأ جميع الخانات",weak:"كلمة السر يجب ألا تقل عن 6 أحرف",
       bad:"اسم المستخدم أو كلمة السر غير صحيحة",too_many:"محاولات كثيرة، أعد المحاولة بعد قليل",server:"تعذّر الاتصال بالخادم",disabled:"لوحة المالك غير مفعّلة.",
-      invalid_name:"اسم المدرسة غير صالح",invalid_username:"اسم المستخدم غير صالح",weak_password:"كلمة السر يجب ألا تقل عن 6 أحرف",
+      invalid_name:"اسم المدرسة غير صالح",invalid_username:"اسم المستخدم غير صالح",username_taken:"اسم المستخدم مستعمل، اختر اسمًا آخر",weak_password:"كلمة السر يجب ألا تقل عن 6 أحرف",
       invalid_code:"رمز المدرسة غير صالح",code_taken:"رمز المدرسة مستعمل، اختر رمزًا آخر",email_used:"هذا البريد مرتبط بحساب قائم",
       doc:"Otoqol — لوحة المالك"},
     fr:{login_title:"Espace propriétaire",login_sub:"Connectez-vous avec le compte propriétaire pour gérer les comptes des écoles.",username:"Identifiant",password:"Mot de passe",enter:"Entrer",logout:"Déconnexion",
@@ -134,7 +133,7 @@ code{direction:ltr;font-family:Consolas,Menlo,monospace;background:#f1f5f9;paddi
       add_title:"Ajouter une école",name:"Nom de l’école",code:"Code de l’école",manager_user:"Identifiant du responsable",manager_pass:"Mot de passe du responsable",add_submit:"Créer le compte",
       added:"L’école a été créée et activée.",fill:"Veuillez remplir tous les champs",weak:"Le mot de passe doit contenir au moins 6 caractères",
       bad:"Identifiant ou mot de passe incorrect",too_many:"Trop de tentatives, réessayez plus tard",server:"Impossible de joindre le serveur",disabled:"L’espace propriétaire n’est pas activé.",
-      invalid_name:"Nom de l’école invalide",invalid_username:"Identifiant invalide",weak_password:"Le mot de passe doit contenir au moins 6 caractères",
+      invalid_name:"Nom de l’école invalide",invalid_username:"Identifiant invalide",username_taken:"Cet identifiant est déjà utilisé, choisissez-en un autre",weak_password:"Le mot de passe doit contenir au moins 6 caractères",
       invalid_code:"Code d’école invalide",code_taken:"Ce code est déjà utilisé, choisissez-en un autre",email_used:"Cet e-mail est déjà lié à un compte",
       doc:"Otoqol — Espace propriétaire"},
     en:{login_title:"Owner dashboard",login_sub:"Sign in with the owner account to manage school accounts.",username:"Username",password:"Password",enter:"Sign in",logout:"Log out",
@@ -147,7 +146,7 @@ code{direction:ltr;font-family:Consolas,Menlo,monospace;background:#f1f5f9;paddi
       add_title:"Add a school",name:"School name",code:"School code",manager_user:"Manager username",manager_pass:"Manager password",add_submit:"Create account",
       added:"The school was created and activated.",fill:"Please fill in all fields",weak:"Password must be at least 6 characters",
       bad:"Incorrect username or password",too_many:"Too many attempts, try again later",server:"Could not reach the server",disabled:"The owner dashboard is not enabled.",
-      invalid_name:"Invalid school name",invalid_username:"Invalid username",weak_password:"Password must be at least 6 characters",
+      invalid_name:"Invalid school name",invalid_username:"Invalid username",username_taken:"This username is already taken, choose another",weak_password:"Password must be at least 6 characters",
       invalid_code:"Invalid school code",code_taken:"This school code is already taken, choose another",email_used:"This email is already linked to an account",
       doc:"Otoqol — Owner dashboard"}
   };
@@ -231,13 +230,13 @@ code{direction:ltr;font-family:Consolas,Menlo,monospace;background:#f1f5f9;paddi
     var err=document.getElementById('add-err'), ok=document.getElementById('add-ok'), go=document.getElementById('add-go');
     err.hidden=true;ok.hidden=true;
     var f=this.elements;
-    if(!f.name.value.trim()||!f.code.value.trim()||!f.managerUsername.value.trim()||!f.managerPassword.value){err.hidden=false;err.textContent=t('fill');return;}
+    if(!f.name.value.trim()||!f.managerUsername.value.trim()||!f.managerPassword.value){err.hidden=false;err.textContent=t('fill');return;}
     if(f.managerPassword.value.length<6){err.hidden=false;err.textContent=t('weak');return;}
     go.disabled=true;
-    api('POST','/api/owner/schools',{name:f.name.value.trim(),code:f.code.value.trim(),managerUsername:f.managerUsername.value.trim(),managerPassword:f.managerPassword.value}).then(function(x){
+    api('POST','/api/owner/schools',{name:f.name.value.trim(),managerUsername:f.managerUsername.value.trim(),managerPassword:f.managerPassword.value}).then(function(x){
       if(!x.ok){err.hidden=false;err.textContent=t((x.j&&x.j.error)||'server');return;}
       f.managerPassword.value='';
-      ok.hidden=false;ok.textContent=t('added')+' '+(x.j.school&&x.j.school.code?x.j.school.code:'');
+      ok.hidden=false;ok.textContent=t('added')+(x.j.school&&x.j.school.name?(' '+x.j.school.name):'');
       return load();
     }).catch(function(){err.hidden=false;err.textContent=t('server');}).then(function(){go.disabled=false;});
   });
