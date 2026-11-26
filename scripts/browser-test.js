@@ -8,7 +8,7 @@ const SHOTS = __dirname + '/../test-shots/';
 let fails = 0; const t = (n, ok, x) => { console.log((ok ? 'PASS ' : 'FAIL ') + n + (x ? '  ' + x : '')); if (!ok) fails++; };
 const api = async (u, cookie) => (await fetch(B + u, { headers: { Cookie: cookie } })).json();
 async function cookieOf(ctx) { const c = (await ctx.cookies()).find(x => x.name === 'otq_sess'); return c ? 'otq_sess=' + c.value : ''; }
-/** The single sign-in screen: username + password only (one install = one school). */
+/** Sign-in screen: optional school code (empty = default school) + username + password. */
 async function signIn(page, base, user, pass, opts = {}) {
   if (!opts.noGoto) await page.goto(base + '/app');
   await page.waitForSelector('[data-oq-signin]', { timeout: 30000 });
@@ -43,7 +43,7 @@ const waitSaved = page => page.waitForSelector('[data-oq-sync=ok]', { timeout: 1
   const ca = await cookieOf(A); let s = await api('/api/db', ca);
   const chk = await fetch(B + '/api/signin', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Otoqol': '1' }, body: JSON.stringify({ username: 'admin', password: 'Demo2026!' }) });
   t('setup: default DB pushed, admin password = school password (and never sent back)', s.version >= 1 && chk.status === 200 && s.data.users.every(u => u.password === ''), 'v' + s.version);
-  t('logged in as manager (all manager pages)', (await pa.locator('.nav button:has-text("المونيتورات")').count()) === 1);
+  t('logged in as manager (all manager pages)', (await pa.locator('.nav button:has-text("المدربون")').count()) === 1);
   await setSchoolName(pa, 'مدرسة النجاح'); await pa.waitForTimeout(300); await waitSaved(pa);
   s = await api('/api/db', ca); t('UI edit saved to server', s.data.settings.school === 'مدرسة النجاح', 'v' + s.version);
 
@@ -68,14 +68,15 @@ const waitSaved = page => page.waitForSelector('[data-oq-sync=ok]', { timeout: 1
   await pa.click('.nav button:has-text("المالية")'); await waitSaved(pa);
   await pa.click('.top [data-oq-logout]'); await pa.waitForSelector('[data-oq-signin]', { timeout: 15000 });
   t('header logout (from Finance) -> sign-in screen, still at /app', new URL(pa.url()).pathname === '/app');
-  t('sign-in screen: no school field', (await pa.locator('[data-oq-signin] input').count()) === 2);
+  t('sign-in screen: optional school code + username + password', (await pa.locator('[data-oq-signin] input').count()) === 3 && (await pa.locator('[data-oq-signin] [data-oq-school]').count()) === 1);
+  t('sign-in screen has a signup link', (await pa.locator('[data-oq-signup-link]').count()) === 1);
   t('logout cleared the session cookie', !(await cookieOf(A)));
   await signIn(pa, B, 'admin', 'wrong', { noGoto: true });
   await pa.waitForSelector('[data-oq-signin] .al.bad', { timeout: 10000 }); await pa.screenshot({ path: SHOTS + '3-signin-error.png' });
-  t('wrong password -> error on the same screen', /غالطين/.test(await pa.locator('[data-oq-signin] .al.bad').innerText()));
+  t('wrong password -> error on the same screen', /غير صحيحة/.test(await pa.locator('[data-oq-signin] .al.bad').innerText()));
   // role permissions still apply: secretary has no "monitors" page
   await signIn(pa, B, 'secretary', '1234', { noGoto: true }); await pa.waitForSelector('.nav', { timeout: 20000 });
-  t('secretary signed in with role permissions (no monitors page)', (await pa.locator('.nav button:has-text("المونيتورات")').count()) === 0 && (await pa.locator('.nav button:has-text("المترشحون")').count()) === 1);
+  t('secretary signed in with role permissions (no monitors page)', (await pa.locator('.nav button:has-text("المدربون")').count()) === 0 && (await pa.locator('.nav button:has-text("المترشحون")').count()) === 1);
 
   // one-time import of old browser data (own throw-away server with a fresh school "imp")
   const port2 = Number(new URL(B).port || 80) + 1, B2 = 'http://localhost:' + port2;
@@ -90,8 +91,8 @@ const waitSaved = page => page.waitForSelector('[data-oq-sync=ok]', { timeout: 1
       users: [{ id: 'u1', name: 'المدير', role: 'manager', username: 'admin', password: '1234' }], monitors: [], vehicles: [],
       candidates: [{ id: 'old1', name: 'مترشح قديم' }, { id: 'old2', name: 'مترشح 2' }], sessions: [], payments: [], expenses: [], notifs: [], requests: [], notes: [], log: [] })));
     await signIn(pc, B2, 'admin', 'Import2026!');
-    await pc.waitForSelector('text=رفع الداتا للسيرفر', { timeout: 15000 }); await pc.screenshot({ path: SHOTS + '4-import-offer.png' });
-    await pc.click('text=رفع الداتا للسيرفر'); await pc.waitForSelector('.nav', { timeout: 20000 });
+    await pc.waitForSelector('text=رفع البيانات إلى الخادم', { timeout: 15000 }); await pc.screenshot({ path: SHOTS + '4-import-offer.png' });
+    await pc.click('text=رفع البيانات إلى الخادم'); await pc.waitForSelector('.nav', { timeout: 20000 });
     const s2 = await (await fetch(B2 + '/api/db', { headers: { Cookie: await cookieOf(C) } })).json();
     t('old localStorage data imported to empty school, straight into the app', s2.data && s2.data.candidates.length === 2, 'v' + s2.version);
     await C.close();
