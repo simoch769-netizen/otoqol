@@ -171,7 +171,11 @@ Object.assign(DICT.fr,{
   "مرحلة السياقة":"Étape conduite",
   "حصل على الرخصة":"Permis obtenu",
   "قبول الدعوة":"Accepter l’invitation",
-  "مرحبا":"Bonjour"
+  "مرحبا":"Bonjour",
+  "الساعات المدفوعة المتبقية":"Heures payées restantes",
+  "تبقّى":"Reste",
+  "تبقّت لك ساعتان أو أقل من الساعات المدفوعة. يُرجى التواصل مع مدرستك.":"Il vous reste deux heures payées ou moins. Merci de contacter votre école.",
+  "لا يمكن طلب حجز جديد: لم تبقَ ساعات مدفوعة. يُرجى التواصل مع مدرستك.":"Vous ne pouvez pas demander une nouvelle réservation : plus d’heures payées. Merci de contacter votre école."
 });
 Object.assign(DICT.en,{
   "بوابة التلميذ":"Student portal",
@@ -261,7 +265,11 @@ Object.assign(DICT.en,{
   "مرحلة السياقة":"Driving stage",
   "حصل على الرخصة":"Licence obtained",
   "قبول الدعوة":"Accept invitation",
-  "مرحبا":"Hello"
+  "مرحبا":"Hello",
+  "الساعات المدفوعة المتبقية":"Paid hours remaining",
+  "تبقّى":"Left",
+  "تبقّت لك ساعتان أو أقل من الساعات المدفوعة. يُرجى التواصل مع مدرستك.":"You have two or fewer paid hours left. Please contact your school.",
+  "لا يمكن طلب حجز جديد: لم تبقَ ساعات مدفوعة. يُرجى التواصل مع مدرستك.":"You cannot request a new booking: no paid hours left. Please contact your school."
 });
 const _t=s=>{if(typeof s!=='string')return s;if(LANG==='ar')return s;const d=DICT[LANG];if(d&&d[s]!==undefined)return d[s];return s;};
 const setLang=(l)=>{LANG=l;try{localStorage.setItem('ae_lang',l);}catch(e){}document.documentElement.lang=l;document.documentElement.dir=l==='ar'?'rtl':'ltr';};
@@ -290,9 +298,13 @@ function tokenFromUrl(){
 }
 
 function Dashboard({me,onGo}){
-  const h=me.hours||{}, b=me.balance||{}, n=me.nextLesson;
+  const h=me.hours||{}, b=me.balance||{}, n=me.nextLesson, ph=me.paidHours||{};
   return <div>
     <h2>{_t('مرحبا')} {me.candidate&&me.candidate.name}</h2>
+    {ph.applicable&&(ph.warning||ph.blocked)&&<div className={'al '+(ph.blocked?'bad':'warn')} data-oq-hours-banner={ph.blocked?'blocked':'warn'} data-oq-hours-left={ph.left}>
+      {ph.blocked?_t('لا يمكن طلب حجز جديد: لم تبقَ ساعات مدفوعة. يُرجى التواصل مع مدرستك.'):_t('تبقّت لك ساعتان أو أقل من الساعات المدفوعة. يُرجى التواصل مع مدرستك.')}
+      {' — '+_t('الساعات المدفوعة المتبقية')+': '+(Math.round((ph.left||0)*10)/10)+' '+_t('س')}
+    </div>}
     <div className="grid">
       <div className="stat"><small>{_t('ساعات الكود')}</small><b>{h.codeDone||0}/{h.codeHours||0} {_t('س')}</b></div>
       <div className="stat"><small>{_t('ساعات السياقة')}</small><b>{h.driveDone||0}/{h.driveHours||0} {_t('س')}</b></div>
@@ -319,7 +331,7 @@ function Schedule({me,reload}){
   const book=async(slot)=>{
     setBusy(slot.date+slot.time);setErr('');setMsg('');
     try{await api('POST','/api/portal/bookings',{date:slot.date,time:slot.time,duration:slot.duration||1,type:typ,monitorId:mid||slot.monitorId});setMsg(_t('تم إرسال طلب الحجز. ينتظر موافقة المدرسة.'));await load();if(reload)reload();}
-    catch(e){const c=e.body&&e.body.error;setErr(_t(c==='slot_taken'||c==='already_booked'?'هاد الموعد تحجز':'تعذر الطلب'));}
+    catch(e){const c=e.body&&e.body.error;setErr(_t(c==='paid_hours_blocked'?'لا يمكن طلب حجز جديد: لم تبقَ ساعات مدفوعة. يُرجى التواصل مع مدرستك.':c==='slot_taken'||c==='already_booked'?'هاد الموعد تحجز':'تعذر الطلب'));}
     finally{setBusy('');}
   };
   const cancel=async(id,pending)=>{
@@ -332,8 +344,13 @@ function Schedule({me,reload}){
   const upcoming=(sch&&sch.upcoming)||[];
   const reqs=((sch&&sch.requests)||[]).filter(r=>r.status==='pending');
   const slots=(sch&&sch.slots)||[];
+  const ph=me.paidHours||{};
+  const noBook=!!(ph.applicable&&ph.blocked);
   return <div>
     <h2>{_t('الجدول')}</h2>
+    {ph.applicable&&(ph.warning||ph.blocked)&&<div className={'al '+(ph.blocked?'bad':'warn')} data-oq-hours-banner={ph.blocked?'blocked':'warn'}>
+      {ph.blocked?_t('لا يمكن طلب حجز جديد: لم تبقَ ساعات مدفوعة. يُرجى التواصل مع مدرستك.'):_t('تبقّت لك ساعتان أو أقل من الساعات المدفوعة. يُرجى التواصل مع مدرستك.')}
+    </div>}
     {msg&&<div className="al ok">{msg}</div>}
     {err&&<div className="al bad">{err}</div>}
     <div className="card">
@@ -356,7 +373,7 @@ function Schedule({me,reload}){
       {!mid&&<div className="meta">{_t('اختار المونيتور باش تشوف المواعيد المتاحة')}</div>}
       {mid&&!slots.length&&<div className="meta">{_t('ما كاين حتى موعد متاح فالأيام الجاية')}</div>}
       {slots.slice(0,40).map(s=><div className="slot" key={s.date+s.time} data-oq-slot={s.date+'T'+s.time}><div><b>{s.date} · {s.time}</b> <span className="meta">{s.duration||1} {_t('س')}</span></div>
-        <button className="b pri" disabled={!!busy} onClick={()=>book(s)}>{_t('طلب هذا الموعد')}</button></div>)}
+        <button className="b pri" data-oq-book-slot="" disabled={!!busy||noBook} onClick={()=>book(s)}>{_t('طلب هذا الموعد')}</button></div>)}
     </div>
   </div>;
 }
