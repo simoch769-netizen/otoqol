@@ -43,11 +43,12 @@ app.use(helmet({
     useDefaults: true,
     directives: {
       // The app uses React UMD + Babel standalone from unpkg (in-browser JSX => needs unsafe-eval/inline)
-      'script-src': ["'self'", "'unsafe-inline'", "'unsafe-eval'", 'https://unpkg.com'],
+      'script-src': ["'self'", "'unsafe-inline'", "'unsafe-eval'", 'https://unpkg.com', 'https://accounts.google.com'],
       'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
       'font-src': ["'self'", 'https://fonts.gstatic.com', 'data:'],
       'img-src': ["'self'", 'data:', 'blob:'],
-      'connect-src': ["'self'"],
+      'connect-src': ["'self'", 'https://accounts.google.com', 'https://www.googleapis.com', 'https://oauth2.googleapis.com'],
+      'frame-src': ["'self'", 'https://accounts.google.com'],
       'frame-ancestors': ["'none'"],
       'upgrade-insecure-requests': PROD ? [] : null,
     },
@@ -394,7 +395,12 @@ app.post('/api/logout', (req, res) => {
   try { const p = verifyTok(tokenOf(req)); if (p.jti) store.delSession(p.jti); } catch (e) {}
   clearCookie(res); res.json({ ok: true });
 });
+app.get('/api/config', auth, (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  res.json({ googleClientId: String(process.env.GOOGLE_CLIENT_ID || '').trim() });
+});
 app.get('/api/me', auth, (req, res) => {
+
   const d = store.getVersion(req.school.id);
   const u = req.appUser && { ...pubUser(req.appUser), role: req.role };
   res.set('Cache-Control', 'no-store');
