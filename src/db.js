@@ -345,10 +345,37 @@ const putData = db.transaction((schoolId, baseVersion, dataStr, reason = 'auto')
 const listHistory = schoolId => db.prepare('SELECT id,version,reason,created_at,length(data) AS bytes FROM history WHERE school_id=? ORDER BY id DESC').all(schoolId);
 const getHistory = (schoolId, hid) => db.prepare('SELECT * FROM history WHERE school_id=? AND id=?').get(schoolId, hid);
 
+function defaultSchoolCode() {
+  return normCode(process.env.DEFAULT_SCHOOL_CODE || process.env.SEED_SCHOOL_CODE || 'demo');
+}
+function isProtectedSchool(s) {
+  return !!(s && normCode(s.code) === defaultSchoolCode());
+}
+function schoolNameMatches(typed, name) {
+  const n = v => String(v == null ? '' : v).trim().replace(/\s+/g, ' ').toLowerCase();
+  const a = n(typed), b = n(name);
+  return a !== '' && a === b;
+}
+/** Permanently delete a school and all of its data, history, and sessions. Usernames become free. */
+function deleteSchool(s) {
+  if (!s || s.id == null) throw new Error('school_not_found');
+  if (isProtectedSchool(s)) throw new Error('protected_school');
+  const tx = db.transaction(() => {
+    db.prepare('DELETE FROM sessions WHERE school_id=?').run(s.id);
+    db.prepare('DELETE FROM history WHERE school_id=?').run(s.id);
+    db.prepare('DELETE FROM school_data WHERE school_id=?').run(s.id);
+    const r = db.prepare('DELETE FROM schools WHERE id=?').run(s.id);
+    if (!r.changes) throw new Error('school_not_found');
+  });
+  tx();
+  return { ok: true, id: s.id, code: s.code, name: s.name };
+}
+
 async function backupFile(dest) { await db.backup(dest); return dest; }
 
 module.exports = { db, DB_FILE, DATA_DIR, createSchool, findSchool, getSchoolById, listSchools, findByEmail, setPassword, setActive, setStatus, schoolStatus,
   checkPassword, getData, getVersion, putData, addSession, hasSession, delSession, purgeSessions, snapshot, listHistory, getHistory, backupFile, normCode,
   allocateCode, slugFromName, isValidCode, RESERVED_CODES, STATUSES,
   getOwnerAccount, setOwnerAccount, hashSetupToken, createSetupToken, peekSetupToken, consumeSetupToken, armSetupTokenFromEnv,
-  normUsername, parseSchoolJson, accountsInSchoolData, findAccountsByUsername, usernameTaken, usernameConflict, listDuplicateUsernames };
+  normUsername, parseSchoolJson, accountsInSchoolData, findAccountsByUsername, usernameTaken, usernameConflict, listDuplicateUsernames,
+  defaultSchoolCode, isProtectedSchool, schoolNameMatches, deleteSchool };

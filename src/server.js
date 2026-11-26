@@ -427,6 +427,10 @@ function takeResetCodeForUsername(username, code) {
   const got = takeResetCode(schoolId, username, code);
   return got.ok ? { ...got, schoolId } : got;
 }
+function clearResetCodesForSchool(schoolId) {
+  const prefix = String(schoolId) + ':';
+  for (const k of [...resetCodes.keys()]) if (k.startsWith(prefix)) resetCodes.delete(k);
+}
 
 app.post('/api/reset-password', resetIpLimiter, (req, res) => {
   const { username, code, password } = req.body || {};
@@ -555,10 +559,28 @@ admin.post('/schools/:code/restore/:hid', wrap(req => {
   if (!h) throw new Error('snapshot not found');
   return store.putData(s.id, null, h.data, 'before-restore');
 }));
+admin.delete('/schools/:code', (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  try {
+    const s = store.findSchool(req.params.code);
+    if (!s) return res.status(404).json({ error: 'school_not_found' });
+    if (store.isProtectedSchool(s)) return res.status(403).json({ error: 'protected_school' });
+    const typed = String((req.body && (req.body.name != null ? req.body.name : req.body.confirm)) || '');
+    if (!store.schoolNameMatches(typed, s.name)) return res.status(400).json({ error: 'name_mismatch' });
+    const out = store.deleteSchool(s);
+    clearResetCodesForSchool(s.id);
+    res.json({ ok: true, deleted: { id: out.id, code: out.code, name: out.name } });
+  } catch (e) {
+    if (e.message === 'protected_school') return res.status(403).json({ error: 'protected_school' });
+    if (e.message === 'school_not_found') return res.status(404).json({ error: 'school_not_found' });
+    const msg = /^SQLITE|constraint|sql/i.test(e.code || '') || /constraint|sqlite/i.test(e.message) ? 'bad_request' : (e.message || 'bad_request');
+    res.status(400).json({ error: msg });
+  }
+});
 app.use('/api/admin', admin);
 
 app.get('/healthz', (req, res) => res.json({ ok: true }));
-onboard.install(app, { store, mail, hashPw, JWT_SECRET, JWT_OPTS, cookieOpts, PROD });
+onboard.install(app, { store, mail, hashPw, JWT_SECRET, JWT_OPTS, cookieOpts, PROD, clearResetCodesForSchool });
 
 app.use('/api', (req, res) => res.status(404).json({ error: 'not_found' }));
 const PUBLIC = path.join(__dirname, '..', 'public');

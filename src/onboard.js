@@ -115,7 +115,7 @@ function schoolStats(s, store) {
 }
 
 function ownerDashboard(store) {
-  const schools = store.listSchools().map(s => ({ ...pubOwnerSchool(s), ...schoolStats(s, store) }));
+  const schools = store.listSchools().map(s => ({ ...pubOwnerSchool(s), ...schoolStats(s, store), protected: store.isProtectedSchool(s) }));
   const totals = {
     schools: schools.length,
     pending: 0, active: 0, rejected: 0, inactive: 0,
@@ -136,7 +136,8 @@ function ownerDashboard(store) {
 }
 
 function install(app, ctx) {
-  const { store, mail, hashPw, JWT_SECRET, JWT_OPTS, cookieOpts, PROD } = ctx;
+  const { store, mail, hashPw, JWT_SECRET, JWT_OPTS, cookieOpts, PROD, clearResetCodesForSchool } = ctx;
+  const clearCodes = typeof clearResetCodesForSchool === 'function' ? clearResetCodesForSchool : () => {};
   const OWNER_COOKIE = 'otq_owner';
   const ownerCookieOpts = { ...cookieOpts, maxAge: 12 * 3600 * 1000, path: '/' };
   const ownerSessions = new Map(); // jti -> exp
@@ -414,6 +415,18 @@ function install(app, ctx) {
     if (st === 'pending') return res.status(400).json({ error: 'not_pending_use_approve' });
     const out = store.setStatus(s.code, 'active');
     res.json({ ok: true, school: { ...pubOwnerSchool(s), ...out } });
+  });
+  app.delete('/api/owner/schools/:id', ownerAuth, (req, res) => {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id < 1) return res.status(400).json({ error: 'bad_request' });
+    const s = store.getSchoolById(id);
+    if (!s) return res.status(404).json({ error: 'school_not_found' });
+    if (store.isProtectedSchool(s)) return res.status(403).json({ error: 'protected_school' });
+    const typed = String((req.body && (req.body.name != null ? req.body.name : req.body.confirm)) || '');
+    if (!store.schoolNameMatches(typed, s.name)) return res.status(400).json({ error: 'name_mismatch' });
+    const out = store.deleteSchool(s);
+    clearCodes(s.id);
+    res.json({ ok: true, deleted: { id: out.id, code: out.code, name: out.name } });
   });
 
   return { ownerAuth, statusError, validateSignup, ownerConfigured };
