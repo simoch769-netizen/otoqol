@@ -371,6 +371,52 @@ Object.assign(DICT.en,{
   "ترفض":"Rejected",
   "ملغى":"Cancelled"
 });
+Object.assign(DICT.fr,{
+  "المستحقات":"Créances",
+  "تم التذكير":"Rappel envoyé",
+  "تذكير عبر واتساب":"Rappel WhatsApp",
+  "تذكير عبر البريد":"Rappel par e-mail",
+  "لم يُذكَّر بعد":"Pas encore rappelé",
+  "لم يُذكَّروا بعد":"Jamais rappelés",
+  "ذُكِّروا هذا الأسبوع":"Rappelés cette semaine",
+  "مستحق مرتفع":"Solde élevé",
+  "أيام الصمت":"Jours de silence",
+  "آخر دفعة":"Dernier paiement",
+  "آخر تذكير":"Dernier rappel",
+  "ما كاين حتى مستحقات":"Aucune créance",
+  "جاري التحميل...":"Chargement…",
+  "تعذر تحميل المستحقات":"Impossible de charger les créances",
+  "تم تسجيل التذكير":"Rappel enregistré",
+  "تعذر إرسال التذكير":"Impossible d’enregistrer le rappel",
+  "لا يوجد بريد إلكتروني":"Pas d’adresse e-mail",
+  "ترتيب حسب أطول صمت":"Classés du plus long silence au plus court",
+  "يدوي":"Manuel",
+  "البريد":"E-mail",
+  "الكل":"Tous"
+});
+Object.assign(DICT.en,{
+  "المستحقات":"Dues",
+  "تم التذكير":"Marked as reminded",
+  "تذكير عبر واتساب":"WhatsApp reminder",
+  "تذكير عبر البريد":"Email reminder",
+  "لم يُذكَّر بعد":"Not yet reminded",
+  "لم يُذكَّروا بعد":"Never reminded",
+  "ذُكِّروا هذا الأسبوع":"Reminded this week",
+  "مستحق مرتفع":"High balance",
+  "أيام الصمت":"Days silent",
+  "آخر دفعة":"Last payment",
+  "آخر تذكير":"Last reminder",
+  "ما كاين حتى مستحقات":"No outstanding dues",
+  "جاري التحميل...":"Loading…",
+  "تعذر تحميل المستحقات":"Could not load dues",
+  "تم تسجيل التذكير":"Reminder logged",
+  "تعذر إرسال التذكير":"Could not log the reminder",
+  "لا يوجد بريد إلكتروني":"No email address",
+  "ترتيب حسب أطول صمت":"Ranked by longest silence first",
+  "يدوي":"Manual",
+  "البريد":"Email",
+  "الكل":"All"
+});
 const _t=s=>{if(typeof s!=='string')return s;if(LANG==='ar'){if(DICT_AR[s]!==undefined)return DICT_AR[s];const a=s.match(/^(\s*)([\s\S]*?)(\s*)$/);return a[2]&&DICT_AR[a[2]]!==undefined?a[1]+DICT_AR[a[2]]+a[3]:s;}const d=DICT[LANG];if(d[s]!==undefined)return d[s];const m=s.match(/^(\s*)([\s\S]*?)(\s*)$/);if(m[2]&&d[m[2]]!==undefined)return m[1]+d[m[2]]+m[3];return s;};
 const lbl=o=>new Proxy(o,{get:(o2,k)=>(typeof k==='string'&&Object.prototype.hasOwnProperty.call(o2,k))?_t(o2[k]):o2[k]});
 const KEY='autoecole_db_v1';
@@ -845,6 +891,69 @@ function Vehicles(){
 }
 
 /* ================= المالية ================= */
+
+function DuesList(){
+  const {user}=useC();
+  const canAct=user.role==='manager'||user.role==='secretary'||user.role==='owner';
+  const [filter,setFilter]=useState('all');
+  const [loading,setLoading]=useState(true);
+  const [err,setErr]=useState('');
+  const [msg,setMsg]=useState('');
+  const [busy,setBusy]=useState('');
+  const [pack,setPack]=useState({count:0,totalDue:0,debtors:[],today:''});
+  const load=()=>{
+    setLoading(true);setErr('');
+    const q='filter='+encodeURIComponent(filter)+'&lang='+encodeURIComponent(LANG||'ar');
+    OQ.api('GET','/api/dues?'+q).then(j=>{
+      setPack({count:j.count||0,totalDue:j.totalDue||0,debtors:j.debtors||[],today:j.today||''});
+    }).catch(()=>setErr(_t('تعذر تحميل المستحقات'))).finally(()=>setLoading(false));
+  };
+  useEffect(()=>{load();},[filter]);
+  const mark=(d,channel)=>{
+    if(busy)return;
+    setBusy(d.id+':'+channel);setErr('');setMsg('');
+    OQ.api('POST','/api/dues/'+encodeURIComponent(d.id)+'/remind',{channel:channel,lang:LANG||'ar'})
+      .then(()=>{setMsg(_t('تم تسجيل التذكير'));load();})
+      .catch(e=>setErr(_t((e.body&&e.body.error)==='no_email'?'لا يوجد بريد إلكتروني':'تعذر إرسال التذكير')))
+      .finally(()=>setBusy(''));
+  };
+  const chLabel=ch=>ch==='whatsapp'?_t('واتساب'):ch==='email'?_t('البريد'):_t('يدوي');
+  const filters=[['all','الكل'],['week','ذُكِّروا هذا الأسبوع'],['never','لم يُذكَّروا بعد'],['high','مستحق مرتفع']];
+  return <div data-oq-dues="">
+    <div className="tabs" style={{flexWrap:'wrap'}}>
+      {filters.map(([k,l])=><button key={k} type="button" className={filter===k?'on':''} data-oq-dues-filter={k} onClick={()=>setFilter(k)}>{_t(l)}</button>)}
+    </div>
+    {loading&&<p className="muted">{_t('جاري التحميل...')}</p>}
+    {err&&<div className="al bad" data-oq-dues-err="">{err}</div>}
+    {msg&&<div className="al ok" data-oq-dues-msg="">{msg}</div>}
+    {!loading&&!err&&<p className="muted" data-oq-dues-summary="">{pack.count} — {fmt(pack.totalDue)} · {_t('ترتيب حسب أطول صمت')}</p>}
+    {!loading&&<div className="tw"><table data-oq-dues-table=""><thead><tr>
+      <th>{_t('المترشح')}</th><th>{_t('الهاتف')}</th><th>{_t('الباقي')}</th>
+      <th>{_t('آخر دفعة')}</th><th>{_t('آخر تذكير')}</th><th>{_t('أيام الصمت')}</th>
+      {canAct&&<th></th>}
+    </tr></thead><tbody>
+      {pack.debtors.map(d=><tr key={d.id} data-oq-debtor={d.id} data-oq-silent={d.daysSilent}>
+        <td>{d.name}{d.highDue&&<span className="bd warn" style={{marginInlineStart:6}}>{_t('مستحق مرتفع')}</span>}</td>
+        <td>{d.phone||'—'}</td>
+        <td><span className="bd warn">{fmt(d.due)}</span></td>
+        <td>{d.lastPaymentDate||'—'}</td>
+        <td>{d.lastReminderDate?(d.lastReminderDate+' ('+chLabel(d.lastReminderChannel)+')'):_t('لم يُذكَّر بعد')}</td>
+        <td data-oq-silent-cell="">{d.daysSilent}</td>
+        {canAct&&<td>
+          <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+            {d.whatsappUrl?<a className="b wa" data-oq-dues-wa="" target="_blank" rel="noreferrer" href={d.whatsappUrl} onClick={()=>mark(d,'whatsapp')} title={_t('تذكير عبر واتساب')}><WaIcon/> {_t('واتساب')}</a>:null}
+            <button type="button" className="b" data-oq-dues-mark="" disabled={!!busy} onClick={()=>mark(d,'manual')}>{_t('تم التذكير')}</button>
+            {d.email?<button type="button" className="b" data-oq-dues-email="" disabled={!!busy} onClick={()=>mark(d,'email')}>{_t('تذكير عبر البريد')}</button>:null}
+          </div>
+        </td>}
+      </tr>)}
+      {!pack.debtors.length&&<tr><td colSpan={canAct?7:6} className="empty">{_t('ما كاين حتى مستحقات')}</td></tr>}
+    </tbody></table></div>}
+  </div>;
+}
+function DuesPage(){
+  return <div><div className="pgh"><h2>{_t('المستحقات')}</h2><p className="muted">{_t('ترتيب حسب أطول صمت')}</p></div><DuesList/></div>;
+}
 function Finance(){
   const {db,upd,user,L}=useC();
   const mgr=user.role==='manager';
@@ -875,10 +984,7 @@ function Finance(){
         {!db.payments.length&&<tr><td colSpan="5" className="empty">{_t("ما كاين حتى دفعة")}</td></tr>}
       </tbody></table></div>
     </div>}
-    {tab==='arr'&&<div className="tw"><table><thead><tr><th>{_t("المترشح")}</th><th>{_t("الهاتف")}</th><th>{_t("ثمن الباقة")}</th><th>{_t("المؤدى")}</th><th>{_t("الباقي")}</th></tr></thead><tbody>
-      {arrears.map(x=><tr key={x.c.id}><td>{x.c.name}</td><td>{x.c.phone}</td><td>{fmt(x.c.price)}</td><td>{fmt(paidOf(db,x.c.id))}</td><td><span className="bd warn">{fmt(x.left)}</span></td></tr>)}
-      {!arrears.length&&<tr><td colSpan="5" className="empty">{_t("ما كاين حتى متأخرات 👌")}</td></tr>}
-    </tbody></table></div>}
+    {tab==='arr'&&<DuesList/>}
     {tab==='exp'&&mgr&&<div>
       <div className="card"><h3>{_t("مصروف جديد")}</h3><div className="fg">
         <F l={_t("الوصف")}><input value={ex.label} onChange={e=>setEx(Object.assign({},ex,{label:e.target.value}))}/></F>
@@ -1274,13 +1380,13 @@ function App(){
   const unread=db.notifs.filter(n=>!n.read&&visibleNotif(user,n)).length;
   const pend=db.requests.filter(r=>r.status==='pending').length;
   const NAV={
-    manager:[['home',_t('🏠 لوحة القيادة')],['candidates',_t('👥 المترشحون')],['sessions',_t('📅 الحصص')],['monitors',_t('🧑‍🏫 المونيتورات')],['vehicles',_t('🚗 السيارات')],['finance',_t('💰 المالية')],['requests',_t('🔁 الطلبات')],['bookings','📥 '+_t('طلبات الحجز')],['notifs',_t('🔔 الإشعارات')],['settings',_t('⚙️ الإعدادات')]],
-    secretary:[['home',_t('🏠 لوحة القيادة')],['candidates',_t('👥 المترشحون')],['sessions',_t('📅 الحصص')],['vehicles',_t('🚗 السيارات')],['finance',_t('💰 المالية')],['requests',_t('🔁 الطلبات')],['bookings','📥 '+_t('طلبات الحجز')],['notifs',_t('🔔 الإشعارات')],['settings',_t('⚙️ الإعدادات')]],
+    manager:[['home',_t('🏠 لوحة القيادة')],['candidates',_t('👥 المترشحون')],['sessions',_t('📅 الحصص')],['monitors',_t('🧑‍🏫 المونيتورات')],['vehicles',_t('🚗 السيارات')],['finance',_t('💰 المالية')],['dues','💳 '+_t('المستحقات')],['requests',_t('🔁 الطلبات')],['bookings','📥 '+_t('طلبات الحجز')],['notifs',_t('🔔 الإشعارات')],['settings',_t('⚙️ الإعدادات')]],
+    secretary:[['home',_t('🏠 لوحة القيادة')],['candidates',_t('👥 المترشحون')],['sessions',_t('📅 الحصص')],['vehicles',_t('🚗 السيارات')],['finance',_t('💰 المالية')],['dues','💳 '+_t('المستحقات')],['requests',_t('🔁 الطلبات')],['bookings','📥 '+_t('طلبات الحجز')],['notifs',_t('🔔 الإشعارات')],['settings',_t('⚙️ الإعدادات')]],
     monitor:[['home',_t('📅 برنامجي')],['mycands',_t('👥 مترشحيني')],['mystats',_t('📊 إحصائياتي')],['notifs',_t('🔔 الإشعارات')],['settings',_t('⚙️ الإعدادات')]]
   }[user.role];
   const mon=user.role==='monitor';
   const PAGES={
-    home:mon?<MySchedule/>:<Dashboard/>,candidates:<Candidates/>,sessions:<Sessions/>,monitors:<Monitors/>,vehicles:<Vehicles/>,finance:<Finance/>,requests:<Requests/>,bookings:<BookingsInbox/>,notifs:<Notifs/>,settings:<Settings/>,mycands:<MyCands/>,mystats:<MyStats/>
+    home:mon?<MySchedule/>:<Dashboard/>,candidates:<Candidates/>,sessions:<Sessions/>,monitors:<Monitors/>,vehicles:<Vehicles/>,finance:<Finance/>,dues:<DuesPage/>,requests:<Requests/>,bookings:<BookingsInbox/>,notifs:<Notifs/>,settings:<Settings/>,mycands:<MyCands/>,mystats:<MyStats/>
   };
   const allowed=NAV.some(x=>x[0]===page)?page:'home';
   return <Ctx.Provider value={{db:db,upd:upd,user:user,L:L,notify:notify,mark:mark,replace:setDb,openSend:setSend,lang:lang,setLang:setLang,logout:logout}}>
