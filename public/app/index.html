@@ -145,6 +145,7 @@ html,body{max-width:100%;overflow-x:hidden}
 <script src="/assets/otoqol-drive.js"></script>
 <script src="/narsa-docs.js"></script>
 <script src="/templates.js"></script>
+<script src="/hours.js?v=24"></script>
 <script type="text/babel">
 
 const {useState,useEffect}=React;
@@ -578,6 +579,26 @@ Object.assign(DICT.en,{
   "الوثائق":"Documents",
   "المهام اليدوية":"Manual tasks"
 });
+Object.assign(DICT.fr,{
+  "الساعات المدفوعة المتبقية":"Heures payées restantes",
+  "تبقّى":"Reste",
+  "ساعة":"heure(s)",
+  "تبقّت لهذا المترشح ساعتان أو أقل من الساعات المدفوعة":"Il reste deux heures payées ou moins à ce candidat",
+  "لا يمكن حجز حصة جديدة: لم تبقَ ساعات مدفوعة":"Impossible de réserver une nouvelle séance : plus d’heures payées",
+  "السماح بهذا الحجز رغم نفاد الساعات المدفوعة؟":"Autoriser cette réservation malgré l’épuisement des heures payées ?",
+  "ساعات مدفوعة على وشك النفاد":"Heures payées bientôt épuisées",
+  "نفدت الساعات المدفوعة":"Heures payées épuisées"
+});
+Object.assign(DICT.en,{
+  "الساعات المدفوعة المتبقية":"Paid hours remaining",
+  "تبقّى":"Left",
+  "ساعة":"hour(s)",
+  "تبقّت لهذا المترشح ساعتان أو أقل من الساعات المدفوعة":"This candidate has two or fewer paid hours left",
+  "لا يمكن حجز حصة جديدة: لم تبقَ ساعات مدفوعة":"Cannot book a new lesson: no paid hours left",
+  "السماح بهذا الحجز رغم نفاد الساعات المدفوعة؟":"Allow this booking even though paid hours have run out?",
+  "ساعات مدفوعة على وشك النفاد":"Paid hours almost used up",
+  "نفدت الساعات المدفوعة":"Paid hours used up"
+});
 const _t=s=>{if(typeof s!=='string')return s;if(LANG==='ar'){if(DICT_AR[s]!==undefined)return DICT_AR[s];const a=s.match(/^(\s*)([\s\S]*?)(\s*)$/);return a[2]&&DICT_AR[a[2]]!==undefined?a[1]+DICT_AR[a[2]]+a[3]:s;}const d=DICT[LANG];if(d[s]!==undefined)return d[s];const m=s.match(/^(\s*)([\s\S]*?)(\s*)$/);if(m[2]&&d[m[2]]!==undefined)return m[1]+d[m[2]]+m[3];return s;};
 const lbl=o=>new Proxy(o,{get:(o2,k)=>(typeof k==='string'&&Object.prototype.hasOwnProperty.call(o2,k))?_t(o2[k]):o2[k]});
 const KEY='autoecole_db_v1';
@@ -623,6 +644,7 @@ const defaultDB=()=>({
 const load=()=>{try{const r=localStorage.getItem(KEY);if(r){const o=Object.assign(defaultDB(),JSON.parse(r));if(!o.settings||!o.settings.school||o.settings.school==='مدرسة السياقة'||o.settings.school==='مدرسة الأمل')o.settings=Object.assign({},o.settings,{school:'Otoqol'});return o;}}catch(e){}return defaultDB();};
 
 const hoursDone=(db,cid,type)=>db.sessions.reduce((s,x)=>{const a=x.att.find(y=>y.cid===cid);return s+((a&&counted(a)&&(!type||x.type===type))?Number(x.duration):0);},0);
+function PaidHoursBanner({db,cid}){if(!window.OQHours)return null;const h=OQHours.snapshot(db,cid);if(!h.applicable||!(h.warning||h.blocked))return null;return <div className={'al '+(h.blocked?'bad':'warn')} data-oq-hours-banner={h.blocked?'blocked':'warn'} data-oq-hours-left={OQHours.formatHours(h.left)} style={{marginBottom:10}}>{h.blocked?_t('نفدت الساعات المدفوعة'):_t('تبقّت لهذا المترشح ساعتان أو أقل من الساعات المدفوعة')}{' — '+_t('الساعات المدفوعة المتبقية')+': '+OQHours.formatHours(h.left)+' '+_t('ساعة')}</div>;}
 const absCount=(db,cid)=>db.sessions.reduce((s,x)=>s+(x.att.some(a=>a.cid===cid&&a.status==='absent')?1:0),0);
 const paidOf=(db,cid)=>db.payments.filter(p=>p.cid===cid).reduce((s,p)=>s+Number(p.amount),0);
 const monStats=(db,mid)=>{
@@ -687,7 +709,7 @@ function SendModal({s,mode,onClose}){
   </Modal>;
 }
 function SessionForm({s,defDate,onClose}){
-  const {db,upd,L,notify,openSend}=useC();
+  const {db,upd,L,notify,openSend,user}=useC();
   const [f,setF]=useState(s?{id:s.id,date:s.date,time:s.time,duration:s.duration,type:s.type,monitorId:s.monitorId,vehicleId:s.vehicleId,notes:s.notes}:{date:defDate,time:'09:00',duration:1,type:'conduite',monitorId:db.monitors[0]?db.monitors[0].id:'',vehicleId:'',notes:''});
   const [sel,setSel]=useState(s?s.att.map(a=>a.cid):[]);
   const [q,setQ]=useState('');
@@ -706,8 +728,26 @@ function SessionForm({s,defDate,onClose}){
       else{const c=x.att.find(a=>sel.includes(a.cid)&&a.status!=='absent');if(c)why=_t('المترشح ')+nm(db.candidates,c.cid)+_t(' عندو حصة أخرى فهاد الوقت');}
     });
     if(why)return alert(_t('تضارب: ')+why);
+    const incoming=JSON.parse(JSON.stringify(db));
+    const draftAtt=sel.map(cid=>{const old=s&&s.att.find(a=>a.cid===cid);return old?Object.assign({},old):{cid:cid,status:'planned',reason:''};});
+    const draft={date:f.date,time:f.time,duration:Number(f.duration),type:f.type,monitorId:f.monitorId,vehicleId:f.type==='conduite'?f.vehicleId:'',notes:f.notes||'',att:draftAtt};
+    if(s){const cur=(incoming.sessions||[]).find(x=>x.id===s.id);if(cur)Object.assign(cur,draft);else incoming.sessions.push(Object.assign({id:s.id},draft));}
+    else incoming.sessions.push(Object.assign({id:'tmp-new'},draft));
+    const diff=window.OQHours?OQHours.bookingDiff(db,incoming):{blocked:[]};
+    let withOverride=false;
+    if(diff.blocked&&diff.blocked.length){
+      const msg=_t('لا يمكن حجز حصة جديدة: لم تبقَ ساعات مدفوعة')+'\n'+diff.blocked.map(b=>b.name+' — '+_t('تبقّى')+' '+(window.OQHours?OQHours.formatHours(b.left):b.left)+' '+_t('ساعة')).join('\n');
+      if(!(user&&user.role==='manager'))return alert(msg);
+      if(!confirm(msg+'\n\n'+_t('السماح بهذا الحجز رغم نفاد الساعات المدفوعة؟')))return;
+      withOverride=true;
+    }
     upd(n=>{
-      const att=sel.map(cid=>{const old=s&&s.att.find(a=>a.cid===cid);return old||{cid:cid,status:'planned',reason:''};});
+      const att=sel.map(cid=>{
+        const old=s&&s.att.find(a=>a.cid===cid);
+        const rec=old?Object.assign({},old):{cid:cid,status:'planned',reason:''};
+        if(withOverride&&diff.blocked.some(b=>b.cid===cid)) rec.hoursOverride={reason:'manager'};
+        return rec;
+      });
       const data={date:f.date,time:f.time,duration:Number(f.duration),type:f.type,monitorId:f.monitorId,vehicleId:f.type==='conduite'?f.vehicleId:'',notes:f.notes||'',att:att};
       if(s){
         Object.assign(n.sessions.find(x=>x.id===s.id),data);
@@ -734,7 +774,7 @@ function SessionForm({s,defDate,onClose}){
     </div>
     <F l={_t('المترشحون (')+sel.length+')'}>
       <input type="search" placeholder={_t("بحث...")} value={q} onChange={e=>setQ(e.target.value)} style={{marginBottom:6}}/>
-      <div className="pick">{elig.length?elig.map(c=><label key={c.id}><input type="checkbox" checked={sel.includes(c.id)} onChange={e=>setSel(e.target.checked?sel.concat(c.id):sel.filter(x=>x!==c.id))}/>{c.name} <small className="meta">({c.license})</small></label>):<div className="meta">{_t("ما كاين حتى مترشح")}</div>}</div>
+      <div className="pick">{elig.length?elig.map(c=><label key={c.id}><input type="checkbox" checked={sel.includes(c.id)} onChange={e=>setSel(e.target.checked?sel.concat(c.id):sel.filter(x=>x!==c.id))}/>{c.name} <small className="meta">({c.license})</small>{window.OQHours&&(()=>{const h=OQHours.snapshot(db,c.id);if(!h.applicable)return null;if(!h.warning&&!h.blocked)return <small className="meta"> · {_t('تبقّى')} {OQHours.formatHours(h.left)} {_t('ساعة')}</small>;return <small className={'bd '+(h.blocked?'bad':'warn')} data-oq-hours-pick={c.id}> · {h.blocked?_t('نفدت الساعات المدفوعة'):_t('تبقّى')+' '+OQHours.formatHours(h.left)+' '+_t('ساعة')}</small>;})()}</label>):<div className="meta">{_t("ما كاين حتى مترشح")}</div>}</div>
     </F>
     <F l={_t("ملاحظات")}><input value={f.notes||''} onChange={e=>set('notes',e.target.value)}/></F>
     <div className="row"><button className="b pri" onClick={save}>{_t("حفظ")}</button><button className="b" onClick={onClose}>{_t("إلغاء")}</button></div>
@@ -925,6 +965,7 @@ function CandidateModal({id,onClose,startNarsa}){
       <span className="bd">{_t("سياقة")} {hoursDone(db,c.id,'conduite')}/{c.driveHours} {_t("س")}</span>
       {absCount(db,c.id)>0&&<span className={'bd '+(absCount(db,c.id)>=db.settings.absLimit?'bad':'warn')}>{_t("غيابات:")} {absCount(db,c.id)}</span>}
     </div>}
+    {c&&<PaidHoursBanner db={db} cid={c.id}/>}
     <Tabs tabs={tabs} v={tab} set={setTab}/>
     {tab==='info'&&<div>
       <div className="fg">
@@ -1628,7 +1669,8 @@ function TasksInbox(){
       doc_insurance:_t('تأمين السيارة'),
       doc_visit:_t('زيارة تقنية'),
       doc_tax:_t('الضريبة'),
-      manual:it.title||_t('مهمة يدوية')
+      manual:it.title||_t('مهمة يدوية'),
+      hours_low:it.hoursLeft<=0?_t('نفدت الساعات المدفوعة'):_t('ساعات مدفوعة على وشك النفاد')
     })[it.type]||it.type;
   };
   const typeOf=t=>t==='code'||t==='conduite'||t==='drive'?typeLbl[t==='drive'?'conduite':t]:(t||'');
@@ -1646,6 +1688,7 @@ function TasksInbox(){
     {id:'lesson',types:['lesson_tomorrow'],label:_t('الدروس')},
     {id:'exam',types:['exam_upcoming'],label:_t('الامتحانات')},
     {id:'docs',types:['doc_medical','doc_insurance','doc_visit','doc_tax'],label:_t('الوثائق')},
+    {id:'hours',types:['hours_low'],label:_t('الساعات المدفوعة المتبقية')},
     {id:'manual',types:['manual'],label:_t('المهام اليدوية')}
   ];
   const items=box&&box.items||[];
@@ -1698,6 +1741,7 @@ function TasksInbox(){
     if(it.instructor)bits.push(it.instructor);
     if(it.type==='due_remind')bits.push(fmt(it.due)+(it.daysSilent!=null?(' · '+_t('صامت منذ')+' '+it.daysSilent+' '+_t('يوماً')):''));
     if((it.type==='doc_insurance'||it.type==='doc_visit'||it.type==='doc_tax')&&it.daysLeft!=null)bits.push((it.daysLeft<0?_t('منتهية منذ')+' '+Math.abs(it.daysLeft):_t('تنتهي بعد')+' '+it.daysLeft)+' '+_t('يوماً'));
+    if(it.type==='hours_low'&&it.hoursLeft!=null)bits.push(_t('تبقّى')+' '+(window.OQHours?OQHours.formatHours(it.hoursLeft):it.hoursLeft)+' '+_t('ساعة'));
     if(it.type==='manual'&&it.overdue)bits.push(_t('متأخرة'));
     if(it.assigneeName)bits.push(it.assigneeName);
     return bits.filter(Boolean).join(' · ');
@@ -1913,6 +1957,14 @@ const OQ=(()=>{
       if(e.body&&e.body.error==='username_taken'){
         setStatus('taken');blocked=true;
         try{alert(_t('اسم المستخدم مستعمل من قبل'));}catch(x){}
+      }else if(e.body&&e.body.error==='paid_hours_blocked'){
+        setStatus('ok');blocked=true;
+        try{
+          const b=(e.body.blocked||[])[0];
+          const left=b&&window.OQHours?OQHours.formatHours(b.left):'';
+          alert(_t('لا يمكن حجز حصة جديدة: لم تبقَ ساعات مدفوعة')+(left?(' ('+_t('تبقّى')+' '+left+' '+_t('ساعة')+')'):''));
+        }catch(x){}
+        if(base){last=base;dirty=false;persist();try{if(setter)setter(JSON.parse(base));}catch(x){}}
       }else if(e.status===401||e.status===403)setStatus('auth');
       else{setStatus('offline');schedule(10000);}
     }finally{inflight=false;}
