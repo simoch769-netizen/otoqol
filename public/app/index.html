@@ -105,8 +105,16 @@ const DICT_AR={"wa:الكود": "الكود", "wa:السياقة": "السياق
 Object.assign(DICT.fr,{"wa:الكود": "code", "wa:السياقة": "conduite", "wa:الحصة ديال {k} تلغات:": "Votre cours de {k} est annulé :", "wa:الحصة ديال {k} تبدلات:": "Votre cours de {k} a été modifié :", "wa:الحصة ديال {k} تأكدات:": "Votre cours de {k} est confirmé :", "wa:السلام ": "Bonjour ", "wa:،": ",", "wa:كنتي غايب(ة) فحصة {k} ديال {d}.": "Vous étiez absent(e) au cours de {k} du {d}.", "wa:كنتي غايب(ة) فالحصة الأخيرة ديالك.": "Vous étiez absent(e) à votre dernier cours.", "wa:عافاك تواصل معانا باش نحددو موعد جديد.": "Merci de nous contacter pour fixer un nouveau rendez-vous."});
 Object.assign(DICT.en,{"wa:الكود": "theory (code)", "wa:السياقة": "driving", "wa:الحصة ديال {k} تلغات:": "Your {k} lesson is cancelled:", "wa:الحصة ديال {k} تبدلات:": "Your {k} lesson has been changed:", "wa:الحصة ديال {k} تأكدات:": "Your {k} lesson is confirmed:", "wa:السلام ": "Hello ", "wa:،": ",", "wa:كنتي غايب(ة) فحصة {k} ديال {d}.": "You were absent from the {k} lesson on {d}.", "wa:كنتي غايب(ة) فالحصة الأخيرة ديالك.": "You were absent from your last lesson.", "wa:عافاك تواصل معانا باش نحددو موعد جديد.": "Please contact us to set a new appointment."});
 /* i18n: single sign-in strings */
-Object.assign(DICT.fr,{"عمر جميع الخانات":"Veuillez remplir tous les champs","تسجيل الخروج":"Déconnexion"});
-Object.assign(DICT.en,{"عمر جميع الخانات":"Please fill in all fields","تسجيل الخروج":"Log out"});
+Object.assign(DICT.fr,{"عمر جميع الخانات":"Veuillez remplir tous les champs","تسجيل الخروج":"Déconnexion",
+  "رمز المدرسة":"Code de l’école","رمز المدرسة (اختياري)":"Code de l’école (facultatif)",
+  "إنشاء حساب لمدرستك":"Créer un compte pour votre école",
+  "طلبك قيد المراجعة. ستتمكن من الدخول بعد الموافقة.":"Votre demande est en cours d’examen. Vous pourrez vous connecter après l’approbation.",
+  "لم تتم الموافقة على طلب هذه المدرسة.":"La demande de cette école n’a pas été approuvée."});
+Object.assign(DICT.en,{"عمر جميع الخانات":"Please fill in all fields","تسجيل الخروج":"Log out",
+  "رمز المدرسة":"School code","رمز المدرسة (اختياري)":"School code (optional)",
+  "إنشاء حساب لمدرستك":"Create an account for your school",
+  "طلبك قيد المراجعة. ستتمكن من الدخول بعد الموافقة.":"Your request is under review. You will be able to sign in after approval.",
+  "لم تتم الموافقة على طلب هذه المدرسة.":"This school’s request was not approved."});
 /* i18n: forgot password + account email */
 Object.assign(DICT.fr,{"نسيت كلمة السر؟":"Mot de passe oublié ?","استرجاع كلمة السر":"Récupération du mot de passe","أرسل رمز التحقق":"Envoyer le code","رمز التحقق":"Code de vérification","كلمة السر الجديدة":"Nouveau mot de passe","تأكيد كلمة السر":"Confirmer le mot de passe","تغيير كلمة السر":"Changer le mot de passe","رجوع لتسجيل الدخول":"Retour à la connexion","إذا كان هذا الحساب مرتبطًا ببريد إلكتروني، فقد أرسلنا إليه رمز التحقق.":"Si ce compte est associé à une adresse e-mail, un code de vérification lui a été envoyé.","تم تغيير كلمة السر. يمكنك تسجيل الدخول الآن.":"Le mot de passe a été modifié. Vous pouvez vous connecter.","الرمز غير صالح أو منتهي الصلاحية.":"Le code est invalide ou a expiré.","كلمتا السر غير متطابقتين":"Les mots de passe ne correspondent pas","البريد الإلكتروني":"E-mail","البريد الإلكتروني غير صالح":"Adresse e-mail invalide","اختياري — لاسترجاع كلمة السر":"Facultatif — pour retrouver le mot de passe","حفظ البريد":"Enregistrer l’e-mail","تم الحفظ":"Enregistré","تحديث البريد الإلكتروني لـ ":"Mise à jour de l’e-mail de ","حسابات الفريق":"Comptes de l’équipe","أضف بريدًا إلكترونيًا لكل حساب حتى يتمكن من استرجاع كلمة السر.":"Ajoutez un e-mail à chaque compte pour permettre la réinitialisation du mot de passe.","إعادة إرسال الرمز":"Renvoyer le code","أدخل الرمز الذي وصلك في البريد وكلمة السر الجديدة.":"Saisissez le code reçu par e-mail et le nouveau mot de passe.","اطلب رمز التحقق":"Demander un code de vérification"});
 Object.assign(DICT.en,{"نسيت كلمة السر؟":"Forgot password?","استرجاع كلمة السر":"Password recovery","أرسل رمز التحقق":"Send the code","رمز التحقق":"Verification code","كلمة السر الجديدة":"New password","تأكيد كلمة السر":"Confirm password","تغيير كلمة السر":"Change password","رجوع لتسجيل الدخول":"Back to sign in","إذا كان هذا الحساب مرتبطًا ببريد إلكتروني، فقد أرسلنا إليه رمز التحقق.":"If this account has an email address, we have sent a verification code to it.","تم تغيير كلمة السر. يمكنك تسجيل الدخول الآن.":"Your password has been changed. You can log in now.","الرمز غير صالح أو منتهي الصلاحية.":"The code is invalid or has expired.","كلمتا السر غير متطابقتين":"The passwords do not match","البريد الإلكتروني":"Email","البريد الإلكتروني غير صالح":"Invalid email address","اختياري — لاسترجاع كلمة السر":"Optional — to recover the password","حفظ البريد":"Save email","تم الحفظ":"Saved","تحديث البريد الإلكتروني لـ ":"Email updated for ","حسابات الفريق":"Team accounts","أضف بريدًا إلكترونيًا لكل حساب حتى يتمكن من استرجاع كلمة السر.":"Add an email to each account so they can recover their password.","إعادة إرسال الرمز":"Resend the code","أدخل الرمز الذي وصلك في البريد وكلمة السر الجديدة.":"Enter the code you received by email and your new password.","اطلب رمز التحقق":"Request a verification code"});
@@ -1035,7 +1043,7 @@ function OQSignOut(){
 /* Single sign-in: school code (remembered on this device) + the app's own username/password, checked by the server. */
 function SchoolGate(){
   const [phase,setPhase]=useState('check');const [school,setSchool]=useState(null);const [server,setServer]=useState(null);
-  const [un,setUn]=useState('');
+  const [un,setUn]=useState('');const [schoolCode,setSchoolCode]=useState(()=>{try{return localStorage.getItem('oq_school_code')||'';}catch(e){return '';}});
   const [pw,setPw]=useState('');const [err,setErr]=useState('');const [busy,setBusy]=useState(false);
   const [fpStep,setFpStep]=useState(null);const [fpUn,setFpUn]=useState('');const [fpCode,setFpCode]=useState('');
   const [fpPw,setFpPw]=useState('');const [fpPw2,setFpPw2]=useState('');const [fpMsg,setFpMsg]=useState('');
@@ -1074,10 +1082,14 @@ function SchoolGate(){
     if(busy)return;setErr('');
     if(!un.trim()||!pw)return setErr(_t('عمر جميع الخانات'));
     setBusy(true);
-    try{const r=await OQ.api('POST','/api/signin',{username:un.trim(),password:pw});
+    try{const sc=schoolCode.trim();try{if(sc)localStorage.setItem('oq_school_code',sc);}catch(x){}
+      const r=await OQ.api('POST','/api/signin',sc?{school:sc,username:un.trim(),password:pw}:{username:un.trim(),password:pw});
       pend.current.setupPw=r.setup?pw:null;setPw('');
       await enter(r.school,r.user);}
-    catch(e){setErr(e.status===401?_t('اسم المستخدم أو كلمة السر غالطين'):
+    catch(e){const code=e.body&&e.body.error;
+      setErr(e.status===401?_t('اسم المستخدم أو كلمة السر غالطين'):
+      code==='school_pending'?_t('طلبك قيد المراجعة. ستتمكن من الدخول بعد الموافقة.'):
+      code==='school_rejected'?_t('لم تتم الموافقة على طلب هذه المدرسة.'):
       e.status===403?_t('هاد الحساب موقوف، تواصل معانا'):
       e.status===429?_t('بزاف ديال المحاولات، عاود من بعد شوية'):
       _t('ما قدرناش نتواصلو مع السيرفر'));}
@@ -1088,7 +1100,7 @@ function SchoolGate(){
     if(busy)return;setErr('');setFpMsg('');
     if(!fpUn.trim())return setErr(_t('عمر جميع الخانات'));
     setBusy(true);
-    try{await OQ.api('POST','/api/forgot-password',{username:fpUn.trim()});
+    try{const sc=schoolCode.trim();await OQ.api('POST','/api/forgot-password',sc?{school:sc,username:fpUn.trim()}:{username:fpUn.trim()});
       setFpMsg(_t('إذا كان هذا الحساب مرتبطًا ببريد إلكتروني، فقد أرسلنا إليه رمز التحقق.'));
       setFpStep('code');}
     catch(e){setErr(e.status===429?_t('بزاف ديال المحاولات، عاود من بعد شوية'):_t('ما قدرناش نتواصلو مع السيرفر'));}
@@ -1100,7 +1112,7 @@ function SchoolGate(){
     if(fpPw!==fpPw2)return setErr(_t('كلمتا السر غير متطابقتين'));
     if(fpPw.trim().length<4)return setErr(_t('4 حروف على الأقل'));
     setBusy(true);
-    try{await OQ.api('POST','/api/reset-password',{username:fpUn.trim(),code:fpCode.trim(),password:fpPw});
+    try{const sc=schoolCode.trim();await OQ.api('POST','/api/reset-password',sc?{school:sc,username:fpUn.trim(),code:fpCode.trim(),password:fpPw}:{username:fpUn.trim(),code:fpCode.trim(),password:fpPw});
       setFpPw('');setFpPw2('');setFpCode('');setFpStep('done');}
     catch(e){setErr(e.status===429?_t('بزاف ديال المحاولات، عاود من بعد شوية'):
       e.body&&e.body.error==='weak_password'?_t('4 حروف على الأقل'):
@@ -1133,6 +1145,7 @@ function SchoolGate(){
     {LangSel}
     <div className="lk"><Wordmark teal h={56}/><div className="tag">{_t('استرجاع كلمة السر')}</div></div>
     {fpStep==='user'&&<div>
+      <F l={_t('رمز المدرسة (اختياري)')}><input name="school" value={schoolCode} dir="ltr" autoComplete="off" autoCapitalize="none" autoCorrect="off" spellCheck="false" onChange={e=>setSchoolCode(e.target.value)} data-oq-school=""/></F>
       <F l={_t('اسم المستخدم')}><input name="username" value={fpUn} dir="ltr" autoComplete="username" autoCapitalize="none" autoCorrect="off" spellCheck="false" onChange={e=>setFpUn(e.target.value)} autoFocus/></F>
       {err&&<div className="al bad">{err}</div>}
       <button type="button" className="b pri" style={{width:'100%'}} disabled={busy} onClick={requestCode}>{busy?_t('…'):_t('أرسل رمز التحقق')}</button>
@@ -1156,11 +1169,13 @@ function SchoolGate(){
   return <div className="login"><div className="card" data-oq-signin="" onKeyDown={e=>{if(e.key==='Enter')go();}}>
     {LangSel}
     <div className="lk"><Wordmark teal h={56}/><div className="tag">{_t('تسيير مدارس السياقة')}</div></div>
+    <F l={_t('رمز المدرسة (اختياري)')}><input name="school" value={schoolCode} dir="ltr" autoComplete="organization" autoCapitalize="none" autoCorrect="off" spellCheck="false" onChange={e=>setSchoolCode(e.target.value)} data-oq-school=""/></F>
     <F l={_t('اسم المستخدم')}><input name="username" value={un} dir="ltr" autoComplete="username" autoCapitalize="none" autoCorrect="off" spellCheck="false" onChange={e=>setUn(e.target.value)} autoFocus/></F>
     <F l={_t('كلمة السر')}><input name="password" type="password" dir="ltr" autoComplete="current-password" autoCapitalize="none" autoCorrect="off" value={pw} onChange={e=>setPw(e.target.value)}/></F>
     {err&&<div className="al bad">{err}</div>}
     <button type="button" className="b pri" style={{width:'100%'}} disabled={busy} onClick={go}>{busy?_t('…'):_t('دخول')}</button>
     <button type="button" className="fp-link" data-oq-forgot-link="" onClick={()=>{setFpStep('user');setFpUn(un);setErr('');setFpMsg('');setFpCode('');setFpPw('');setFpPw2('');}}>{_t('نسيت كلمة السر؟')}</button>
+    <a className="fp-link" href="/signup" data-oq-signup-link="" style={{display:'block',textAlign:'center',marginTop:8}}>{_t('إنشاء حساب لمدرستك')}</a>
   </div></div>;
 }
 
