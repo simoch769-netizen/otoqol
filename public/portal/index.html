@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Otoqol — بوابة التلميذ</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Tajawal:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="icon" href="/assets/otoqol-icon.svg">
+<meta name="theme-color" content="#0F766E">
+<script>try{var l=localStorage.getItem('ae_lang');if(l==='fr'||l==='en'){document.documentElement.lang=l;document.documentElement.dir='ltr';}}catch(e){}</script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" integrity="sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@8.1.3/babel.min.js" integrity="sha384-wcosL0FTsgG9VdClvFesIL0VBVQZvPXyzBKp/WYD1KNTOHLGGOXma8GNuoiO5xaV" crossorigin="anonymous"></script>
+<style>
+:root{--p:#0f766e;--p2:#115e59;--bg:#f1f5f9;--c:#fff;--t:#0f172a;--m:#64748b;--bd:#e2e8f0;--ok:#16a34a;--bad:#dc2626;--warn:#d97706}
+*{box-sizing:border-box}
+html,body{max-width:100%;overflow-x:hidden}
+body{margin:0;font-family:Inter,Tajawal,Tahoma,sans-serif;background:var(--bg);color:var(--t);font-size:15px}
+button,input,select,textarea{font-family:inherit;font-size:14px}
+input,select,textarea{width:100%;padding:8px 10px;border:1px solid var(--bd);border-radius:8px;background:#fff}
+h1,h2,h3,.stat b{font-family:Outfit,Tajawal,sans-serif}
+.top{background:var(--p);color:#fff;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.brand{display:flex;align-items:center;gap:8px;margin:0;font-size:18px;min-width:0}
+.brand img{height:28px;width:auto;display:block}
+.brand small{font-weight:500;opacity:.9;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:40vw}
+.u{display:flex;align-items:center;gap:8px;font-size:13px}
+.nav{background:var(--p2);display:flex;gap:4px;padding:6px 10px;position:sticky;top:0;z-index:10;overflow-x:auto}
+.nav button{background:transparent;border:0;color:#fff;padding:8px 12px;border-radius:8px;cursor:pointer;white-space:nowrap}
+.nav button.on,.nav button:hover{background:rgba(255,255,255,.16)}
+.wrap{padding:16px 20px 40px;max-width:980px;margin:0 auto}
+.card{background:var(--c);border:1px solid var(--bd);border-radius:14px;padding:16px 18px;margin-bottom:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:12px}
+.stat{background:var(--c);border:1px solid var(--bd);border-radius:12px;padding:12px}
+.stat small{display:block;color:var(--m);margin-bottom:4px}
+.stat b{font-size:20px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.b{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:#fff;border:1px solid var(--bd);border-radius:8px;padding:8px 12px;cursor:pointer;font-weight:600}
+.b.pri{background:var(--p);color:#fff;border-color:var(--p)}
+.b.del{color:var(--bad);border-color:#fecaca}
+.b:disabled{opacity:.55;cursor:default}
+.bd{display:inline-block;background:#f1f5f9;border-radius:999px;padding:2px 8px;font-size:12px;font-weight:600}
+.bd.ok{background:#dcfce7;color:#166534}.bd.bad{background:#fee2e2;color:#991b1b}.bd.warn{background:#fef3c7;color:#92400e}.bd.info{background:#e0f2fe;color:#075985}
+.meta{color:var(--m);font-size:13px}
+.al{border-radius:10px;padding:10px 12px;margin:8px 0}
+.al.bad{background:#fef2f2;color:#991b1b}.al.ok{background:#f0fdf4;color:#166534}
+.f{display:block;margin:0 0 10px}
+.f span{display:block;margin-bottom:4px;font-weight:600;font-size:13px}
+.login{max-width:400px;margin:8vh auto;padding:0 16px}
+.lk{display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:14px}
+.tag{color:var(--m);font-size:13px}
+.fp-link{display:block;text-align:center;margin-top:10px;color:var(--p2);font-weight:600;background:none;border:0;cursor:pointer;width:100%}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;background:#fff}
+th,td{padding:8px 10px;border-bottom:1px solid var(--bd);text-align:start}
+th{font-size:12px;color:var(--m);font-weight:700}
+.empty{text-align:center;color:var(--m);padding:16px}
+.slot{display:flex;justify-content:space-between;align-items:center;gap:8px;border:1px solid var(--bd);border-radius:10px;padding:8px 10px;background:#fff;margin:0 0 8px}
+.nav-toggle{display:none;align-items:center;justify-content:center;min-width:44px;min-height:44px;padding:0;border:0;border-radius:10px;background:rgba(255,255,255,.16);color:#fff;font-size:22px;cursor:pointer}
+.nav-back{display:none;position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:35}
+.nav-back.on{display:block}
+@media(max-width:900px){
+  .nav-toggle{display:inline-flex}
+  .nav{flex-direction:column;align-items:stretch;position:fixed;top:0;bottom:0;inset-inline-start:0;width:min(320px,86vw);height:100%;overflow-y:auto;padding:16px 10px;z-index:40;transform:translateX(-120%);transition:transform .2s ease}
+  html[dir=rtl] .nav{transform:translateX(120%)}
+  .nav.open,html[dir=rtl] .nav.open{transform:none;box-shadow:0 0 24px rgba(15,23,42,.25)}
+  .nav button{width:100%;text-align:start;min-height:44px}
+  .wrap{padding:12px}
+  .login{margin:6vh auto}
+  .b{min-height:44px}
+  input,select,textarea{font-size:16px;min-height:44px}
+  .grid{grid-template-columns:1fr 1fr}
+  .tw thead{display:none}
+  .tw tbody tr{display:block;border:1px solid var(--bd);border-radius:12px;margin:0 0 10px;padding:8px 12px}
+  .tw td{display:flex;justify-content:space-between;gap:10px;border:0;padding:7px 0}
+  .tw td::before{content:attr(data-th);font-weight:600;color:var(--m)}
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useEffect} = React;
+let LANG=(()=>{try{return localStorage.getItem('ae_lang')||'ar';}catch(e){return 'ar';}})();
+const DICT={fr:{},en:{}};
+Object.assign(DICT.fr,{
+  "بوابة التلميذ":"Espace élève",
+  "دخول":"Connexion",
+  "اسم المستخدم":"Nom d’utilisateur",
+  "كلمة السر":"Mot de passe",
+  "نسيت كلمة السر؟":"Mot de passe oublié ?",
+  "تسجيل الدخول للموظفين":"Espace personnel de l’auto-école",
+  "كنحملو…":"Chargement…",
+  "تسجيل الخروج":"Déconnexion",
+  "القائمة":"Menu",
+  "إغلاق القائمة":"Fermer le menu",
+  "لوحة القيادة":"Tableau de bord",
+  "الجدول":"Planning",
+  "الأداءات":"Paiements",
+  "سجل الحصص":"Historique",
+  "ساعات الكود":"Heures de code",
+  "ساعات السياقة":"Heures de conduite",
+  "الباقي":"Reste dû",
+  "المؤدى":"Payé",
+  "ثمن الباقة":"Prix du forfait",
+  "الحصة القادمة":"Prochaine séance",
+  "المرحلة":"Étape",
+  "ما كاين حتى حصة قادمة":"Aucune séance à venir",
+  "المونيتور":"Moniteur",
+  "الماستر المعيّن":"Moniteur assigné",
+  "المونيتور المعيّن":"Moniteur assigné",
+  "— اختار —":"— Choisir —",
+  "المواعيد المتاحة":"Créneaux disponibles",
+  "طلب هذا الموعد":"Demander ce créneau",
+  "حصصي":"Mes séances",
+  "الطلبات":"Demandes",
+  "كود (نظري)":"Code (théorie)",
+  "تطبيقي (سياقة)":"Conduite (pratique)",
+  "نوع الحصة":"Type de séance",
+  "في الانتظار":"En attente",
+  "مبرمجة":"Planifiée",
+  "حاضر":"Présent",
+  "غائب":"Absent",
+  "متأخر":"En retard",
+  "إلغاء":"Annuler",
+  "سحب الطلب":"Retirer la demande",
+  "طلب إلغاء":"Demander l’annulation",
+  "ما كاين حتى موعد متاح فالأيام الجاية":"Aucun créneau libre dans les prochains jours",
+  "اختار المونيتور باش تشوف المواعيد المتاحة":"Choisissez un moniteur pour voir les créneaux",
+  "تم إرسال طلب الحجز. ينتظر موافقة المدرسة.":"Demande envoyée. Elle attend l’accord de l’école.",
+  "تم سحب الطلب":"Demande retirée",
+  "تم إرسال طلب الإلغاء":"Demande d’annulation envoyée",
+  "تعذر الطلب":"Demande impossible",
+  "هاد الموعد تحجز":"Ce créneau est déjà pris",
+  "تعيين كلمة السر":"Choisir un mot de passe",
+  "تأكيد كلمة السر":"Confirmer le mot de passe",
+  "أوافق على معالجة مدرستي لبياناتي الشخصية (الهوية، الهاتف، البريد، الحصص، والأداءات) لتسيير تكويني عبر Otoqol.":"J’accepte que mon auto-école traite mes données personnelles (identité, téléphone, e-mail, séances et paiements) pour assurer ma formation via Otoqol.",
+  "تفعيل الحساب والدخول":"Activer mon compte et entrer",
+  "الدعوة غير صالحة أو انتهت صلاحيتها.":"Invitation invalide ou expirée.",
+  "كلمتا السر غير متطابقتين":"Les deux mots de passe ne correspondent pas",
+  "4 حروف على الأقل":"4 caractères au moins",
+  "خاص توافق على معالجة البيانات":"Veuillez accepter le traitement des données",
+  "عمر جميع الخانات":"Remplissez tous les champs",
+  "اسم المستخدم أو كلمة السر غالطين":"Identifiant ou mot de passe incorrect",
+  "بوابة التلميذ موقوفة حالياً":"L’espace élève est actuellement désactivé",
+  "بزاف ديال المحاولات، عاود من بعد شوية":"Trop de tentatives, réessayez plus tard",
+  "ما قدرناش نتواصلو مع السيرفر":"Impossible de joindre le serveur",
+  "أرسل رمز التحقق":"Envoyer le code",
+  "رمز التحقق":"Code de vérification",
+  "كلمة السر الجديدة":"Nouveau mot de passe",
+  "استرجاع كلمة السر":"Récupération du mot de passe",
+  "إذا كان هذا الحساب مرتبطًا ببريد إلكتروني، فقد أرسلنا إليه رمز التحقق.":"Si ce compte a un e-mail, un code y a été envoyé.",
+  "أدخل الرمز الذي وصلك في البريد وكلمة السر الجديدة.":"Saisissez le code reçu par e-mail et le nouveau mot de passe.",
+  "تغيير كلمة السر":"Changer le mot de passe",
+  "إعادة إرسال الرمز":"Renvoyer le code",
+  "تم تغيير كلمة السر. يمكنك تسجيل الدخول الآن.":"Mot de passe modifié. Vous pouvez vous connecter.",
+  "رجوع لتسجيل الدخول":"Retour à la connexion",
+  "الدفعات":"Paiements",
+  "ما كاين حتى دفعة":"Aucun paiement",
+  "ملاحظات المدربين":"Remarques des moniteurs",
+  "ما كاين حتى ملاحظة":"Aucune remarque",
+  "تاريخ":"Date",
+  "ساعة":"Heure",
+  "المبلغ":"Montant",
+  "ملاحظة":"Remarque",
+  "النوع":"Type",
+  "الحالة":"Statut",
+  "س":"h",
+  " د.م":" DH",
+  "مرحلة التسجيل":"Inscription",
+  "مرحلة الكود":"Étape code",
+  "مرحلة السياقة":"Étape conduite",
+  "حصل على الرخصة":"Permis obtenu",
+  "قبول الدعوة":"Accepter l’invitation",
+  "مرحبا":"Bonjour"
+});
+Object.assign(DICT.en,{
+  "بوابة التلميذ":"Student portal",
+  "دخول":"Log in",
+  "اسم المستخدم":"Username",
+  "كلمة السر":"Password",
+  "نسيت كلمة السر؟":"Forgot password?",
+  "تسجيل الدخول للموظفين":"Staff sign-in",
+  "كنحملو…":"Loading…",
+  "تسجيل الخروج":"Log out",
+  "القائمة":"Menu",
+  "إغلاق القائمة":"Close menu",
+  "لوحة القيادة":"Dashboard",
+  "الجدول":"Schedule",
+  "الأداءات":"Payments",
+  "سجل الحصص":"Lesson history",
+  "ساعات الكود":"Theory hours",
+  "ساعات السياقة":"Driving hours",
+  "الباقي":"Balance due",
+  "المؤدى":"Paid",
+  "ثمن الباقة":"Package price",
+  "الحصة القادمة":"Next lesson",
+  "المرحلة":"Stage",
+  "ما كاين حتى حصة قادمة":"No upcoming lesson",
+  "المونيتور":"Instructor",
+  "المونيتور المعيّن":"Assigned instructor",
+  "— اختار —":"— Choose —",
+  "المواعيد المتاحة":"Open slots",
+  "طلب هذا الموعد":"Request this slot",
+  "حصصي":"My lessons",
+  "الطلبات":"Requests",
+  "كود (نظري)":"Theory (code)",
+  "تطبيقي (سياقة)":"Driving (practical)",
+  "نوع الحصة":"Lesson type",
+  "في الانتظار":"Pending",
+  "مبرمجة":"Scheduled",
+  "حاضر":"Present",
+  "غائب":"Absent",
+  "متأخر":"Late",
+  "إلغاء":"Cancel",
+  "سحب الطلب":"Withdraw request",
+  "طلب إلغاء":"Request cancellation",
+  "ما كاين حتى موعد متاح فالأيام الجاية":"No open slots in the coming days",
+  "اختار المونيتور باش تشوف المواعيد المتاحة":"Choose an instructor to see open slots",
+  "تم إرسال طلب الحجز. ينتظر موافقة المدرسة.":"Request sent. It is waiting for the school to approve it.",
+  "تم سحب الطلب":"Request withdrawn",
+  "تم إرسال طلب الإلغاء":"Cancellation request sent",
+  "تعذر الطلب":"Could not make the request",
+  "هاد الموعد تحجز":"This slot is already taken",
+  "تعيين كلمة السر":"Set a password",
+  "تأكيد كلمة السر":"Confirm password",
+  "أوافق على معالجة مدرستي لبياناتي الشخصية (الهوية، الهاتف، البريد، الحصص، والأداءات) لتسيير تكويني عبر Otoqol.":"I agree that my driving school may process my personal data (identity, phone, email, lessons and payments) to manage my training through Otoqol.",
+  "تفعيل الحساب والدخول":"Activate my account and enter",
+  "الدعوة غير صالحة أو انتهت صلاحيتها.":"This invitation is invalid or has expired.",
+  "كلمتا السر غير متطابقتين":"The two passwords do not match",
+  "4 حروف على الأقل":"At least 4 characters",
+  "خاص توافق على معالجة البيانات":"Please accept the data-processing terms",
+  "عمر جميع الخانات":"Fill in all fields",
+  "اسم المستخدم أو كلمة السر غالطين":"Wrong username or password",
+  "بوابة التلميذ موقوفة حالياً":"The student portal is currently off",
+  "بزاف ديال المحاولات، عاود من بعد شوية":"Too many attempts, try again later",
+  "ما قدرناش نتواصلو مع السيرفر":"Cannot reach the server",
+  "أرسل رمز التحقق":"Send the code",
+  "رمز التحقق":"Verification code",
+  "كلمة السر الجديدة":"New password",
+  "استرجاع كلمة السر":"Reset password",
+  "إذا كان هذا الحساب مرتبطًا ببريد إلكتروني، فقد أرسلنا إليه رمز التحقق.":"If this account has an email, a code was sent to it.",
+  "أدخل الرمز الذي وصلك في البريد وكلمة السر الجديدة.":"Enter the code from your email and a new password.",
+  "تغيير كلمة السر":"Change password",
+  "إعادة إرسال الرمز":"Resend the code",
+  "تم تغيير كلمة السر. يمكنك تسجيل الدخول الآن.":"Password changed. You can sign in now.",
+  "رجوع لتسجيل الدخول":"Back to sign-in",
+  "الدفعات":"Payments",
+  "ما كاين حتى دفعة":"No payments yet",
+  "ملاحظات المدربين":"Instructor notes",
+  "ما كاين حتى ملاحظة":"No notes yet",
+  "تاريخ":"Date",
+  "ساعة":"Time",
+  "المبلغ":"Amount",
+  "ملاحظة":"Note",
+  "النوع":"Type",
+  "الحالة":"Status",
+  "س":"h",
+  " د.م":" MAD",
+  "مرحلة التسجيل":"Registration",
+  "مرحلة الكود":"Theory stage",
+  "مرحلة السياقة":"Driving stage",
+  "حصل على الرخصة":"Licence obtained",
+  "قبول الدعوة":"Accept invitation",
+  "مرحبا":"Hello"
+});
+const _t=s=>{if(typeof s!=='string')return s;if(LANG==='ar')return s;const d=DICT[LANG];if(d&&d[s]!==undefined)return d[s];return s;};
+const setLang=(l)=>{LANG=l;try{localStorage.setItem('ae_lang',l);}catch(e){}document.documentElement.lang=l;document.documentElement.dir=l==='ar'?'rtl':'ltr';};
+const fmt=n=>(Number(n)||0).toLocaleString(LANG==='en'?'en-US':'fr-FR')+_t(' د.م');
+const stageLbl={reg:_t('مرحلة التسجيل'),code:_t('مرحلة الكود'),drive:_t('مرحلة السياقة'),done:_t('حصل على الرخصة')};
+const typeLbl={code:_t('كود (نظري)'),conduite:_t('تطبيقي (سياقة)')};
+const statusLbl={pending:_t('في الانتظار'),planned:_t('مبرمجة'),present:_t('حاضر'),late:_t('متأخر'),absent:_t('غائب'),cancelled:_t('إلغاء')};
+async function api(method,url,body){
+  const r=await fetch(url,{method,headers:{'Content-Type':'application/json','X-Otoqol':'1'},credentials:'same-origin',body:body===undefined?undefined:JSON.stringify(body)});
+  let j=null;try{j=await r.json();}catch(e){}
+  if(!r.ok){const e=new Error((j&&j.error)||('HTTP '+r.status));e.status=r.status;e.body=j;throw e;}
+  return j;
+}
+function F({l,children}){return <label className="f"><span>{l}</span>{children}</label>;}
+function LangSel({lang,onLang}){return <div style={{textAlign:'end',marginBottom:6}}><select className="lg" value={lang} onChange={e=>onLang(e.target.value)}><option value="ar">العربية</option><option value="fr">Français</option><option value="en">English</option></select></div>;}
+function Logo(){return <img src="/assets/otoqol-logo.svg" alt="Otoqol" style={{height:48}}/>;}
+
+function tokenFromUrl(){
+  try{
+    const u=new URL(location.href);
+    if(u.searchParams.get('token'))return u.searchParams.get('token');
+    const m=u.pathname.match(/\/portal\/invite\/?$/);
+    if(m && u.searchParams.get('token'))return u.searchParams.get('token');
+  }catch(e){}
+  return '';
+}
+
+function Dashboard({me,onGo}){
+  const h=me.hours||{}, b=me.balance||{}, n=me.nextLesson;
+  return <div>
+    <h2>{_t('مرحبا')} {me.candidate&&me.candidate.name}</h2>
+    <div className="grid">
+      <div className="stat"><small>{_t('ساعات الكود')}</small><b>{h.codeDone||0}/{h.codeHours||0} {_t('س')}</b></div>
+      <div className="stat"><small>{_t('ساعات السياقة')}</small><b>{h.driveDone||0}/{h.driveHours||0} {_t('س')}</b></div>
+      <div className="stat"><small>{_t('الباقي')}</small><b>{fmt(b.due)}</b></div>
+      <div className="stat"><small>{_t('المرحلة')}</small><b>{stageLbl[(me.candidate&&me.candidate.stage)||'reg']||'—'}</b></div>
+    </div>
+    <div className="card">
+      <h3>{_t('الحصة القادمة')}</h3>
+      {n?<div><b>{n.date} · {n.time}</b> <span className="bd info">{typeLbl[n.type]||n.type}</span> <span className="meta">{n.monitorName}</span></div>:<div className="meta">{_t('ما كاين حتى حصة قادمة')}</div>}
+      <div className="row" style={{marginTop:10}}><button className="b pri" onClick={()=>onGo('schedule')}>{_t('الجدول')}</button></div>
+    </div>
+  </div>;
+}
+
+function Schedule({me,reload}){
+  const [sch,setSch]=useState(null);
+  const [mid,setMid]=useState((me.candidate&&me.candidate.monitorId)||'');
+  const [typ,setTyp]=useState('conduite');
+  const [msg,setMsg]=useState('');
+  const [err,setErr]=useState('');
+  const [busy,setBusy]=useState('');
+  const load=()=>api('GET','/api/portal/schedule?monitorId='+encodeURIComponent(mid||'')).then(setSch).catch(e=>setErr(e.body&&e.body.error||'error'));
+  useEffect(()=>{load();},[mid]);
+  const book=async(slot)=>{
+    setBusy(slot.date+slot.time);setErr('');setMsg('');
+    try{await api('POST','/api/portal/bookings',{date:slot.date,time:slot.time,duration:slot.duration||1,type:typ,monitorId:mid||slot.monitorId});setMsg(_t('تم إرسال طلب الحجز. ينتظر موافقة المدرسة.'));await load();if(reload)reload();}
+    catch(e){const c=e.body&&e.body.error;setErr(_t(c==='slot_taken'||c==='already_booked'?'هاد الموعد تحجز':'تعذر الطلب'));}
+    finally{setBusy('');}
+  };
+  const cancel=async(id,pending)=>{
+    setBusy(id);setErr('');setMsg('');
+    try{const r=await api('POST','/api/portal/bookings/'+id+'/cancel',{});setMsg(_t(r.immediate?'تم سحب الطلب':'تم إرسال طلب الإلغاء'));await load();if(reload)reload();}
+    catch(e){setErr(_t('تعذر الطلب'));}
+    finally{setBusy('');}
+  };
+  if(!sch&&!err)return <div className="meta">{_t('كنحملو…')}</div>;
+  const upcoming=(sch&&sch.upcoming)||[];
+  const reqs=((sch&&sch.requests)||[]).filter(r=>r.status==='pending');
+  const slots=(sch&&sch.slots)||[];
+  return <div>
+    <h2>{_t('الجدول')}</h2>
+    {msg&&<div className="al ok">{msg}</div>}
+    {err&&<div className="al bad">{err}</div>}
+    <div className="card">
+      <h3>{_t('حصصي')}</h3>
+      {!upcoming.length&&<div className="meta">{_t('ما كاين حتى حصة قادمة')}</div>}
+      {upcoming.map(s=><div className="slot" key={s.id} data-oq-lesson={s.id}><div><b>{s.date} · {s.time}</b> <span className="bd">{typeLbl[s.type]||s.type}</span> <span className={'bd '+(s.status==='pending'?'warn':'info')}>{statusLbl[s.status]||s.status}</span> <span className="meta">{s.monitorName}</span></div>
+        <button className="b del" disabled={!!busy} onClick={()=>cancel(s.portalBookingId||s.id,s.status==='pending')}>{s.status==='pending'?_t('سحب الطلب'):_t('طلب إلغاء')}</button></div>)}
+    </div>
+    {!!reqs.length&&<div className="card">
+      <h3>{_t('الطلبات')}</h3>
+      {reqs.map(r=><div className="slot" key={r.id} data-oq-request={r.id}><div><b>{r.date} · {r.time}</b> <span className="bd warn">{r.kind==='cancel'?_t('طلب إلغاء'):_t('في الانتظار')}</span></div>
+        {r.kind==='book'&&<button className="b del" disabled={!!busy} onClick={()=>cancel(r.id,true)}>{_t('سحب الطلب')}</button>}</div>)}
+    </div>}
+    <div className="card">
+      <h3>{_t('المواعيد المتاحة')}</h3>
+      <div className="fg" style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
+        <F l={_t('المونيتور')}><select data-oq-portal-monitor="" value={mid} onChange={e=>setMid(e.target.value)}><option value="">{_t('— اختار —')}</option>{((sch&&sch.monitors)||[]).map(m=><option key={m.id} value={m.id}>{m.name}</option>)}</select></F>
+        <F l={_t('نوع الحصة')}><select data-oq-portal-type="" value={typ} onChange={e=>setTyp(e.target.value)}><option value="conduite">{typeLbl.conduite}</option><option value="code">{typeLbl.code}</option></select></F>
+      </div>
+      {!mid&&<div className="meta">{_t('اختار المونيتور باش تشوف المواعيد المتاحة')}</div>}
+      {mid&&!slots.length&&<div className="meta">{_t('ما كاين حتى موعد متاح فالأيام الجاية')}</div>}
+      {slots.slice(0,40).map(s=><div className="slot" key={s.date+s.time} data-oq-slot={s.date+'T'+s.time}><div><b>{s.date} · {s.time}</b> <span className="meta">{s.duration||1} {_t('س')}</span></div>
+        <button className="b pri" disabled={!!busy} onClick={()=>book(s)}>{_t('طلب هذا الموعد')}</button></div>)}
+    </div>
+  </div>;
+}
+
+function Payments(){
+  const [d,setD]=useState(null);
+  useEffect(()=>{api('GET','/api/portal/payments').then(setD).catch(()=>{});},[]);
+  if(!d)return <div className="meta">{_t('كنحملو…')}</div>;
+  return <div>
+    <h2>{_t('الأداءات')}</h2>
+    <div className="grid">
+      <div className="stat"><small>{_t('ثمن الباقة')}</small><b>{fmt(d.price)}</b></div>
+      <div className="stat"><small>{_t('المؤدى')}</small><b>{fmt(d.paid)}</b></div>
+      <div className="stat"><small>{_t('الباقي')}</small><b>{fmt(d.due)}</b></div>
+      <div className="stat"><small>{_t('ساعات الكود')}</small><b>{d.hours.codeDone}/{d.hours.codeHours} {_t('س')}</b></div>
+      <div className="stat"><small>{_t('ساعات السياقة')}</small><b>{d.hours.driveDone}/{d.hours.driveHours} {_t('س')}</b></div>
+    </div>
+    <div className="tw"><table><thead><tr><th>{_t('تاريخ')}</th><th>{_t('المبلغ')}</th><th>{_t('ملاحظة')}</th></tr></thead><tbody>
+      {(d.payments||[]).map(p=><tr key={p.id}><td data-th={_t('تاريخ')}>{p.date}</td><td data-th={_t('المبلغ')}>{fmt(p.amount)}</td><td data-th={_t('ملاحظة')}>{p.note||'—'}</td></tr>)}
+      {!(d.payments||[]).length&&<tr><td colSpan="3" className="empty">{_t('ما كاين حتى دفعة')}</td></tr>}
+    </tbody></table></div>
+  </div>;
+}
+
+function History(){
+  const [d,setD]=useState(null);
+  useEffect(()=>{api('GET','/api/portal/history').then(setD).catch(()=>{});},[]);
+  if(!d)return <div className="meta">{_t('كنحملو…')}</div>;
+  return <div>
+    <h2>{_t('سجل الحصص')}</h2>
+    <div className="tw"><table><thead><tr><th>{_t('تاريخ')}</th><th>{_t('ساعة')}</th><th>{_t('النوع')}</th><th>{_t('المونيتور')}</th><th>{_t('الحالة')}</th></tr></thead><tbody>
+      {(d.lessons||[]).map(s=><tr key={s.id}><td data-th={_t('تاريخ')}>{s.date}</td><td data-th={_t('ساعة')}>{s.time}</td><td data-th={_t('النوع')}>{typeLbl[s.type]||s.type}</td><td data-th={_t('المونيتور')}>{s.monitorName||'—'}</td><td data-th={_t('الحالة')}>{statusLbl[s.status]||s.status}</td></tr>)}
+      {!(d.lessons||[]).length&&<tr><td colSpan="5" className="empty">{_t('ما كاين حتى حصة قادمة')}</td></tr>}
+    </tbody></table></div>
+    <div className="card" style={{marginTop:14}}>
+      <h3>{_t('ملاحظات المدربين')}</h3>
+      {(d.notes||[]).map(n=><div key={n.id} style={{marginBottom:8}}><div className="meta">{n.date} · {n.monitorName}</div>{n.text}</div>)}
+      {!(d.notes||[]).length&&<div className="meta">{_t('ما كاين حتى ملاحظة')}</div>}
+    </div>
+  </div>;
+}
+
+function PortalApp({me0,onLogout}){
+  const [me,setMe]=useState(me0);
+  const [page,setPage]=useState('home');
+  const [menuOpen,setMenuOpen]=useState(false);
+  const [lang,setLangS]=useState(LANG);
+  const onLang=l=>{setLang(l);setLangS(l);};
+  const NAV=[['home',_t('لوحة القيادة')],['schedule',_t('الجدول')],['pay',_t('الأداءات')],['hist',_t('سجل الحصص')]];
+  const reload=()=>api('GET','/api/portal/me').then(setMe).catch(()=>{});
+  useEffect(()=>{setMenuOpen(false);},[page]);
+  const logout=async()=>{try{await api('POST','/api/logout',{});}catch(e){} onLogout();};
+  return <div>
+    <div className="top">
+      <button type="button" className="nav-toggle" data-oq-nav-toggle="" aria-label={menuOpen?_t('إغلاق القائمة'):_t('القائمة')} onClick={()=>setMenuOpen(o=>!o)}>{menuOpen?'✕':'☰'}</button>
+      <h1 className="brand"><img src="/assets/otoqol-logo-white.svg" alt="Otoqol"/>{me.school&&me.school.name&&<small>{me.school.name}</small>}</h1>
+      <div className="u"><span>{me.user&&me.user.name}</span>
+        <select value={lang} onChange={e=>onLang(e.target.value)} style={{width:'auto',padding:'4px 6px'}}><option value="ar">العربية</option><option value="fr">Français</option><option value="en">English</option></select>
+        <button type="button" className="b" data-oq-logout="" onClick={logout} style={{background:'#fff',color:'var(--p2)',border:0}}>{_t('تسجيل الخروج')}</button>
+      </div>
+    </div>
+    <div className={'nav-back'+(menuOpen?' on':'')} onClick={()=>setMenuOpen(false)}></div>
+    <div className={'nav'+(menuOpen?' open':'')} data-oq-portal-nav="">{NAV.map(x=><button key={x[0]} className={page===x[0]?'on':''} onClick={()=>{setPage(x[0]);setMenuOpen(false);}}>{x[1]}</button>)}</div>
+    <div className="wrap" data-oq-portal-page={page}>
+      {page==='home'&&<Dashboard me={me} onGo={setPage}/>}
+      {page==='schedule'&&<Schedule me={me} reload={reload}/>}
+      {page==='pay'&&<Payments/>}
+      {page==='hist'&&<History/>}
+    </div>
+  </div>;
+}
+
+function Invite({token,onDone,lang,onLang}){
+  const [info,setInfo]=useState(null);
+  const [err,setErr]=useState('');
+  const [pw,setPw]=useState('');const [pw2,setPw2]=useState('');
+  const [consent,setConsent]=useState(false);
+  const [busy,setBusy]=useState(false);
+  useEffect(()=>{
+    api('GET','/api/portal/invite/'+encodeURIComponent(token)).then(setInfo).catch(e=>{
+      const c=e.body&&e.body.error;
+      setErr(_t(c==='portal_disabled'?'بوابة التلميذ موقوفة حالياً':'الدعوة غير صالحة أو انتهت صلاحيتها.'));
+    });
+  },[token]);
+  const go=async()=>{
+    setErr('');
+    if(!pw||!pw2)return setErr(_t('عمر جميع الخانات'));
+    if(pw!==pw2)return setErr(_t('كلمتا السر غير متطابقتين'));
+    if(pw.trim().length<4)return setErr(_t('4 حروف على الأقل'));
+    if(!consent)return setErr(_t('خاص توافق على معالجة البيانات'));
+    setBusy(true);
+    try{await api('POST','/api/portal/activate',{token,password:pw,consent:true});onDone();}
+    catch(e){const c=e.body&&e.body.error;setErr(_t(c==='portal_disabled'?'بوابة التلميذ موقوفة حالياً':c==='weak_password'?'4 حروف على الأقل':c==='consent_required'?'خاص توافق على معالجة البيانات':'الدعوة غير صالحة أو انتهت صلاحيتها.'));}
+    finally{setBusy(false);}
+  };
+  return <div className="login"><div className="card" data-oq-portal-activate="">
+    <LangSel lang={lang} onLang={onLang}/>
+    <div className="lk"><Logo/><div className="tag">{_t('قبول الدعوة')}</div></div>
+    {info&&<p className="meta">{info.schoolName} — {info.studentName}<br/>{_t('اسم المستخدم')}: <b dir="ltr">{info.username}</b></p>}
+    {err&&!info&&<div className="al bad">{err}</div>}
+    {info&&<div>
+      <F l={_t('تعيين كلمة السر')}><input type="password" data-oq-portal-pw="" dir="ltr" autoComplete="new-password" value={pw} onChange={e=>setPw(e.target.value)}/></F>
+      <F l={_t('تأكيد كلمة السر')}><input type="password" data-oq-portal-pw2="" dir="ltr" autoComplete="new-password" value={pw2} onChange={e=>setPw2(e.target.value)}/></F>
+      <label className="row" style={{alignItems:'flex-start',margin:'10px 0'}}>
+        <input type="checkbox" data-oq-consent="" checked={consent} onChange={e=>setConsent(e.target.checked)} style={{width:'auto',minHeight:0,marginTop:3}}/>
+        <span>{_t('أوافق على معالجة مدرستي لبياناتي الشخصية (الهوية، الهاتف، البريد، الحصص، والأداءات) لتسيير تكويني عبر Otoqol.')}</span>
+      </label>
+      {err&&<div className="al bad">{err}</div>}
+      <button type="button" className="b pri" style={{width:'100%'}} disabled={busy} onClick={go}>{_t('تفعيل الحساب والدخول')}</button>
+    </div>}
+  </div></div>;
+}
+
+function Gate(){
+  const [phase,setPhase]=useState('check');
+  const [me,setMe]=useState(null);
+  const [lang,setLangS]=useState(LANG);
+  const [un,setUn]=useState('');const [pw,setPw]=useState('');
+  const [err,setErr]=useState('');const [busy,setBusy]=useState(false);
+  const [fp,setFp]=useState(null);const [fpUn,setFpUn]=useState('');const [fpCode,setFpCode]=useState('');
+  const [fpPw,setFpPw]=useState('');const [fpPw2,setFpPw2]=useState('');const [fpMsg,setFpMsg]=useState('');
+  const token=tokenFromUrl();
+  const onLang=l=>{setLang(l);setLangS(l);};
+  const loadMe=async()=>{
+    try{const r=await api('GET','/api/portal/me');setMe(r);setPhase('app');}
+    catch(e){
+      if(e.status===401||e.status===403){
+        if(e.body&&e.body.error==='forbidden'){ /* staff session */ location.replace('/app'); return; }
+        setPhase(token?'invite':'login');
+      } else setPhase(token?'invite':'login');
+    }
+  };
+  useEffect(()=>{loadMe();},[]);
+  const go=async()=>{
+    if(busy)return;setErr('');
+    if(!un.trim()||!pw)return setErr(_t('عمر جميع الخانات'));
+    setBusy(true);
+    try{
+      const r=await api('POST','/api/signin',{username:un.trim(),password:pw});
+      if(r.user&&r.user.role!=='student'){location.replace('/app');return;}
+      await loadMe();
+    }catch(e){
+      const code=e.body&&e.body.error;
+      setErr(_t(code==='portal_disabled'?'بوابة التلميذ موقوفة حالياً':e.status===401?'اسم المستخدم أو كلمة السر غالطين':e.status===429?'بزاف ديال المحاولات، عاود من بعد شوية':'ما قدرناش نتواصلو مع السيرفر'));
+    }finally{setBusy(false);}
+  };
+  const requestCode=async()=>{
+    if(!fpUn.trim())return setErr(_t('عمر جميع الخانات'));
+    setBusy(true);setErr('');
+    try{await api('POST','/api/forgot-password',{username:fpUn.trim()});setFpMsg(_t('إذا كان هذا الحساب مرتبطًا ببريد إلكتروني، فقد أرسلنا إليه رمز التحقق.'));setFp('code');}
+    catch(e){setErr(e.status===429?_t('بزاف ديال المحاولات، عاود من بعد شوية'):_t('ما قدرناش نتواصلو مع السيرفر'));}
+    finally{setBusy(false);}
+  };
+  const submitReset=async()=>{
+    if(!fpUn.trim()||!fpCode.trim()||!fpPw)return setErr(_t('عمر جميع الخانات'));
+    if(fpPw!==fpPw2)return setErr(_t('كلمتا السر غير متطابقتين'));
+    if(fpPw.trim().length<4)return setErr(_t('4 حروف على الأقل'));
+    setBusy(true);setErr('');
+    try{await api('POST','/api/reset-password',{username:fpUn.trim(),code:fpCode.trim(),password:fpPw});setFp('done');}
+    catch(e){setErr(e.status===400?_t('الدعوة غير صالحة أو انتهت صلاحيتها.'):_t('ما قدرناش نتواصلو مع السيرفر'));}
+    finally{setBusy(false);}
+  };
+  if(phase==='check')return <div className="login"><div className="card" style={{textAlign:'center'}}><Logo/><div className="meta">{_t('كنحملو…')}</div></div></div>;
+  if(phase==='app'&&me)return <PortalApp me0={me} onLogout={()=>{setMe(null);setPhase('login');}}/>;
+  if(phase==='invite'&&token)return <Invite token={token} lang={lang} onLang={onLang} onDone={loadMe}/>;
+  if(fp){
+    return <div className="login"><div className="card">
+      <LangSel lang={lang} onLang={onLang}/>
+      <div className="lk"><Logo/><div className="tag">{_t('استرجاع كلمة السر')}</div></div>
+      {fp==='user'&&<div>
+        <F l={_t('اسم المستخدم')}><input value={fpUn} dir="ltr" autoComplete="username" onChange={e=>setFpUn(e.target.value)}/></F>
+        {err&&<div className="al bad">{err}</div>}
+        <button type="button" className="b pri" style={{width:'100%'}} disabled={busy} onClick={requestCode}>{_t('أرسل رمز التحقق')}</button>
+      </div>}
+      {fp==='code'&&<div>
+        {fpMsg&&<div className="al ok">{fpMsg}</div>}
+        <p className="meta">{_t('أدخل الرمز الذي وصلك في البريد وكلمة السر الجديدة.')}</p>
+        <F l={_t('رمز التحقق')}><input value={fpCode} dir="ltr" onChange={e=>setFpCode(e.target.value)}/></F>
+        <F l={_t('كلمة السر الجديدة')}><input type="password" dir="ltr" value={fpPw} onChange={e=>setFpPw(e.target.value)}/></F>
+        <F l={_t('تأكيد كلمة السر')}><input type="password" dir="ltr" value={fpPw2} onChange={e=>setFpPw2(e.target.value)}/></F>
+        {err&&<div className="al bad">{err}</div>}
+        <button type="button" className="b pri" style={{width:'100%',marginBottom:8}} disabled={busy} onClick={submitReset}>{_t('تغيير كلمة السر')}</button>
+      </div>}
+      {fp==='done'&&<div className="al ok">{_t('تم تغيير كلمة السر. يمكنك تسجيل الدخول الآن.')}</div>}
+      <button type="button" className="fp-link" onClick={()=>{setFp(null);setErr('');}}>{_t('رجوع لتسجيل الدخول')}</button>
+    </div></div>;
+  }
+  return <div className="login"><div className="card" data-oq-portal-signin="" onKeyDown={e=>{if(e.key==='Enter')go();}}>
+    <LangSel lang={lang} onLang={onLang}/>
+    <div className="lk"><Logo/><div className="tag">{_t('بوابة التلميذ')}</div></div>
+    <F l={_t('اسم المستخدم')}><input name="username" data-oq-portal-user="" value={un} dir="ltr" autoComplete="username" autoCapitalize="none" onChange={e=>setUn(e.target.value)} autoFocus/></F>
+    <F l={_t('كلمة السر')}><input name="password" type="password" data-oq-portal-pass="" value={pw} dir="ltr" autoComplete="current-password" onChange={e=>setPw(e.target.value)}/></F>
+    {err&&<div className="al bad">{err}</div>}
+    <button type="button" className="b pri" style={{width:'100%'}} disabled={busy} onClick={go}>{_t('دخول')}</button>
+    <button type="button" className="fp-link" onClick={()=>{setFp('user');setFpUn(un);setErr('');}}>{_t('نسيت كلمة السر؟')}</button>
+    <a className="fp-link" href="/app">{_t('تسجيل الدخول للموظفين')}</a>
+  </div></div>;
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<Gate/>);
+</script>
+</body>
+</html>
