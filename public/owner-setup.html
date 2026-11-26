@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Otoqol — إنشاء حساب المالك</title>
+<link rel="icon" type="image/svg+xml" href="/assets/otoqol-icon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Tajawal:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script>try{var l=localStorage.getItem('ae_lang');if(l==='fr'||l==='en'){document.documentElement.lang=l;document.documentElement.dir='ltr';}}catch(e){}</script>
+<style>
+:root{--teal:#0F766E;--deep:#115E59;--aqua:#2DD4BF;--ink:#0F172A;--slate:#64748B;--line:#E2E8F0;--mint:#ECFDF8;--bad:#991b1b;--badbg:#fee2e2;--ok:#166534;--okbg:#dcfce7}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Tajawal,Inter,system-ui,sans-serif;color:var(--ink);background:linear-gradient(180deg,var(--mint) 0%,#fff 50%);min-height:100vh;line-height:1.6}
+html[dir=ltr] body{font-family:Inter,system-ui,sans-serif}
+a{color:var(--teal);text-decoration:none;font-weight:600}
+.wrap{max-width:480px;margin:0 auto;padding:24px 20px 48px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:28px}
+.brand img{height:34px;width:auto;display:block}
+select.lg{appearance:none;-webkit-appearance:none;border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 30px 8px 12px;font:inherit;font-size:14px;cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-size:16px;background-position:right 9px center}
+html[dir=rtl] select.lg{padding:8px 12px 8px 30px;background-position:left 9px center}
+.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:28px 24px;box-shadow:0 10px 40px rgba(15,23,42,.06)}
+h1{font-family:Tajawal,Outfit,sans-serif;font-size:24px;margin-bottom:8px}
+html[dir=ltr] h1{font-family:Outfit,Inter,sans-serif}
+.sub{color:var(--slate);margin-bottom:18px}
+label{display:block;margin-bottom:12px;font-size:14px;color:var(--slate)}
+label span{display:block;margin-bottom:4px;font-weight:600;color:var(--ink)}
+input{width:100%;border:1px solid var(--line);border-radius:10px;padding:11px 12px;font:inherit;font-size:16px}
+input:focus{outline:2px solid var(--aqua);border-color:var(--teal)}
+.al{border-radius:10px;padding:10px 12px;margin:0 0 14px;font-size:14px}
+.al.bad{background:var(--badbg);color:var(--bad)}
+.al.ok{background:var(--okbg);color:var(--ok)}
+.btn{display:inline-flex;align-items:center;justify-content:center;width:100%;border:0;border-radius:12px;padding:13px 20px;font:inherit;font-weight:700;font-size:16px;cursor:pointer;background:var(--teal);color:#fff}
+.btn:hover{background:var(--deep)}
+.btn:disabled{opacity:.65;cursor:default}
+.links{margin-top:16px;text-align:center;font-size:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="brand" href="/" aria-label="Otoqol"><img src="/assets/otoqol-logo.svg" alt="Otoqol" width="112" height="34"></a>
+    <select class="lg" id="lang" aria-label="Language"><option value="ar">العربية</option><option value="fr">Français</option><option value="en">English</option></select>
+  </header>
+  <div class="card" id="card" data-oq-owner-setup="">
+    <h1 data-t="title">إنشاء حساب المالك</h1>
+    <p class="sub" data-t="sub">اختر اسم مستخدم وكلمة سر خاصين بك للوحة المدارس. هذا الرابط يُستخدم مرة واحدة.</p>
+    <div class="al bad" id="pre-err" hidden></div>
+    <form id="form" hidden>
+      <label><span data-t="username">اسم المستخدم</span><input name="username" required maxlength="40" dir="ltr" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" autofocus></label>
+      <label><span data-t="password">كلمة السر</span><input name="password" type="password" required minlength="8" maxlength="200" dir="ltr" autocomplete="new-password"></label>
+      <label><span data-t="password2">تأكيد كلمة السر</span><input name="password2" type="password" required minlength="8" maxlength="200" dir="ltr" autocomplete="new-password"></label>
+      <div class="al bad" id="err" hidden></div>
+      <button type="submit" class="btn" id="go" data-t="submit">حفظ الحساب</button>
+    </form>
+    <div id="ok" hidden data-oq-owner-setup-ok="">
+      <div class="al ok" data-t="ok">تم إنشاء حسابك. يمكنك الدخول إلى اللوحة الآن.</div>
+      <p class="links"><a href="/owner" data-t="open">فتح لوحة المالك</a></p>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  var T={
+    ar:{title:"إنشاء حساب المالك",sub:"اختر اسم مستخدم وكلمة سر خاصين بك للوحة المدارس. هذا الرابط يُستخدم مرة واحدة.",username:"اسم المستخدم",password:"كلمة السر",password2:"تأكيد كلمة السر",submit:"حفظ الحساب",ok:"تم إنشاء حسابك. يمكنك الدخول إلى اللوحة الآن.",open:"فتح لوحة المالك",
+      fill:"املأ جميع الخانات",mismatch:"كلمتا السر غير متطابقتين",weak:"كلمة السر يجب ألا تقل عن 8 أحرف",
+      invalid_username:"اسم المستخدم غير صالح",weak_password:"كلمة السر يجب ألا تقل عن 8 أحرف",
+      invalid_token:"هذا الرابط غير صالح.",used_token:"هذا الرابط استُعمل من قبل.",expired_token:"انتهت صلاحية هذا الرابط.",
+      too_many:"محاولات كثيرة، أعد المحاولة بعد قليل",server:"تعذّر الاتصال بالخادم",missing:"هذا الرابط غير مكتمل.",doc:"Otoqol — إنشاء حساب المالك"},
+    fr:{title:"Créer le compte propriétaire",sub:"Choisissez un identifiant et un mot de passe pour l’espace des écoles. Ce lien ne peut être utilisé qu’une seule fois.",username:"Identifiant",password:"Mot de passe",password2:"Confirmation du mot de passe",submit:"Enregistrer le compte",ok:"Votre compte a été créé. Vous pouvez accéder à l’espace maintenant.",open:"Ouvrir l’espace propriétaire",
+      fill:"Veuillez remplir tous les champs",mismatch:"Les mots de passe ne correspondent pas",weak:"Le mot de passe doit contenir au moins 8 caractères",
+      invalid_username:"Identifiant invalide",weak_password:"Le mot de passe doit contenir au moins 8 caractères",
+      invalid_token:"Ce lien n’est pas valide.",used_token:"Ce lien a déjà été utilisé.",expired_token:"Ce lien a expiré.",
+      too_many:"Trop de tentatives, réessayez plus tard",server:"Impossible de joindre le serveur",missing:"Ce lien est incomplet.",doc:"Otoqol — Compte propriétaire"},
+    en:{title:"Create the owner account",sub:"Choose a username and password for the schools dashboard. This link can be used only once.",username:"Username",password:"Password",password2:"Confirm password",submit:"Save account",ok:"Your account has been created. You can open the dashboard now.",open:"Open the owner dashboard",
+      fill:"Please fill in all fields",mismatch:"Passwords do not match",weak:"Password must be at least 8 characters",
+      invalid_username:"Invalid username",weak_password:"Password must be at least 8 characters",
+      invalid_token:"This link is not valid.",used_token:"This link has already been used.",expired_token:"This link has expired.",
+      too_many:"Too many attempts, try again later",server:"Could not reach the server",missing:"This link is incomplete.",doc:"Otoqol — Owner account"}
+  };
+  function t(k){var l=document.documentElement.lang;return (T[l]&&T[l][k])||T.ar[k]||k;}
+  function apply(l){
+    if(!T[l])l='ar';
+    document.documentElement.lang=l;document.documentElement.dir=l==='ar'?'rtl':'ltr';
+    document.querySelectorAll('[data-t]').forEach(function(el){if(T[l][el.getAttribute('data-t')])el.textContent=T[l][el.getAttribute('data-t')];});
+    document.title=T[l].doc;
+    document.getElementById('lang').value=l;
+  }
+  var lang='ar';try{lang=localStorage.getItem('ae_lang')||'ar';}catch(e){}
+  apply(lang);
+  document.getElementById('lang').addEventListener('change',function(e){var v=e.target.value;try{localStorage.setItem('ae_lang',v);}catch(x){}apply(v);});
+  var token='';
+  try{token=new URLSearchParams(location.search).get('token')||'';}catch(e){}
+  var pre=document.getElementById('pre-err'), form=document.getElementById('form');
+  function showPre(k){pre.hidden=false;pre.textContent=t(k);form.hidden=true;}
+  if(!token){showPre('missing');return;}
+  fetch('/api/owner/setup?token='+encodeURIComponent(token),{credentials:'same-origin'}).then(function(r){
+    return r.json().then(function(j){return {ok:r.ok,s:r.status,j:j};});
+  }).then(function(x){
+    if(!x.ok){showPre((x.j&&x.j.error)||(x.s===429?'too_many':'invalid_token'));return;}
+    form.hidden=false;
+  }).catch(function(){showPre('server');});
+  document.getElementById('form').addEventListener('submit',function(e){
+    e.preventDefault();
+    var err=document.getElementById('err'), go=document.getElementById('go');
+    err.hidden=true;
+    var f=this.elements;
+    if(!f.username.value.trim()||!f.password.value||!f.password2.value){err.hidden=false;err.textContent=t('fill');return;}
+    if(f.password.value!==f.password2.value){err.hidden=false;err.textContent=t('mismatch');return;}
+    if(f.password.value.length<8){err.hidden=false;err.textContent=t('weak');return;}
+    go.disabled=true;
+    fetch('/api/owner/setup',{method:'POST',headers:{'Content-Type':'application/json','X-Otoqol':'1'},credentials:'same-origin',body:JSON.stringify({token:token,username:f.username.value.trim(),password:f.password.value})}).then(function(r){
+      return r.json().then(function(j){return {ok:r.ok,s:r.status,j:j};});
+    }).then(function(x){
+      if(!x.ok){err.hidden=false;err.textContent=t((x.s===429?'too_many':(x.j&&x.j.error))||'server');return;}
+      form.hidden=true;pre.hidden=true;
+      document.getElementById('ok').hidden=false;
+      f.password.value='';f.password2.value='';
+    }).catch(function(){err.hidden=false;err.textContent=t('server');}).then(function(){go.disabled=false;});
+  });
+})();
+</script>
+</body>
+</html>
