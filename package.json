@@ -11,7 +11,8 @@
     "test:security": "node scripts/security-test.js",
     "test:load": "node scripts/load-test.js",
     "test:forgot": "node scripts/forgot-password-test.js",
-    "test:signup": "node scripts/signup-approval-test.js"
+    "test:signup": "node scripts/signup-approval-test.js",
+    "test:owner-setup": "node scripts/owner-setup-test.js"
   },
   "keywords": [],
   "author": "",
