@@ -91,7 +91,7 @@ h3{margin:4px 0 10px}
 .nt{padding:10px;border-bottom:1px solid var(--bd)}.nt.un{background:#f0fdfa}
 html,body{max-width:100%;overflow-x:hidden}
 .nav-toggle{display:none;align-items:center;justify-content:center;min-width:44px;min-height:44px;padding:0;border:0;border-radius:10px;background:rgba(255,255,255,.16);color:#fff;font-size:22px;line-height:1;cursor:pointer}
-.nav-back{display:none;position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:35}
+.nav-back{display:none;position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:35;touch-action:none;overscroll-behavior:none}
 .nav-back.on{display:block}
 .brand{min-width:0}
 .brand small{overflow-wrap:anywhere}
@@ -101,7 +101,7 @@ html,body{max-width:100%;overflow-x:hidden}
   .top .u{gap:6px;font-size:12px}
   .top .u>span{max-width:34vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .top .u button{min-height:44px;padding:8px 10px}
-  .nav{display:flex;flex-direction:column;align-items:stretch;gap:4px;position:fixed;top:0;bottom:0;inset-inline-start:0;width:min(320px,86vw);max-width:320px;height:100%;overflow-y:auto;overflow-x:hidden;padding:16px 10px 24px;z-index:40;transform:translateX(-120%);transition:transform .2s ease;box-shadow:none}
+  .nav{display:flex;flex-direction:column;align-items:stretch;gap:4px;position:fixed;top:0;bottom:0;inset-inline-start:0;width:min(270px,75vw);max-width:270px;height:100%;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:16px 10px 24px;z-index:40;transform:translateX(-120%);transition:transform .2s ease;box-shadow:none}
   html[dir=rtl] .nav{transform:translateX(120%)}
   .nav.open,html[dir=rtl] .nav.open{transform:none;box-shadow:0 0 24px rgba(15,23,42,.25)}
   .nav button{width:100%;text-align:start;min-height:44px;padding:12px 14px;white-space:normal;border-radius:10px}
@@ -1330,9 +1330,31 @@ function App(){
     if(!menuOpen)return;
     const onKey=e=>{if(e.key==='Escape')setMenuOpen(false);};
     document.addEventListener('keydown',onKey);
-    const prev=document.body.style.overflow;
-    document.body.style.overflow='hidden';
-    return ()=>{document.removeEventListener('keydown',onKey);document.body.style.overflow=prev;};
+    const html=document.documentElement,body=document.body;
+    const y=window.scrollY||window.pageYOffset||0;
+    const prev={ho:html.style.overflow,bo:body.style.overflow,bp:body.style.position,bt:body.style.top,bl:body.style.left,br:body.style.right,bw:body.style.width};
+    const onBackTouch=e=>{e.preventDefault();};
+    html.style.overflow='hidden';
+    body.style.overflow='hidden';
+    body.style.position='fixed';
+    body.style.top='-'+y+'px';
+    body.style.left='0';
+    body.style.right='0';
+    body.style.width='100%';
+    const back=document.querySelector('[data-oq-nav-back]');
+    if(back)back.addEventListener('touchmove',onBackTouch,{passive:false});
+    return ()=>{
+      document.removeEventListener('keydown',onKey);
+      if(back)back.removeEventListener('touchmove',onBackTouch);
+      html.style.overflow=prev.ho;
+      body.style.overflow=prev.bo;
+      body.style.position=prev.bp;
+      body.style.top=prev.bt;
+      body.style.left=prev.bl;
+      body.style.right=prev.br;
+      body.style.width=prev.bw;
+      window.scrollTo(0,y);
+    };
   },[menuOpen]);
   useEffect(()=>{
     document.querySelectorAll('.tw table').forEach(table=>{
