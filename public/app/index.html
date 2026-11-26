@@ -34,6 +34,14 @@ input:focus,select:focus,textarea:focus{outline:2px solid #2DD4BF;border-color:v
 .nav button{background:none;border:0;color:#cbd5e1;padding:8px 12px;border-radius:8px;cursor:pointer;white-space:nowrap;font-weight:500}
 .nav button.on{background:#fff;color:var(--p2)}
 .nav .cnt{background:var(--bad);color:#fff;border-radius:10px;padding:0 6px;font-size:11px;margin-inline-start:4px}
+.oq-task-list{display:flex;flex-direction:column;gap:8px}
+.oq-task{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:flex-start;justify-content:space-between}
+.oq-task .oq-task-main{flex:1;min-width:180px}
+.oq-task .oq-task-acts{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.oq-task-add{display:grid;grid-template-columns:minmax(140px,2fr) minmax(110px,1fr) minmax(110px,1fr) minmax(110px,1fr) auto;gap:8px;align-items:end}
+.oq-task-filters{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 12px}
+@media(max-width:700px){.oq-task-add{grid-template-columns:1fr}}
+
 .wrap{max-width:1100px;margin:0 auto;padding:14px}
 .card{background:var(--c);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:12px}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:12px}
@@ -484,6 +492,91 @@ Object.assign(DICT.en,{
   "الإنجليزية":"English",
   "نص القالب":"Template text",
   "تُستخدم هذه القوالب في واتساب والبريد حسب لغة كل مترشح.":"These templates are used for WhatsApp and email in each candidate’s language."
+});
+
+Object.assign(DICT.fr,{
+  "المهام":"Tâches",
+  "صندوق المهام":"Boîte des tâches",
+  "لا توجد مهام اليوم":"Aucune tâche pour aujourd'hui",
+  "كنحملو المهام…":"Chargement des tâches…",
+  "إضافة مهمة":"Ajouter une tâche",
+  "عنوان المهمة":"Titre de la tâche",
+  "تاريخ الاستحقاق":"Échéance",
+  "المكلف":"Assigné à",
+  "بدون مكلف":"Non assigné",
+  "حفظ المهمة":"Enregistrer la tâche",
+  "تم إنجاز المهمة":"Tâche terminée",
+  "حذف المهمة":"Supprimer la tâche",
+  "إخفاء اليوم":"Masquer aujourd'hui",
+  "طلب حجز في الانتظار":"Demande de réservation en attente",
+  "طلب إلغاء حصة":"Demande d'annulation de séance",
+  "مستحقات غير مذكَّرة":"Créances sans rappel récent",
+  "صامت منذ":"Sans contact depuis",
+  "يوماً":"jours",
+  "حصة الغد تحتاج تذكيراً":"Cours de demain à rappeler",
+  "تم إرسال التذكير":"Rappel envoyé",
+  "حضور غير مسجَّل":"Présence non saisie",
+  "امتحان قادم بدون استدعاء":"Examen à venir sans convocation",
+  "تم إرسال الاستدعاء":"Convocation envoyée",
+  "شهادة طبية ناقصة":"Certificat médical manquant",
+  "تأمين السيارة":"Assurance du véhicule",
+  "زيارة تقنية":"Contrôle technique",
+  "الضريبة":"Vignette",
+  "منتهية منذ":"Expiré depuis",
+  "تنتهي بعد":"Expire dans",
+  "مهمة يدوية":"Tâche manuelle",
+  "متأخرة":"En retard",
+  "اختر مترشحاً (اختياري)":"Choisir un candidat (facultatif)",
+  "تعذر تحميل المهام":"Impossible de charger les tâches",
+  "تعذر حفظ المهمة":"Impossible d'enregistrer la tâche",
+  "كل المهام":"Toutes les tâches",
+  "الحجوزات":"Réservations",
+  "الدروس":"Cours",
+  "الامتحانات":"Examens",
+  "الوثائق":"Documents",
+  "المهام اليدوية":"Tâches manuelles"
+});
+Object.assign(DICT.en,{
+  "المهام":"Tasks",
+  "صندوق المهام":"Task inbox",
+  "لا توجد مهام اليوم":"No tasks for today",
+  "كنحملو المهام…":"Loading tasks…",
+  "إضافة مهمة":"Add a task",
+  "عنوان المهمة":"Task title",
+  "تاريخ الاستحقاق":"Due date",
+  "المكلف":"Assignee",
+  "بدون مكلف":"Unassigned",
+  "حفظ المهمة":"Save task",
+  "تم إنجاز المهمة":"Task completed",
+  "حذف المهمة":"Delete task",
+  "إخفاء اليوم":"Hide for today",
+  "طلب حجز في الانتظار":"Pending booking request",
+  "طلب إلغاء حصة":"Lesson cancellation request",
+  "مستحقات غير مذكَّرة":"Overdue dues not recently reminded",
+  "صامت منذ":"Silent for",
+  "يوماً":"days",
+  "حصة الغد تحتاج تذكيراً":"Tomorrow's lesson needs a reminder",
+  "تم إرسال التذكير":"Reminder marked as sent",
+  "حضور غير مسجَّل":"Attendance not marked",
+  "امتحان قادم بدون استدعاء":"Upcoming exam without convocation",
+  "تم إرسال الاستدعاء":"Convocation marked as sent",
+  "شهادة طبية ناقصة":"Missing medical certificate",
+  "تأمين السيارة":"Vehicle insurance",
+  "زيارة تقنية":"Technical inspection",
+  "الضريبة":"Road tax",
+  "منتهية منذ":"Expired for",
+  "تنتهي بعد":"Expires in",
+  "مهمة يدوية":"Manual task",
+  "متأخرة":"Overdue",
+  "اختر مترشحاً (اختياري)":"Choose a candidate (optional)",
+  "تعذر تحميل المهام":"Could not load tasks",
+  "تعذر حفظ المهمة":"Could not save the task",
+  "كل المهام":"All tasks",
+  "الحجوزات":"Bookings",
+  "الدروس":"Lessons",
+  "الامتحانات":"Exams",
+  "الوثائق":"Documents",
+  "المهام اليدوية":"Manual tasks"
 });
 const _t=s=>{if(typeof s!=='string')return s;if(LANG==='ar'){if(DICT_AR[s]!==undefined)return DICT_AR[s];const a=s.match(/^(\s*)([\s\S]*?)(\s*)$/);return a[2]&&DICT_AR[a[2]]!==undefined?a[1]+DICT_AR[a[2]]+a[3]:s;}const d=DICT[LANG];if(d[s]!==undefined)return d[s];const m=s.match(/^(\s*)([\s\S]*?)(\s*)$/);if(m[2]&&d[m[2]]!==undefined)return m[1]+d[m[2]]+m[3];return s;};
 const lbl=o=>new Proxy(o,{get:(o2,k)=>(typeof k==='string'&&Object.prototype.hasOwnProperty.call(o2,k))?_t(o2[k]):o2[k]});
@@ -1499,6 +1592,144 @@ function Login({onLogin,school,lang,setLang}){
     <button type="button" className="b pri" style={{width:'100%'}} onClick={go}>{_t("دخول")}</button>  </div></div>;
 }
 
+function TasksInbox(){
+  const {db,user,mark}=useC();
+  const [box,setBox]=useState(null);
+  const [err,setErr]=useState('');
+  const [busy,setBusy]=useState('');
+  const [filter,setFilter]=useState('all');
+  const [form,setForm]=useState({title:'',due:'',cid:'',assigneeId:user&&user.role==='monitor'?(user.id||''):''});
+  const ping=()=>{try{window.dispatchEvent(new Event('oq-tasks-refresh'));}catch(e){}};
+  const apply=r=>{if(r&&r.items){setBox(r);ping();}};
+  const load=()=>OQ.api('GET','/api/tasks').then(r=>{apply(r);setErr('');}).catch(()=>setErr(_t('تعذر تحميل المهام')));
+  useEffect(()=>{load();},[]);
+  const run=(key,p)=>Promise.resolve().then(()=>{setBusy(key);setErr('');return p;}).then(apply).catch(()=>setErr(_t('تعذر حفظ المهمة'))).finally(()=>setBusy(''));
+  const people=(db.users||[]).concat(db.monitors||[]);
+  const add=e=>{
+    e.preventDefault();
+    const fd=new FormData(e.currentTarget);
+    const title=String(fd.get('title')||'').trim();
+    if(!title)return;
+    const due=String(fd.get('due')||'')||undefined;
+    const cid=String(fd.get('cid')||'')||undefined;
+    const assigneeId=String(fd.get('assigneeId')||form.assigneeId||'')||undefined;
+    run('add',OQ.api('POST','/api/tasks',{title,due,cid,assigneeId}))
+      .then(()=>setForm(f=>({...f,title:''})));
+  };
+  const typeTitle=it=>{
+    return ({
+      booking_pending:_t('طلب حجز في الانتظار'),
+      booking_cancel:_t('طلب إلغاء حصة'),
+      due_remind:_t('مستحقات غير مذكَّرة'),
+      lesson_tomorrow:_t('حصة الغد تحتاج تذكيراً'),
+      attendance_open:_t('حضور غير مسجَّل'),
+      exam_upcoming:_t('امتحان قادم بدون استدعاء'),
+      doc_medical:_t('شهادة طبية ناقصة'),
+      doc_insurance:_t('تأمين السيارة'),
+      doc_visit:_t('زيارة تقنية'),
+      doc_tax:_t('الضريبة'),
+      manual:it.title||_t('مهمة يدوية')
+    })[it.type]||it.type;
+  };
+  const typeOf=t=>t==='code'||t==='conduite'||t==='drive'?typeLbl[t==='drive'?'conduite':t]:(t||'');
+  const hideItem=key=>setBox(b=>b?{...b,items:(b.items||[]).filter(x=>x.key!==key),count:Math.max(0,(b.count||1)-1)}:b);
+  const markAtt=(it,st)=>{
+    mark(it.sessionId,it.cid,st,'');
+    hideItem(it.key);
+    ping();
+    setTimeout(load,2500);
+  };
+  const groups=[
+    {id:'booking',types:['booking_pending','booking_cancel'],label:_t('الحجوزات')},
+    {id:'due',types:['due_remind'],label:_t('المستحقات')},
+    {id:'attendance',types:['attendance_open'],label:_t('حضور غير مسجَّل')},
+    {id:'lesson',types:['lesson_tomorrow'],label:_t('الدروس')},
+    {id:'exam',types:['exam_upcoming'],label:_t('الامتحانات')},
+    {id:'docs',types:['doc_medical','doc_insurance','doc_visit','doc_tax'],label:_t('الوثائق')},
+    {id:'manual',types:['manual'],label:_t('المهام اليدوية')}
+  ];
+  const items=box&&box.items||[];
+  const visible=filter==='all'?items:items.filter(it=>{
+    const g=groups.find(x=>x.id===filter);
+    return g&&g.types.includes(it.type);
+  });
+  const actions=it=>{
+    const k=it.key;
+    const dis=<button type="button" className="b" data-oq-task-dismiss={k} disabled={!!busy} onClick={()=>run('d:'+k,OQ.api('POST','/api/tasks/dismiss',{key:k}))}>{_t('إخفاء اليوم')}</button>;
+    if(it.type==='booking_pending'||it.type==='booking_cancel') return <>
+      <button type="button" className="b pri" data-oq-task-approve={it.bookingId} disabled={!!busy} onClick={()=>run('a:'+k,OQ.api('POST','/api/portal/requests/'+it.bookingId+'/approve',{}).then(()=>OQ.api('GET','/api/tasks')))}>{_t('قبول')}</button>
+      <button type="button" className="b del" data-oq-task-reject={it.bookingId} disabled={!!busy} onClick={()=>run('r:'+k,OQ.api('POST','/api/portal/requests/'+it.bookingId+'/reject',{}).then(()=>OQ.api('GET','/api/tasks')))}>{_t('رفض')}</button>
+      {dis}
+    </>;
+    if(it.type==='due_remind') return <>
+      {it.whatsappUrl&&<a className="b wa" data-oq-task-wa={k} target="_blank" rel="noreferrer" href={it.whatsappUrl} onClick={()=>run('wa:'+k,OQ.api('POST','/api/dues/'+encodeURIComponent(it.cid)+'/remind',{channel:'whatsapp',lang:LANG||'ar'}).then(()=>OQ.api('GET','/api/tasks')))}><WaIcon/></a>}
+      <button type="button" className="b" data-oq-task-reminded={k} disabled={!!busy} onClick={()=>run('rm:'+k,OQ.api('POST','/api/dues/'+encodeURIComponent(it.cid)+'/remind',{channel:'manual',lang:LANG||'ar'}).then(()=>OQ.api('GET','/api/tasks')))}>{_t('تم التذكير')}</button>
+      {dis}
+    </>;
+    if(it.type==='lesson_tomorrow') return <>
+      {it.whatsappUrl&&<a className="b wa" data-oq-task-wa={k} target="_blank" rel="noreferrer" href={it.whatsappUrl} onClick={()=>run('sr:'+k,OQ.api('POST','/api/tasks/session/'+encodeURIComponent(it.sessionId)+'/reminded',{cid:it.cid}))}><WaIcon/></a>}
+      <button type="button" className="b" data-oq-task-reminded={k} disabled={!!busy} onClick={()=>run('sr:'+k,OQ.api('POST','/api/tasks/session/'+encodeURIComponent(it.sessionId)+'/reminded',{cid:it.cid}))}>{_t('تم إرسال التذكير')}</button>
+      {dis}
+    </>;
+    if(it.type==='attendance_open') return <>
+      <button type="button" className="b present" data-oq-task-present={k} onClick={()=>markAtt(it,'present')}>{statusLbl.present}</button>
+      <button type="button" className="b late" data-oq-task-late={k} onClick={()=>markAtt(it,'late')}>{statusLbl.late}</button>
+      <button type="button" className="b absent" data-oq-task-absent={k} onClick={()=>markAtt(it,'absent')}>{statusLbl.absent}</button>
+      {dis}
+    </>;
+    if(it.type==='exam_upcoming') return <>
+      {it.whatsappUrl&&<a className="b wa" data-oq-task-wa={k} target="_blank" rel="noreferrer" href={it.whatsappUrl} onClick={()=>run('ex:'+k,OQ.api('POST','/api/tasks/exam/'+encodeURIComponent(it.cid)+'/'+encodeURIComponent(it.examId)+'/convoked',{}))}><WaIcon/></a>}
+      <button type="button" className="b" data-oq-task-convoked={k} disabled={!!busy} onClick={()=>run('ex:'+k,OQ.api('POST','/api/tasks/exam/'+encodeURIComponent(it.cid)+'/'+encodeURIComponent(it.examId)+'/convoked',{}))}>{_t('تم إرسال الاستدعاء')}</button>
+      {dis}
+    </>;
+    if(it.type==='manual') return <>
+      <button type="button" className="b pri" data-oq-task-done={it.taskId} disabled={!!busy} onClick={()=>run('dn:'+k,OQ.api('POST','/api/tasks/'+encodeURIComponent(it.taskId)+'/done',{}))}>{_t('تم إنجاز المهمة')}</button>
+      <button type="button" className="b del" data-oq-task-delete={it.taskId} disabled={!!busy} onClick={()=>run('del:'+k,OQ.api('DELETE','/api/tasks/'+encodeURIComponent(it.taskId)))}>{_t('حذف المهمة')}</button>
+      {dis}
+    </>;
+    return dis;
+  };
+  const meta=it=>{
+    const bits=[];
+    if(it.studentName)bits.push(it.studentName);
+    if(it.plate)bits.push(it.plate);
+    if(it.date)bits.push(it.time?it.date+' '+it.time:it.date);
+    if(it.sessionType)bits.push(typeOf(it.sessionType));
+    if(it.instructor)bits.push(it.instructor);
+    if(it.type==='due_remind')bits.push(fmt(it.due)+(it.daysSilent!=null?(' · '+_t('صامت منذ')+' '+it.daysSilent+' '+_t('يوماً')):''));
+    if((it.type==='doc_insurance'||it.type==='doc_visit'||it.type==='doc_tax')&&it.daysLeft!=null)bits.push((it.daysLeft<0?_t('منتهية منذ')+' '+Math.abs(it.daysLeft):_t('تنتهي بعد')+' '+it.daysLeft)+' '+_t('يوماً'));
+    if(it.type==='manual'&&it.overdue)bits.push(_t('متأخرة'));
+    if(it.assigneeName)bits.push(it.assigneeName);
+    return bits.filter(Boolean).join(' · ');
+  };
+  return <div data-oq-tasks="">
+    <h2>{_t('المهام')}</h2>
+    {err&&<div className="al bad">{err}</div>}
+    <form className="card oq-task-add" data-oq-task-add="" onSubmit={add}>
+      <label>{_t('عنوان المهمة')}<input name="title" data-oq-task-title="" value={form.title} onChange={e=>setForm(f=>({...f,title:e.target.value}))} required/></label>
+      <label>{_t('تاريخ الاستحقاق')}<input type="date" name="due" data-oq-task-due="" value={form.due} onChange={e=>setForm(f=>({...f,due:e.target.value}))}/></label>
+      <label>{_t('اختر مترشحاً (اختياري)')}<select className="lg" name="cid" data-oq-task-cid="" value={form.cid} onChange={e=>setForm(f=>({...f,cid:e.target.value}))}><option value="">{_t('اختر مترشحاً (اختياري)')}</option>{(db.candidates||[]).map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select></label>
+      {user.role!=='monitor'&&<label>{_t('المكلف')}<select className="lg" name="assigneeId" data-oq-task-assignee="" value={form.assigneeId} onChange={e=>setForm(f=>({...f,assigneeId:e.target.value}))}><option value="">{_t('بدون مكلف')}</option>{people.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select></label>}
+      <button type="submit" className="b pri" data-oq-task-save="" disabled={!!busy||!form.title.trim()}>{_t('حفظ المهمة')}</button>
+    </form>
+    <div className="oq-task-filters">
+      <button type="button" className={'b'+(filter==='all'?' pri':'')} data-oq-task-filter="all" onClick={()=>setFilter('all')}>{_t('كل المهام')}{box?(' ('+items.length+')'):''}</button>
+      {groups.map(g=>{const n=items.filter(it=>g.types.includes(it.type)).length;if(!n)return null;return <button type="button" key={g.id} className={'b'+(filter===g.id?' pri':'')} data-oq-task-filter={g.id} onClick={()=>setFilter(g.id)}>{g.label} ({n})</button>;})}
+    </div>
+    {!box&&<div className="card empty">{_t('كنحملو المهام…')}</div>}
+    {box&&!visible.length&&<div className="card empty" data-oq-tasks-empty="">{_t('لا توجد مهام اليوم')}</div>}
+    <div className="oq-task-list">
+      {visible.map(it=><div key={it.key} className="card oq-task" data-oq-task-item={it.key} data-oq-task-type={it.type}>
+        <div className="oq-task-main">
+          <strong>{typeTitle(it)}</strong>
+          <div className="meta">{meta(it)}</div>
+        </div>
+        <div className="oq-task-acts">{actions(it)}</div>
+      </div>)}
+    </div>
+  </div>;
+}
+
 function App(){
   const [db,setDb]=useState(load);
   const [user,setUser]=useState(()=>{try{const u=JSON.parse(sessionStorage.getItem('ae_user')||localStorage.getItem('ae_user'));if(!u)return null;const ok=u.role==='monitor'?db.monitors.some(m=>m.id===u.id):db.users.some(x=>x.id===u.id);return ok?u:null;}catch(e){return null;}});
@@ -1507,6 +1738,7 @@ function App(){
   const [lang,setLangS]=useState(LANG);
   const [menuOpen,setMenuOpen]=useState(false);
   const [portalPend,setPortalPend]=useState(0);
+  const [taskCount,setTaskCount]=useState(0);
   const setLang=l=>{LANG=l;try{localStorage.setItem('ae_lang',l);}catch(e){}setLangS(l);};
   useEffect(()=>{document.documentElement.lang=lang;document.documentElement.dir=lang==='ar'?'rtl':'ltr';},[lang]);
   useEffect(()=>{try{localStorage.setItem(KEY,JSON.stringify(db));}catch(e){}OQ.changed(db);},[db]);
@@ -1558,6 +1790,16 @@ function App(){
     const tmr=setInterval(load,20000);
     return ()=>{stop=true;clearInterval(tmr);};
   },[user&&user.role]);
+  useEffect(()=>{
+    if(!user) return;
+    let stop=false;
+    const load=()=>OQ.api('GET','/api/tasks').then(r=>{if(!stop)setTaskCount(r.count||0);}).catch(()=>{});
+    load();
+    const on=()=>load();
+    window.addEventListener('oq-tasks-refresh',on);
+    const tmr=setInterval(load,20000);
+    return ()=>{stop=true;clearInterval(tmr);window.removeEventListener('oq-tasks-refresh',on);};
+  },[user&&user.id]);
   const upd=fn=>setDb(d=>{const n=JSON.parse(JSON.stringify(d));fn(n);return n;});
   const L=(n,text)=>{n.log.unshift({id:uid(),date:new Date().toISOString(),user:user?user.name:'',text:text});if(n.log.length>300)n.log.length=300;};
   const notify=(n,to,text,cid)=>{n.notifs.unshift({id:uid(),to:to,text:text,cid:cid||'',date:new Date().toISOString(),read:false});if(n.notifs.length>500)n.notifs.length=500;};
@@ -1588,13 +1830,13 @@ function App(){
   const unread=db.notifs.filter(n=>!n.read&&visibleNotif(user,n)).length;
   const pend=db.requests.filter(r=>r.status==='pending').length;
   const NAV={
-    manager:[['home',_t('🏠 لوحة القيادة')],['candidates',_t('👥 المترشحون')],['sessions',_t('📅 الحصص')],['monitors',_t('🧑‍🏫 المونيتورات')],['vehicles',_t('🚗 السيارات')],['finance',_t('💰 المالية')],['dues','💳 '+_t('المستحقات')],['requests',_t('🔁 الطلبات')],['bookings','📥 '+_t('طلبات الحجز')],['notifs',_t('🔔 الإشعارات')],['settings',_t('⚙️ الإعدادات')]],
-    secretary:[['home',_t('🏠 لوحة القيادة')],['candidates',_t('👥 المترشحون')],['sessions',_t('📅 الحصص')],['vehicles',_t('🚗 السيارات')],['finance',_t('💰 المالية')],['dues','💳 '+_t('المستحقات')],['requests',_t('🔁 الطلبات')],['bookings','📥 '+_t('طلبات الحجز')],['notifs',_t('🔔 الإشعارات')],['settings',_t('⚙️ الإعدادات')]],
-    monitor:[['home',_t('📅 برنامجي')],['mycands',_t('👥 مترشحيني')],['mystats',_t('📊 إحصائياتي')],['notifs',_t('🔔 الإشعارات')],['settings',_t('⚙️ الإعدادات')]]
+    manager:[['home',_t('🏠 لوحة القيادة')],['tasks','✅ '+_t('المهام')],['candidates',_t('👥 المترشحون')],['sessions',_t('📅 الحصص')],['monitors',_t('🧑‍🏫 المونيتورات')],['vehicles',_t('🚗 السيارات')],['finance',_t('💰 المالية')],['dues','💳 '+_t('المستحقات')],['requests',_t('🔁 الطلبات')],['bookings','📥 '+_t('طلبات الحجز')],['notifs',_t('🔔 الإشعارات')],['settings',_t('⚙️ الإعدادات')]],
+    secretary:[['home',_t('🏠 لوحة القيادة')],['tasks','✅ '+_t('المهام')],['candidates',_t('👥 المترشحون')],['sessions',_t('📅 الحصص')],['vehicles',_t('🚗 السيارات')],['finance',_t('💰 المالية')],['dues','💳 '+_t('المستحقات')],['requests',_t('🔁 الطلبات')],['bookings','📥 '+_t('طلبات الحجز')],['notifs',_t('🔔 الإشعارات')],['settings',_t('⚙️ الإعدادات')]],
+    monitor:[['home',_t('📅 برنامجي')],['tasks','✅ '+_t('المهام')],['mycands',_t('👥 مترشحيني')],['mystats',_t('📊 إحصائياتي')],['notifs',_t('🔔 الإشعارات')],['settings',_t('⚙️ الإعدادات')]]
   }[user.role];
   const mon=user.role==='monitor';
   const PAGES={
-    home:mon?<MySchedule/>:<Dashboard/>,candidates:<Candidates/>,sessions:<Sessions/>,monitors:<Monitors/>,vehicles:<Vehicles/>,finance:<Finance/>,dues:<DuesPage/>,requests:<Requests/>,bookings:<BookingsInbox/>,notifs:<Notifs/>,settings:<Settings/>,mycands:<MyCands/>,mystats:<MyStats/>
+    home:mon?<MySchedule/>:<Dashboard/>,tasks:<TasksInbox/>,candidates:<Candidates/>,sessions:<Sessions/>,monitors:<Monitors/>,vehicles:<Vehicles/>,finance:<Finance/>,dues:<DuesPage/>,requests:<Requests/>,bookings:<BookingsInbox/>,notifs:<Notifs/>,settings:<Settings/>,mycands:<MyCands/>,mystats:<MyStats/>
   };
   const allowed=NAV.some(x=>x[0]===page)?page:'home';
   return <Ctx.Provider value={{db:db,upd:upd,user:user,L:L,notify:notify,mark:mark,replace:setDb,openSend:setSend,lang:lang,setLang:setLang,logout:logout}}>
@@ -1604,7 +1846,7 @@ function App(){
       <div className="u"><span>{_t(user.name)}{user.role==='monitor'?' ('+_t('مونيتور')+')':''}</span><button type="button" data-oq-logout="" onClick={logout} style={{background:'#fff',color:'var(--p2)',border:0,borderRadius:8,padding:'6px 12px',fontWeight:700,cursor:'pointer',fontSize:13}}>⎋ {_t('تسجيل الخروج')}</button></div>
     </div>
     <div className={'nav-back'+(menuOpen?' on':'')} data-oq-nav-back="" onClick={()=>setMenuOpen(false)}></div>
-    <div className={'nav'+(menuOpen?' open':'')} id="oq-nav" data-oq-nav="">{NAV.map(x=><button key={x[0]} className={allowed===x[0]?'on':''} onClick={()=>{setPage(x[0]);setMenuOpen(false);}}>{x[1]}{x[0]==='notifs'&&unread>0&&<span className="cnt">{unread}</span>}{x[0]==='requests'&&pend>0&&<span className="cnt">{pend}</span>}{x[0]==='bookings'&&portalPend>0&&<span className="cnt" data-oq-portal-pend="">{portalPend}</span>}</button>)}</div>
+    <div className={'nav'+(menuOpen?' open':'')} id="oq-nav" data-oq-nav="">{NAV.map(x=><button key={x[0]} className={allowed===x[0]?'on':''} data-oq-nav-item={x[0]} onClick={()=>{setPage(x[0]);setMenuOpen(false);}}>{x[1]}{x[0]==='notifs'&&unread>0&&<span className="cnt">{unread}</span>}{x[0]==='requests'&&pend>0&&<span className="cnt">{pend}</span>}{x[0]==='bookings'&&portalPend>0&&<span className="cnt" data-oq-portal-pend="">{portalPend}</span>}{x[0]==='tasks'&&taskCount>0&&<span className="cnt" data-oq-task-count="">{taskCount}</span>}</button>)}</div>
     <div className="wrap" key={allowed}>{PAGES[allowed]}</div>
     {send&&<SendModal s={send.s} mode={send.mode} onClose={()=>setSend(null)}/>}
   </Ctx.Provider>;
