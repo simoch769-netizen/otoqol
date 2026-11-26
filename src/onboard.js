@@ -143,7 +143,9 @@ function install(app, ctx) {
   const ownerSessions = new Map(); // jti -> exp
   setInterval(() => { const now = Date.now(); for (const [k, exp] of ownerSessions) if (exp <= now) ownerSessions.delete(k); }, 3600e3).unref();
 
-  function ownerUsername() { return String(process.env.OWNER_USERNAME || '').trim(); }
+  store.armSetupTokenFromEnv();
+
+  function envOwnerUsername() { return String(process.env.OWNER_USERNAME || '').trim(); }
   function ownerPasswordHash() { return String(process.env.OWNER_PASSWORD_HASH || '').trim(); }
   function ownerPasswordPlain() {
     const a = String(process.env.OWNER_PASSWORD || '').trim();
@@ -151,7 +153,15 @@ function install(app, ctx) {
     const b = String(process.env.ADMIN_TOKEN || '').trim();
     return b.length >= 16 ? b : '';
   }
-  function ownerConfigured() { return !!(ownerUsername() && (ownerPasswordHash() || ownerPasswordPlain())); }
+  function dbOwner() { return store.getOwnerAccount(); }
+  function ownerUsername() {
+    const acc = dbOwner();
+    return acc ? acc.username : envOwnerUsername();
+  }
+  function ownerConfigured() {
+    if (dbOwner()) return true;
+    return !!(envOwnerUsername() && (ownerPasswordHash() || ownerPasswordPlain()));
+  }
   function checkOwnerUsername(typed) {
     const exp = ownerUsername();
     const got = String(typed == null ? '' : typed).trim();
@@ -166,12 +176,16 @@ function install(app, ctx) {
   }
   function checkOwnerPassword(typed) {
     const got = String(typed == null ? '' : typed);
+    const acc = dbOwner();
+    if (acc && acc.password_hash) {
+      try { return bcrypt.compareSync(got, acc.password_hash); } catch (e) { return false; }
+    }
     const hash = ownerPasswordHash();
     if (hash) {
       try { return bcrypt.compareSync(got, hash); } catch (e) { return false; }
     }
     const exp = ownerPasswordPlain();
-    if (!exp) { bcrypt.compareSync(got || 'x', '$2a$10$abcdefghijklmnopqrstuuABCDEFGHIJKLMNOPQRSTUVWXYZ012345'); return false; }
+    if (!exp) { try { bcrypt.compareSync(got || 'x', '$2a$10$abcdefghijklmnopqrstuuABCDEFGHIJKLMNOPQRSTUVWXYZ012345'); } catch (e) {} return false; }
     const a = Buffer.from(got);
     const b = Buffer.from(exp);
     if (a.length !== b.length) { crypto.timingSafeEqual(b, b); return false; }
@@ -211,6 +225,37 @@ function install(app, ctx) {
     keyGenerator: req => 'owner:' + String((req.body && req.body.username) || '').trim().toLowerCase().slice(0, 100),
     validate: { keyGeneratorIpFallback: false },
     standardHeaders: false, legacyHeaders: false, message: { error: 'too_many_attempts' },
+  });
+  const setupLimiter = rateLimit({
+    windowMs: 15 * 60_000, limit: Number(process.env.OWNER_SETUP_PER_15MIN || 8),
+    standardHeaders: 'draft-7', legacyHeaders: false, message: { error: 'too_many_attempts' },
+  });
+
+  app.get('/api/owner/setup', setupLimiter, (req, res) => {
+    const token = typeof req.query.token === 'string' ? req.query.token : '';
+    const p = store.peekSetupToken(token);
+    if (!p.ok) return res.status(400).json({ error: p.error });
+    res.set('Cache-Control', 'no-store');
+    res.json({ ok: true, expires_at: p.expires_at });
+  });
+  app.post('/api/owner/setup', setupLimiter, (req, res) => {
+    const b = req.body || {};
+    const token = b.token;
+    const username = nz(b.username);
+    const password = String(b.password == null ? '' : b.password);
+    if (typeof token !== 'string' || typeof (b.username) !== 'string' || typeof (b.password) !== 'string' ||
+        token.length > 200 || username.length > 100 || password.length > 200)
+      return res.status(400).json({ error: 'bad_request' });
+    if (!validUsername(username)) return res.status(400).json({ error: 'invalid_username' });
+    if (password.length < 8) return res.status(400).json({ error: 'weak_password' });
+    const peeked = store.peekSetupToken(token);
+    if (!peeked.ok) return res.status(400).json({ error: peeked.error });
+    const used = store.consumeSetupToken(token);
+    if (!used.ok) return res.status(400).json({ error: used.error });
+    const hash = bcrypt.hashSync(password, 11);
+    store.setOwnerAccount(username, hash);
+    res.cookie(OWNER_COOKIE, signOwner(), ownerCookieOpts);
+    res.json({ ok: true, user: { username, role: 'owner' } });
   });
 
   app.post('/api/signup', signupLimiter, (req, res) => {

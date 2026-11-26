@@ -513,6 +513,7 @@ const sendApp = (req, res) => { res.set('Cache-Control', 'no-cache'); res.sendFi
 app.get(['/app', '/app/', '/app/{*rest}'], sendApp);
 const sendPage = file => (req, res) => { res.set('Cache-Control', 'no-cache'); res.sendFile(path.join(PUBLIC, file)); };
 app.get(['/signup', '/signup/'], sendPage('signup.html'));
+app.get(['/owner/setup', '/owner/setup/'], sendPage('owner-setup.html'));
 app.get(['/owner', '/owner/'], sendPage('owner.html'));
 app.use(express.static(PUBLIC, { index: 'index.html', maxAge: 0, redirect: false }));
 

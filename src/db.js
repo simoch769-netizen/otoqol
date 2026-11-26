@@ -65,6 +65,72 @@ CREATE INDEX IF NOT EXISTS idx_sessions_exp ON sessions(expires_at);
   db.exec(`CREATE INDEX IF NOT EXISTS idx_schools_email ON schools(contact_email)`);
 })();
 
+db.exec(`
+CREATE TABLE IF NOT EXISTS owner_account (
+  id INTEGER PRIMARY KEY CHECK (id = 1),
+  username TEXT NOT NULL,
+  password_hash TEXT NOT NULL,
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE TABLE IF NOT EXISTS owner_setup_tokens (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  token_hash TEXT NOT NULL,
+  expires_at INTEGER NOT NULL,
+  used_at INTEGER,
+  created_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_owner_setup_hash ON owner_setup_tokens(token_hash);
+`);
+
+function hashSetupToken(token) {
+  return crypto.createHash('sha256').update('otq-setup:' + String(token || '')).digest('hex');
+}
+function getOwnerAccount() {
+  return db.prepare('SELECT username, password_hash, updated_at FROM owner_account WHERE id = 1').get() || null;
+}
+function setOwnerAccount(username, passwordHash) {
+  const un = String(username || '').trim();
+  if (!un) throw new Error('invalid_username');
+  if (!passwordHash) throw new Error('weak_password');
+  db.prepare(`INSERT INTO owner_account(id, username, password_hash, updated_at)
+    VALUES (1, ?, ?, datetime('now'))
+    ON CONFLICT(id) DO UPDATE SET username=excluded.username, password_hash=excluded.password_hash, updated_at=datetime('now')`).run(un, passwordHash);
+  return { username: un };
+}
+function createSetupToken(token, ttlMs) {
+  const hash = hashSetupToken(token);
+  const now = Date.now();
+  const ttl = (ttlMs === undefined || ttlMs === null || ttlMs === '') ? 3600e3 : Number(ttlMs);
+  if (!Number.isFinite(ttl)) throw new Error('invalid_ttl');
+  const expires = now + ttl;
+  db.prepare('INSERT INTO owner_setup_tokens(token_hash, expires_at, created_at) VALUES (?,?,?)').run(hash, expires, now);
+  return { expires_at: expires };
+}
+function peekSetupToken(token) {
+  const hash = hashSetupToken(token);
+  const row = db.prepare('SELECT * FROM owner_setup_tokens WHERE token_hash = ? ORDER BY id DESC LIMIT 1').get(hash);
+  if (!row) return { ok: false, error: 'invalid_token' };
+  if (row.used_at) return { ok: false, error: 'used_token' };
+  if (Number(row.expires_at) <= Date.now()) return { ok: false, error: 'expired_token' };
+  return { ok: true, id: row.id, expires_at: row.expires_at };
+}
+function consumeSetupToken(token) {
+  const p = peekSetupToken(token);
+  if (!p.ok) return p;
+  db.prepare('UPDATE owner_setup_tokens SET used_at = ? WHERE id = ?').run(Date.now(), p.id);
+  return { ok: true };
+}
+/** If OWNER_SETUP_TOKEN_HASH is set, arm a 1-hour token starting now, unless this hash was already used or is already live. */
+function armSetupTokenFromEnv() {
+  const hash = String(process.env.OWNER_SETUP_TOKEN_HASH || '').trim().toLowerCase();
+  if (!/^[0-9a-f]{64}$/.test(hash)) return { armed: false };
+  if (db.prepare('SELECT 1 FROM owner_setup_tokens WHERE token_hash = ? AND used_at IS NOT NULL').get(hash)) return { armed: false, reason: 'used' };
+  if (db.prepare('SELECT 1 FROM owner_setup_tokens WHERE token_hash = ? AND used_at IS NULL AND expires_at > ?').get(hash, Date.now())) return { armed: false, reason: 'already_live' };
+  const now = Date.now();
+  db.prepare('INSERT INTO owner_setup_tokens(token_hash, expires_at, created_at) VALUES (?,?,?)').run(hash, now + 3600e3, now);
+  return { armed: true, expires_at: now + 3600e3 };
+}
+
 const HISTORY_MAX_BYTES = Number(process.env.HISTORY_MAX_MB || 100) * 1024 * 1024; // per school, protects the disk
 
 const genLicence = () => 'OTQ-' + crypto.randomBytes(8).toString('hex').toUpperCase().match(/.{4}/g).join('-');
@@ -217,4 +283,5 @@ async function backupFile(dest) { await db.backup(dest); return dest; }
 
 module.exports = { db, DB_FILE, DATA_DIR, createSchool, findSchool, getSchoolById, listSchools, findByEmail, setPassword, setActive, setStatus, schoolStatus,
   checkPassword, getData, getVersion, putData, addSession, hasSession, delSession, purgeSessions, snapshot, listHistory, getHistory, backupFile, normCode,
-  allocateCode, slugFromName, isValidCode, RESERVED_CODES, STATUSES };
+  allocateCode, slugFromName, isValidCode, RESERVED_CODES, STATUSES,
+  getOwnerAccount, setOwnerAccount, hashSetupToken, createSetupToken, peekSetupToken, consumeSetupToken, armSetupTokenFromEnv };
