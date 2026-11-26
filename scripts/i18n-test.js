@@ -78,17 +78,18 @@ const arabicLeft = page => page.evaluate(() => {
     const navCount = await page.locator('.nav button').count();
     for (let i = 0; i < navCount; i++) {
       const b = page.locator('.nav button').nth(i); const name = (await b.innerText()).trim();
+      const navKey = await b.getAttribute('data-oq-nav-item');
       await b.click(); await page.waitForTimeout(150);
       add('page ' + name, await arabicLeft(page));
       const tabs = page.locator('.wrap .tabs button'); const tc = await tabs.count();
       for (let k = 0; k < tc; k++) { await tabs.nth(k).click(); await page.waitForTimeout(100); add('page ' + name + ' / tab ' + (await tabs.nth(k).innerText()).trim(), await arabicLeft(page));
-        if (i === 5 && k === 0) await page.screenshot({ path: SHOTS + `i18n-${lang}-4-finance.png`, fullPage: true }); }
+        if (navKey === 'finance' && k === 0) await page.screenshot({ path: SHOTS + `i18n-${lang}-4-finance.png`, fullPage: true }); }
       // open any "add / new" modal on this page (primary buttons in the toolbar), scan it, close it
       const adds = page.locator('.wrap .bar button.b.pri, .wrap > div > .row > button.b.pri');
       if (await adds.count()) { await adds.first().click(); await page.waitForTimeout(150);
         if (await page.locator('.md').count()) { add('page ' + name + ' / new-form', await arabicLeft(page)); await page.locator('.md .mh button.x').click(); } }
-      if (i === 0) await page.screenshot({ path: SHOTS + `i18n-${lang}-2-dashboard.png`, fullPage: true });
-      if (i === 1) { await page.screenshot({ path: SHOTS + `i18n-${lang}-3-candidates.png`, fullPage: true });
+      if (navKey === 'home') await page.screenshot({ path: SHOTS + `i18n-${lang}-2-dashboard.png`, fullPage: true });
+      if (navKey === 'candidates') { await page.screenshot({ path: SHOTS + `i18n-${lang}-3-candidates.png`, fullPage: true });
         // candidate modal + tabs + receipt
         await page.locator('tr.cl').first().click(); await page.waitForTimeout(200); add('candidate modal', await arabicLeft(page));
         const mt = page.locator('.md .tabs button'); const mc = await mt.count();
