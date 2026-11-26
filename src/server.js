@@ -10,6 +10,7 @@ const jwt = require('jsonwebtoken');
 const store = require('./db');
 const mail = require('./mail');
 const onboard = require('./onboard');
+const narsa = require('../public/narsa-docs.js');
 
 const PORT = Number(process.env.PORT || 3000);
 const HOST = process.env.HOST || '0.0.0.0';
@@ -581,6 +582,35 @@ app.use('/api/admin', admin);
 
 app.get('/healthz', (req, res) => res.json({ ok: true }));
 onboard.install(app, { store, mail, hashPw, JWT_SECRET, JWT_OPTS, cookieOpts, PROD, clearResetCodesForSchool });
+
+
+function narsaStaff(req) {
+  return req.role === 'manager' || req.role === 'secretary' || req.role === 'owner';
+}
+function schoolDataJson(schoolId) {
+  const d = store.getData(schoolId);
+  if (!d || d.data == null) return null;
+  try { return JSON.parse(d.data); } catch (e) { return null; }
+}
+app.get('/api/narsa/docs', auth, (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  if (!narsaStaff(req)) return res.status(403).json({ error: 'forbidden' });
+  const type = String((req.query && req.query.type) || '');
+  const cid = String((req.query && req.query.cid) || '');
+  const copies = req.query && req.query.copies;
+  const lang = String((req.query && req.query.lang) || 'ar');
+  const data = schoolDataJson(req.school.id);
+  if (!data) return res.status(404).json({ error: 'school_empty' });
+  const out = narsa.build(data, cid, { type, copies, lang });
+  if (out.error === 'bad_type') return res.status(400).json({ error: 'bad_type' });
+  if (out.error === 'candidate_not_found') return res.status(404).json({ error: 'candidate_not_found' });
+  if (!out.ok) return res.status(422).json({ ok: false, error: 'missing_fields', missing: out.missing });
+  if (String((req.query && req.query.format) || '') === 'html') {
+    res.type('html').send(out.html);
+    return;
+  }
+  res.json({ ok: true, type: out.type, title: out.title, filename: out.filename, copies: out.copies, html: out.html });
+});
 
 app.use('/api', (req, res) => res.status(404).json({ error: 'not_found' }));
 const PUBLIC = path.join(__dirname, '..', 'public');
