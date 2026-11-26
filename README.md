@@ -12,7 +12,7 @@
 - `public/signup.html` و `public/owner.html` : صفحة التسجيل للمدارس وصفحة موافقة المالك.
 - `scripts/admin.js` : أوامر الإدارة (إنشاء مدرسة، تبديل كلمة السر، توقيف، export/import، backup).
 - `public/index.html` : نسخة من التطبيق، تبدل فيها غير الحفظ (sync مع السيرفر + cache فالجهاز).
-- `scripts/api-test.js` و `scripts/browser-test.js` و `scripts/responsive-test.js` و `scripts/student-portal-test.js` و `scripts/dues-test.js` : تيستات.
+- `scripts/api-test.js` و `scripts/browser-test.js` و `scripts/responsive-test.js` و `scripts/student-portal-test.js` و `scripts/dues-test.js` و `scripts/templates-test.js` و `scripts/drawer-fix-test.js` : تيستات.
 - `Dockerfile`, `docker-compose.yml`, `ecosystem.config.js` (pm2), `render.yaml` (Render), `.env.example`.
 
 ## التشغيل (4 أوامر)
@@ -66,6 +66,14 @@ node scripts/admin.js backup [dir]                         # نسخة كاملة
 - الإجراءات (المدير/السكريتيرة فقط؛ المونيتور ما يقدرش): فتح واتساب برسالة تذكير جاهزة (عربية فصحى، أو فرنسية/إنجليزية حسب لغة الواجهة)، تسجيل **«تم التذكير»**، وإرسال نفس النص بالإيميل إلى كان عند التلميذ بريد (Brevo). كل تذكير كيتسجل (من، متى، القناة، والمبلغ وقتها). تاريخ التذكيرات ما كيتمسحش من الواجهة (`reminders` محمي فالسريرفر).
 - نفس القائمة خدامة من تبويب **المتأخرات** فصفحة المالية.
 - `GET /api/dues?filter=all|week|never|high&lang=ar|fr|en` و `POST /api/dues/:cid/remind {channel: whatsapp|email|manual, lang}`.
+
+## قوالب الرسائل
+- من **الإعدادات** (المدير فقط)، بطاقة **«قوالب الرسائل»**: لكل نوع نص بالعربية الفصحى والفرنسية والإنجليزية، قابل للتعديل، مع معاينة مباشرة واستعادة النص الافتراضي. السكريتيرة كتستعمل القوالب وما تقدرش تبدّلها.
+- الأنواع: تذكير المستحقات، تذكير/تأكيد/تغيير/إلغاء الحصة، رفض الحجز، استدعاء الامتحان، ترحيب وتسجيل، دعوة بوابة التلميذ، وصل الأداء، وإشعار الغياب.
+- الحقول: `{school}` `{student}` `{amount}` `{due}` `{date}` `{time}` `{instructor}` `{link}` `{phone}` (`{username}` `{paid}` `{type}` حسب النوع).
+- لغة الرسالة: حقل **اللغة المفضلة للرسائل** فالمترشح، وإلا لغة المدرسة الافتراضية، وإلا العربية. واتساب والبريد كيخدمو هاد اللغة.
+- القوالب محمية فالسريرفر (`messageTemplates`) وما كيتمسوش من `PUT /api/db`. التعديل عبر `GET/PUT /api/templates` و `POST /api/templates/:type/reset`.
+
 
 ## الدخول (عدة مدارس فنفس السيرفر)
 - شاشة الدخول فيها: **اسم المستخدم** + **كلمة السر** فقط (بالعربية الفصحى/الفرنسية/الإنجليزية). السيرفر كيلقى المدرسة من اسم المستخدم عبر كل المدارس. مدرسة التجربة (demo) كتبقى خدامة.
@@ -186,6 +194,8 @@ node scripts/i18n-test.js http://localhost:3000 demo 'Demo2026!'           # ك�
 node scripts/forgot-password-test.js                                         # تيست نسيت كلمة السر (SMTP وهمي، كيشعل سيرفر بوحدو فـ4300)
 node scripts/signup-approval-test.js                                         # تيست التسجيل وموافقة المالك وتعدد المدارس (كيشعل سيرفر بوحدو فـ4400)
 node scripts/dues-test.js                                                    # تيست المستحقات وتذكير المدينين (كيشعل سيرفر بوحدو فـ4370)
+node scripts/templates-test.js                                               # تيست قوالب الرسائل (كيشعل سيرفر بوحدو فـ4380)
+node scripts/drawer-fix-test.js                                              # تيست عرض القائمة فالهاتف وقفل التمرير (كيشعل سيرفر بوحدو فـ4360)
 ```
 
 ## حدود خاص تعرفها
