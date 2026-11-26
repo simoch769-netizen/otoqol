@@ -1,5 +1,6 @@
 'use strict';
 const crypto = require('crypto');
+const templates = require('./templates');
 
 const CHANNELS = new Set(['whatsapp', 'email', 'manual']);
 
@@ -92,17 +93,15 @@ function formatAmount(n, lang) {
   return num + ' د.م';
 }
 
-function reminderMessage({ schoolName, studentName, amount, lang }) {
+function reminderMessage({ schoolName, studentName, amount, lang, data }) {
   const school = String(schoolName || 'Otoqol');
-  const name = String(studentName || '');
-  const amt = formatAmount(amount, lang);
-  if (lang === 'fr') {
-    return 'Bonjour ' + name + ',\n\nRappel de ' + school + ' : le reste à payer pour votre formation est de ' + amt + '.\nMerci de régulariser dès que possible.\n\n' + school;
-  }
-  if (lang === 'en') {
-    return 'Hello ' + name + ',\n\nA reminder from ' + school + ': the remaining balance for your training is ' + amt + '.\nPlease settle it at your earliest convenience. Thank you.\n\n' + school;
-  }
-  return 'السلام عليكم ' + name + '،\n\nتذكير من ' + school + ' بأن الباقي من رسوم التكوين هو ' + amt + '.\nنرجو تسوية المبلغ في أقرب وقت. شكراً لتعاملكم.\n\n' + school;
+  return templates.render('debt', {
+    school: school,
+    student: studentName,
+    amount: amount,
+    due: amount,
+    phone: (data && data.settings && data.settings.phone) || '',
+  }, lang, data && data.messageTemplates);
 }
 
 function waDigits(phone) {
@@ -126,7 +125,8 @@ function publicDebtor(data, c, today, lang) {
   const lastRem = lastReminder(data, c.id);
   const lastRemDate = lastRem ? String(lastRem.date || lastRem.at || '').slice(0, 10) : null;
   const school = (data.settings && data.settings.school) || 'Otoqol';
-  const message = reminderMessage({ schoolName: school, studentName: c.name, amount: due, lang: lang || 'ar' });
+  const usedLang = lang || templates.studentLang(c, data.settings, data.messageTemplates);
+  const message = reminderMessage({ schoolName: school, studentName: c.name, amount: due, lang: usedLang, data: data });
   return {
     id: c.id,
     name: c.name,
@@ -150,9 +150,9 @@ function publicDebtor(data, c, today, lang) {
 function listDues(data, opts) {
   const today = (opts && opts.today) || todayCasablanca();
   const filter = (opts && opts.filter) || 'all';
-  const lang = (opts && opts.lang) || 'ar';
+  const forceLang = opts && opts.forceLang;
   let rows = (data.candidates || []).filter(c => c && dueOf(data, c.id) > 0)
-    .map(c => publicDebtor(data, c, today, lang));
+    .map(c => publicDebtor(data, c, today, forceLang));
   if (filter === 'never') rows = rows.filter(r => r.neverReminded);
   else if (filter === 'week') rows = rows.filter(r => r.remindedThisWeek);
   else if (filter === 'high') rows = rows.filter(r => r.highDue);
@@ -195,7 +195,8 @@ function install(app, deps) {
     const allowed = { all: 1, week: 1, never: 1, high: 1 };
     const f = allowed[filter] ? filter : 'all';
     res.set('Cache-Control', 'no-store');
-    res.json(listDues(data, { filter: f, lang: langOf(req) }));
+    const qLang = req.query && req.query.lang != null && String(req.query.lang) !== '' ? langOf(req) : null;
+    res.json(listDues(data, { filter: f, forceLang: qLang }));
   });
 
   app.post('/api/dues/:cid/remind', auth, staff, async (req, res) => {
@@ -214,7 +215,9 @@ function install(app, deps) {
       if (!email) return res.status(400).json({ error: 'no_email' });
     }
     const schoolName = (data0.settings && data0.settings.school) || req.school.name;
-    const message = reminderMessage({ schoolName, studentName: c.name, amount: due, lang });
+    const explicitLang = (req.body && req.body.lang) || (req.query && req.query.lang);
+    const usedLang = explicitLang ? lang : templates.studentLang(c, data0.settings, data0.messageTemplates);
+    const message = reminderMessage({ schoolName, studentName: c.name, amount: due, lang: usedLang, data: data0 });
     let emailSent = false;
     if (channel === 'email' && mail.isConfigured()) {
       try {

@@ -351,14 +351,14 @@ async function sendSchoolApprovedEmail({ to, name, username }) {
 }
 
 
-function buildStudentInviteEmail({ name, schoolName, username, url, alreadyActive }) {
+function buildStudentInviteEmail({ name, schoolName, username, url, alreadyActive, text }) {
   const school = String(schoolName || 'Otoqol');
   const who = String(name || '');
   const user = String(username || '');
   const link = String(url || '');
   const titleAr = alreadyActive ? 'رابط بوابة التلميذ' : 'دعوة إلى بوابة التلميذ';
   const titleFr = alreadyActive ? 'Lien vers votre espace élève' : 'Invitation à l’espace élève';
-  const bodyText = alreadyActive
+  const bodyText = (text && String(text).trim()) ? String(text) : alreadyActive
     ? ('مرحبا ' + who + '،\n\nيمكنك الدخول إلى بوابة التلميذ لمدرسة ' + school + ' من هذا الرابط:\n' + link + '\n\nاسم المستخدم: ' + user + '\n\n— Otoqol')
     : ('مرحبا ' + who + '،\n\nدعَتك مدرسة ' + school + ' إلى بوابة التلميذ. افتح الرابط التالي وعيّن كلمة السر:\n' + link + '\n\nاسم المستخدم: ' + user + '\nصالح لمدة 7 أيام.\n\n— Otoqol');
   const bodyHtml = alreadyActive

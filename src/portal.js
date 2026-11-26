@@ -1,4 +1,5 @@
 'use strict';
+const templates = require('./templates');
 const crypto = require('crypto');
 const rateLimit = require('express-rate-limit');
 
@@ -197,12 +198,25 @@ function publicSession(data, s, cid) {
 function publicBooking(b, data) {
   const mon = (data.monitors || []).find(m => m && m.id === b.monitorId);
   const c = (data.candidates || []).find(x => x && x.id === b.cid);
+  const tplId = templates.bookingTemplate(b.kind, b.status);
+  const lang = templates.studentLang(c, data.settings, data.messageTemplates);
+  const message = (tplId && c) ? templates.render(tplId, {
+    school: (data.settings && data.settings.school) || 'Otoqol',
+    student: c.name,
+    date: b.date,
+    time: b.time,
+    instructor: mon ? mon.name : '',
+    type: templates.typeLabel(b.type, lang),
+    phone: (data.settings && data.settings.phone) || '',
+  }, lang, data.messageTemplates) : '';
   return {
     id: b.id, kind: b.kind, status: b.status, cid: b.cid,
-    studentName: c ? c.name : '', date: b.date, time: b.time,
+    studentName: c ? c.name : '', studentPhone: c ? (c.phone || '') : '',
+    date: b.date, time: b.time,
     duration: Number(b.duration) || 1, type: b.type,
     monitorId: b.monitorId || '', monitorName: mon ? mon.name : '',
     sessionId: b.sessionId || null, createdAt: b.createdAt, decidedAt: b.decidedAt || null,
+    message, whatsappUrl: (c && c.phone && message) ? templates.waLink(c.phone, message) : '',
   };
 }
 
@@ -373,12 +387,17 @@ function install(app, deps) {
     const existing = (data0.portalUsers || []).find(x => x && x.cid === cid && x.activatedAt);
     if (existing) {
       const loginUrl = String((publicUrl || mail.publicUrl)()).replace(/\/+$/, '') + '/portal';
-      const text = 'مرحبا ' + c.name + '، يمكنك الدخول إلى بوابة التلميذ لمدرسة ' + ((data0.settings && data0.settings.school) || req.school.name) + ' من: ' + loginUrl + (existing.username ? (' — اسم المستخدم: ' + existing.username) : '');
+      const schoolName0 = (data0.settings && data0.settings.school) || req.school.name;
+      const lang0 = templates.studentLang(c, data0.settings, data0.messageTemplates);
+      const text = templates.render('portal_invite', {
+        school: schoolName0, student: c.name, link: loginUrl, username: existing.username || '',
+        phone: (data0.settings && data0.settings.phone) || '',
+      }, lang0, data0.messageTemplates);
       const whatsappUrl = waLink(c.phone, text);
       if (emailIn && mail.isConfigured()) {
         void mail.sendStudentInviteEmail({
-          to: emailIn, name: c.name, schoolName: (data0.settings && data0.settings.school) || req.school.name,
-          username: existing.username, url: loginUrl, alreadyActive: true,
+          to: emailIn, name: c.name, schoolName: schoolName0,
+          username: existing.username, url: loginUrl, alreadyActive: true, text,
         }).catch(e => console.error('[mail] student invite send error:', e && e.message));
       }
       return res.json({
@@ -418,12 +437,16 @@ function install(app, deps) {
     if (!r.ok) return res.status(r.status || 400).json({ error: r.error });
     const url = inviteUrl((publicUrl || mail.publicUrl)(), token);
     const schoolName = (r.data.settings && r.data.settings.school) || req.school.name;
-    const text = 'مرحبا ' + c.name + '، ادخل إلى بوابة التلميذ لمدرسة ' + schoolName + ' وعيّن كلمة السر من هذا الرابط: ' + url + ' — اسم المستخدم: ' + un;
+    const langInv = templates.studentLang(c, r.data.settings, r.data.messageTemplates);
+    const text = templates.render('portal_invite', {
+      school: schoolName, student: c.name, link: url, username: un,
+      phone: (r.data.settings && r.data.settings.phone) || '',
+    }, langInv, r.data.messageTemplates);
     const whatsappUrl = waLink(c.phone, text);
     let emailSent = false;
     if (emailIn && mail.isConfigured()) {
       try {
-        await mail.sendStudentInviteEmail({ to: emailIn, name: c.name, schoolName, username: un, url });
+        await mail.sendStudentInviteEmail({ to: emailIn, name: c.name, schoolName, username: un, url, text });
         emailSent = true;
       } catch (e) {
         console.error('[mail] student invite send error:', e && e.message);

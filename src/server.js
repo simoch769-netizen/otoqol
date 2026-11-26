@@ -13,6 +13,7 @@ const onboard = require('./onboard');
 const narsa = require('../public/narsa-docs.js');
 const portal = require('./portal');
 const dues = require('./dues');
+const templates = require('./templates');
 
 const PORT = Number(process.env.PORT || 3000);
 const HOST = process.env.HOST || '0.0.0.0';
@@ -519,6 +520,7 @@ function validDB(o) {
   for (const k of ['users', 'monitors', 'vehicles', 'candidates', 'sessions', 'payments', 'expenses', 'notifs', 'requests', 'notes', 'log', 'portalUsers', 'bookings', 'portalInvites', 'reminders'])
     if (o[k] !== undefined && !Array.isArray(o[k])) return false;
   if (o.settings !== undefined && (!o.settings || typeof o.settings !== 'object' || Array.isArray(o.settings))) return false;
+  if (o.messageTemplates !== undefined && (!o.messageTemplates || typeof o.messageTemplates !== 'object' || Array.isArray(o.messageTemplates))) return false;
   return Array.isArray(o.candidates) && Array.isArray(o.users);
 }
 // What each role may NOT change through the API (same limits as the app's screens): taken from the stored copy.
@@ -531,7 +533,7 @@ app.put('/api/db', auth, (req, res) => {
   const cur = store.getData(req.school.id);
   if (cur.version !== version) return res.status(409).json({ error: 'version_conflict', version: cur.version });
   const stored = cur.data == null ? null : JSON.parse(cur.data);
-  const SERVER_OWNED = ['portalUsers', 'bookings', 'portalInvites', 'reminders'];
+  const SERVER_OWNED = ['portalUsers', 'bookings', 'portalInvites', 'reminders', 'messageTemplates'];
   if (stored) {
     for (const k of SERVER_OWNED) {
       if (stored[k] === undefined) delete data[k];
@@ -658,6 +660,10 @@ portal.install(app, {
 });
 dues.install(app, {
   store, mail, auth, cachedData,
+  bump: schoolId => { dataCache.delete(schoolId); bodyCache.delete(schoolId); },
+});
+templates.install(app, {
+  store, auth, cachedData,
   bump: schoolId => { dataCache.delete(schoolId); bodyCache.delete(schoolId); },
 });
 
