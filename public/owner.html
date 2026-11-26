@@ -59,6 +59,9 @@ code{direction:ltr;font-family:Consolas,Menlo,monospace;background:#f1f5f9;paddi
 .stat span{font-size:12px;color:var(--slate);font-weight:600}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
 @media (max-width:640px){.grid2{grid-template-columns:1fr}}
+.modal-back{position:fixed;inset:0;background:rgba(15,23,42,.45);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+.modal{max-width:440px;width:100%;margin:0}
+#del-modal[hidden]{display:none!important}#del-modal:not([hidden]){position:fixed;inset:0;z-index:50}
 </style>
 </head>
 <body>
@@ -107,14 +110,31 @@ code{direction:ltr;font-family:Consolas,Menlo,monospace;background:#f1f5f9;paddi
     </div>
   </div>
 </div>
+<div id="del-modal" hidden data-oq-delete-modal="">
+  <div class="modal-back" data-oq-delete-backdrop="">
+    <div class="card modal" role="dialog" aria-modal="true" aria-labelledby="del-title">
+      <h2 id="del-title" data-t="delete_title">مسح المدرسة؟</h2>
+      <p class="sub" id="del-warn" data-oq-delete-warn=""></p>
+      <label><span data-t="delete_type">اكتب اسم المدرسة للتأكيد</span><input id="del-name" data-oq-delete-input="" autocomplete="off" spellcheck="false"></label>
+      <div class="al bad" id="del-err" hidden></div>
+      <div class="row">
+        <button type="button" class="btn bad" id="del-go" data-t="delete_confirm">مسح نهائي</button>
+        <button type="button" class="btn out" id="del-cancel" data-t="delete_cancel">إلغاء</button>
+      </div>
+    </div>
+  </div>
+</div>
 <script>
 (function(){
   var T={
     ar:{login_title:"لوحة المالك",login_sub:"سجّل الدخول بحساب المالك لإدارة حسابات المدارس.",username:"اسم المستخدم",password:"كلمة السر",enter:"دخول",logout:"خروج",
-      dash_title:"لوحة المالك",dash_sub:"حسابات المدارس فقط: الحالات، الإحصائيات، الموافقة وإضافة مدرسة.",
+      dash_title:"لوحة المالك",dash_sub:"حسابات المدارس فقط: الحالات، الإحصائيات، الموافقة، الإضافة والمسح.",
       list_title:"المدارس",list_sub:"الطلبات قيد الانتظار أولًا، ثم المدارس المفعّلة.",
       pending:"قيد الانتظار",active:"مفعّلة",rejected:"مرفوضة",inactive:"موقوفة",
-      approve:"موافقة",reject:"رفض",deactivate:"إيقاف",activate:"تفعيل",empty:"لا توجد مدارس بعد.",
+      approve:"موافقة",reject:"رفض",deactivate:"إيقاف",activate:"تفعيل",delete:"مسح",empty:"لا توجد مدارس بعد.",
+      delete_title:"مسح المدرسة؟",delete_warn:"سيتم حذف «{name}» وجميع بياناتها نهائيًا. لا يمكن التراجع عن هذا الإجراء.",
+      delete_type:"اكتب اسم المدرسة للتأكيد",delete_confirm:"مسح نهائي",delete_cancel:"إلغاء",
+      delete_mismatch:"اسم المدرسة غير مطابق.",protected_school:"لا يمكن مسح المدرسة الافتراضية.",school_not_found:"المدرسة غير موجودة.",name_mismatch:"اسم المدرسة غير مطابق.",
       city:"المدينة",manager:"المدير",email:"البريد",phone:"الهاتف",created:"تاريخ الإنشاء",activity:"آخر نشاط",
       candidates:"المترشحون",sessions:"الحصص",payments:"مجموع الأداءات",users:"المستخدمون",schools:"المدارس",
       add_title:"إضافة مدرسة",name:"اسم المدرسة",code:"رمز المدرسة",manager_user:"اسم مستخدم المدير",manager_pass:"كلمة سر المدير",add_submit:"إنشاء الحساب",
@@ -124,10 +144,13 @@ code{direction:ltr;font-family:Consolas,Menlo,monospace;background:#f1f5f9;paddi
       invalid_code:"رمز المدرسة غير صالح",code_taken:"رمز المدرسة مستعمل، اختر رمزًا آخر",email_used:"هذا البريد مرتبط بحساب قائم",
       doc:"Otoqol — لوحة المالك"},
     fr:{login_title:"Espace propriétaire",login_sub:"Connectez-vous avec le compte propriétaire pour gérer les comptes des écoles.",username:"Identifiant",password:"Mot de passe",enter:"Entrer",logout:"Déconnexion",
-      dash_title:"Espace propriétaire",dash_sub:"Uniquement les comptes des écoles : statuts, statistiques, approbation et création d’une école.",
+      dash_title:"Espace propriétaire",dash_sub:"Uniquement les comptes des écoles : statuts, statistiques, approbation, création et suppression.",
       list_title:"Écoles",list_sub:"Les demandes en attente d’abord, puis les écoles actives.",
       pending:"En attente",active:"Active",rejected:"Refusée",inactive:"Désactivée",
-      approve:"Approuver",reject:"Refuser",deactivate:"Désactiver",activate:"Activer",empty:"Aucune école pour le moment.",
+      approve:"Approuver",reject:"Refuser",deactivate:"Désactiver",activate:"Activer",delete:"Supprimer",empty:"Aucune école pour le moment.",
+      delete_title:"Supprimer l’école ?",delete_warn:"« {name} » et toutes ses données seront définitivement supprimées. Cette action est irréversible.",
+      delete_type:"Saisissez le nom de l’école pour confirmer",delete_confirm:"Supprimer définitivement",delete_cancel:"Annuler",
+      delete_mismatch:"Le nom de l’école ne correspond pas.",protected_school:"L’école par défaut ne peut pas être supprimée.",school_not_found:"École introuvable.",name_mismatch:"Le nom de l’école ne correspond pas.",
       city:"Ville",manager:"Responsable",email:"E-mail",phone:"Téléphone",created:"Date de création",activity:"Dernière activité",
       candidates:"Candidats",sessions:"Séances",payments:"Total des paiements",users:"Utilisateurs",schools:"Écoles",
       add_title:"Ajouter une école",name:"Nom de l’école",code:"Code de l’école",manager_user:"Identifiant du responsable",manager_pass:"Mot de passe du responsable",add_submit:"Créer le compte",
@@ -137,10 +160,13 @@ code{direction:ltr;font-family:Consolas,Menlo,monospace;background:#f1f5f9;paddi
       invalid_code:"Code d’école invalide",code_taken:"Ce code est déjà utilisé, choisissez-en un autre",email_used:"Cet e-mail est déjà lié à un compte",
       doc:"Otoqol — Espace propriétaire"},
     en:{login_title:"Owner dashboard",login_sub:"Sign in with the owner account to manage school accounts.",username:"Username",password:"Password",enter:"Sign in",logout:"Log out",
-      dash_title:"Owner dashboard",dash_sub:"School accounts only: status, statistics, approval, and adding a school.",
+      dash_title:"Owner dashboard",dash_sub:"School accounts only: status, statistics, approval, adding, and deleting a school.",
       list_title:"Schools",list_sub:"Pending requests first, then active schools.",
       pending:"Pending",active:"Active",rejected:"Rejected",inactive:"Deactivated",
-      approve:"Approve",reject:"Reject",deactivate:"Deactivate",activate:"Activate",empty:"No schools yet.",
+      approve:"Approve",reject:"Reject",deactivate:"Deactivate",activate:"Activate",delete:"Delete",empty:"No schools yet.",
+      delete_title:"Delete this school?",delete_warn:"“{name}” and all of its data will be permanently deleted. This cannot be undone.",
+      delete_type:"Type the school name to confirm",delete_confirm:"Delete permanently",delete_cancel:"Cancel",
+      delete_mismatch:"The school name does not match.",protected_school:"The default school cannot be deleted.",school_not_found:"School not found.",name_mismatch:"The school name does not match.",
       city:"City",manager:"Manager",email:"Email",phone:"Phone",created:"Created",activity:"Last activity",
       candidates:"Candidates",sessions:"Sessions",payments:"Payments total",users:"Users",schools:"Schools",
       add_title:"Add a school",name:"School name",code:"School code",manager_user:"Manager username",manager_pass:"Manager password",add_submit:"Create account",
@@ -192,7 +218,8 @@ code{direction:ltr;font-family:Consolas,Menlo,monospace;background:#f1f5f9;paddi
         '<button type="button" class="btn bad" data-oq-reject="'+esc(s.code)+'">'+esc(t('reject'))+'</button>';
       else if(st==='active') actions='<button type="button" class="btn out" data-oq-deactivate="'+esc(s.code)+'">'+esc(t('deactivate'))+'</button>';
       else actions='<button type="button" class="btn" data-oq-activate="'+esc(s.code)+'">'+esc(t('activate'))+'</button>';
-      return '<article class="sch" data-oq-school="'+esc(s.code)+'" data-oq-status="'+esc(st)+'">'+
+      if(!s.protected && s.id) actions+='<button type="button" class="btn bad" data-oq-delete="'+esc(s.id)+'" data-oq-delete-name="'+esc(s.name)+'">'+esc(t('delete'))+'</button>';
+      return '<article class="sch" data-oq-school="'+esc(s.code)+'" data-oq-id="'+esc(s.id)+'" data-oq-status="'+esc(st)+'"'+(s.protected?' data-oq-protected="1"':'')+'>'+
         '<div class="hd"><div><h3>'+esc(s.name)+' <code>'+esc(s.code)+'</code></h3></div>'+
         '<span class="tag '+esc(st)+'">'+esc(t(st))+'</span></div>'+
         line(t('city'),s.city)+line(t('manager'),s.contact_name)+line(t('email'),s.contact_email)+line(t('phone'),s.contact_phone)+
@@ -241,8 +268,51 @@ code{direction:ltr;font-family:Consolas,Menlo,monospace;background:#f1f5f9;paddi
     }).catch(function(){err.hidden=false;err.textContent=t('server');}).then(function(){go.disabled=false;});
   });
   document.getElementById('logout').addEventListener('click',function(){api('POST','/api/owner/logout',{}).finally(function(){showLogin();});});
+  var delTarget=null;
+  function closeDel(){
+    delTarget=null;
+    document.getElementById('del-modal').hidden=true;
+    document.getElementById('del-name').value='';
+    document.getElementById('del-err').hidden=true;
+  }
+  function openDel(id,name){
+    delTarget={id:id,name:name};
+    document.getElementById('del-warn').textContent=t('delete_warn').replace('{name}',name||'');
+    document.getElementById('del-title').textContent=t('delete_title');
+    document.getElementById('del-go').textContent=t('delete_confirm');
+    document.getElementById('del-cancel').textContent=t('delete_cancel');
+    var lab=document.querySelector('#del-modal [data-t=delete_type]');
+    if(lab)lab.textContent=t('delete_type');
+    document.getElementById('del-err').hidden=true;
+    document.getElementById('del-name').value='';
+    document.getElementById('del-modal').hidden=false;
+    setTimeout(function(){document.getElementById('del-name').focus();},0);
+  }
+  function submitDel(){
+    if(!delTarget)return;
+    var typed=document.getElementById('del-name').value;
+    var err=document.getElementById('del-err'), go=document.getElementById('del-go');
+    err.hidden=true;
+    var norm=function(s){return String(s||'').trim().replace(/\s+/g,' ').toLowerCase();};
+    if(norm(typed)!==norm(delTarget.name)||!norm(typed)){err.hidden=false;err.textContent=t('delete_mismatch');return;}
+    go.disabled=true;
+    api('DELETE','/api/owner/schools/'+encodeURIComponent(delTarget.id),{name:typed}).then(function(x){
+      if(!x.ok){err.hidden=false;err.textContent=t((x.j&&x.j.error)||'server');return;}
+      closeDel();
+      return load();
+    }).catch(function(){err.hidden=false;err.textContent=t('server');}).then(function(){go.disabled=false;});
+  }
+  document.getElementById('del-cancel').addEventListener('click',closeDel);
+  document.getElementById('del-go').addEventListener('click',submitDel);
+  document.querySelector('[data-oq-delete-backdrop]').addEventListener('click',function(e){if(e.target===this)closeDel();});
+  document.getElementById('del-name').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();submitDel();}if(e.key==='Escape')closeDel();});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!document.getElementById('del-modal').hidden)closeDel();});
   document.getElementById('list').addEventListener('click',function(e){
     var btn=e.target.closest('button');if(!btn)return;
+    if(btn.hasAttribute('data-oq-delete')){
+      openDel(btn.getAttribute('data-oq-delete'),btn.getAttribute('data-oq-delete-name')||'');
+      return;
+    }
     var action=btn.hasAttribute('data-oq-approve')?'approve':btn.hasAttribute('data-oq-reject')?'reject':btn.hasAttribute('data-oq-deactivate')?'deactivate':btn.hasAttribute('data-oq-activate')?'activate':null;
     var code=btn.getAttribute('data-oq-approve')||btn.getAttribute('data-oq-reject')||btn.getAttribute('data-oq-deactivate')||btn.getAttribute('data-oq-activate');
     if(!action||!code)return;
