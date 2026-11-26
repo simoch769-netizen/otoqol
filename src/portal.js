@@ -1,5 +1,6 @@
 'use strict';
 const templates = require('./templates');
+const hoursMod = require('./hours');
 const crypto = require('crypto');
 const rateLimit = require('express-rate-limit');
 
@@ -179,6 +180,7 @@ function studentPayload(data, cid, extra) {
       driveLeft: Math.max(0, driveHours - driveDone),
     },
     balance: { price, paid, due: Math.max(0, price - paid) },
+    paidHours: hoursMod.publicSnapshot(data, cid),
     nextLesson: nxt ? publicSession(data, nxt, cid) : null,
     exams: Array.isArray(c.exams) ? c.exams.map(e => ({ id: e.id, type: e.type, date: e.date, result: e.result })) : [],
   };
@@ -603,6 +605,8 @@ function install(app, deps) {
         (s.att || []).some(a => a.cid === req.cid && attActive(a)) && overlaps(date, time, dur, s.date, s.time, s.duration)
       );
       if (clashMe) return { error: 'already_booked', status: 409 };
+      const snap = hoursMod.snapshot(data, c.id);
+      if (snap.blockedFor(dur)) return { error: 'paid_hours_blocked', status: 403, paidHours: hoursMod.publicSnapshot(data, c.id) };
       const booking = {
         id: 'b-' + uid(), kind: 'book', status: 'pending', cid: req.cid,
         monitorId: mid, date, time, duration: dur, type: typ,
@@ -621,7 +625,7 @@ function install(app, deps) {
       notify(data, 'manager', 'طلب حجز حصة من ' + c.name + ' — ' + date + ' ' + time, req.cid);
       return { booking, sess };
     });
-    if (!r.ok) return res.status(r.status || 400).json({ error: r.error });
+    if (!r.ok) return res.status(r.status || 400).json({ error: r.error, paidHours: r.paidHours });
     res.status(201).json({ ok: true, request: publicBooking(r.booking, r.data) });
   });
 

@@ -15,6 +15,7 @@ const portal = require('./portal');
 const dues = require('./dues');
 const templates = require('./templates');
 const tasks = require('./tasks');
+const hours = require('./hours');
 
 const PORT = Number(process.env.PORT || 3000);
 const HOST = process.env.HOST || '0.0.0.0';
@@ -518,7 +519,7 @@ app.get('/api/db/version', auth, (req, res) => {
 });
 function validDB(o) {
   if (!o || typeof o !== 'object' || Array.isArray(o)) return false;
-  for (const k of ['users', 'monitors', 'vehicles', 'candidates', 'sessions', 'payments', 'expenses', 'notifs', 'requests', 'notes', 'log', 'portalUsers', 'bookings', 'portalInvites', 'reminders', 'tasks'])
+  for (const k of ['users', 'monitors', 'vehicles', 'candidates', 'sessions', 'payments', 'expenses', 'notifs', 'requests', 'notes', 'log', 'portalUsers', 'bookings', 'portalInvites', 'reminders', 'tasks', 'hoursOverrides'])
     if (o[k] !== undefined && !Array.isArray(o[k])) return false;
   if (o.settings !== undefined && (!o.settings || typeof o.settings !== 'object' || Array.isArray(o.settings))) return false;
   if (o.messageTemplates !== undefined && (!o.messageTemplates || typeof o.messageTemplates !== 'object' || Array.isArray(o.messageTemplates))) return false;
@@ -535,7 +536,7 @@ app.put('/api/db', auth, (req, res) => {
   const cur = store.getData(req.school.id);
   if (cur.version !== version) return res.status(409).json({ error: 'version_conflict', version: cur.version });
   const stored = cur.data == null ? null : JSON.parse(cur.data);
-  const SERVER_OWNED = ['portalUsers', 'bookings', 'portalInvites', 'reminders', 'messageTemplates', 'tasks', 'taskState'];
+  const SERVER_OWNED = ['portalUsers', 'bookings', 'portalInvites', 'reminders', 'messageTemplates', 'tasks', 'taskState', 'hoursOverrides'];
   if (stored) {
     for (const k of SERVER_OWNED) {
       if (stored[k] === undefined) delete data[k];
@@ -552,6 +553,13 @@ app.put('/api/db', auth, (req, res) => {
   securePasswords(data, stored);
   if (!sanitizeEmails(data)) return res.status(400).json({ error: 'invalid_email' });
   if (store.usernameConflict(data, req.school.id)) return res.status(400).json({ error: 'username_taken' });
+  const hoursGuard = hours.guardBookings(stored, data, {
+    role: req.role,
+    user: req.appUser,
+    reason: req.body && req.body.reason,
+  });
+  if (!hoursGuard.ok) return res.status(hoursGuard.status || 403).json({ error: hoursGuard.error, blocked: hoursGuard.blocked });
+  if (hoursGuard.overrides && hoursGuard.overrides.length) hours.applyOverrides(data, hoursGuard.overrides, req.appUser);
   const r = store.putData(req.school.id, version, JSON.stringify(data), 'auto');
   if (!r.ok) return res.status(409).json({ error: 'version_conflict', version: r.version });
   // the signed-in user changed their own password: keep them signed in with a fresh session
@@ -672,6 +680,7 @@ tasks.install(app, {
   store, auth, cachedData,
   bump: schoolId => { dataCache.delete(schoolId); bodyCache.delete(schoolId); },
 });
+hours.install(app);
 
 app.use('/api', (req, res) => res.status(404).json({ error: 'not_found' }));
 const PUBLIC = path.join(__dirname, '..', 'public');

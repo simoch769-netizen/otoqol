@@ -2,6 +2,7 @@
 const crypto = require('crypto');
 const dues = require('./dues');
 const templates = require('./templates');
+const hours = require('./hours');
 
 const TITLE_MAX = 200;
 const DUE_SILENCE_DAYS = 7;
@@ -263,6 +264,22 @@ function buildInbox(data, opts) {
           date: d,
           daysLeft: left,
         });
+      });
+    });
+  }
+
+  if (staff) {
+    hours.lowHoursStudents(data, { role }).forEach(snap => {
+      push({
+        key: 'hours:' + snap.cid,
+        type: 'hours_low',
+        priority: snap.blocked ? 3 : 4,
+        cid: snap.cid,
+        studentName: snap.name,
+        phone: (candOf(data, snap.cid) || {}).phone || '',
+        hoursLeft: snap.left,
+        hoursUsed: snap.used,
+        hoursEntitled: snap.entitled,
       });
     });
   }
