@@ -311,9 +311,65 @@ Object.assign(DICT.fr,{
   "القائمة":"Menu",
   "إغلاق القائمة":"Fermer le menu"
 });
+Object.assign(DICT.fr,{
+  "بوابة التلميذ":"Espace élève",
+  "تفعيل بوابة التلميذ":"Activer l’espace élève",
+  "يمكن للتلاميذ الدخول ومتابعة حصصهم وطلب مواعيد من هنا.":"Les élèves peuvent se connecter, suivre leurs heures et demander un créneau.",
+  "دعوة إلى بوابة التلميذ":"Inviter à l’espace élève",
+  "أُرسلت الدعوة":"Invitation envoyée",
+  "الحساب مفعّل":"Compte activé",
+  "انسخ الرابط":"Copier le lien",
+  "تم نسخ الرابط":"Lien copié",
+  "إرسال عبر واتساب":"Envoyer via WhatsApp",
+  "الدعوة صالحة 7 أيام":"L’invitation est valable 7 jours",
+  "بوابة التلميذ موقوفة. فعّلها من الإعدادات.":"L’espace élève est désactivé. Activez-le dans les paramètres.",
+  "ما قدرناش نرسلو الدعوة، عاود جرب":"Impossible d’envoyer l’invitation, réessayez",
+  "طلبات الحجز":"Demandes de réservation",
+  "نوع الطلب":"Type",
+  "حجز":"Réservation",
+  "إلغاء حصة":"Annulation",
+  "قبول":"Accepter",
+  "رفض":"Refuser",
+  "ما كاين حتى طلب حجز":"Aucune demande de réservation",
+  "المونيتور المعيّن":"Moniteur assigné",
+  "البريد الإلكتروني للتلميذ":"E-mail de l’élève",
+  "اختياري — لإرسال الدعوة":"Facultatif — pour envoyer l’invitation",
+  "الدخول إلى بوابة التلميذ":"Accéder à l’espace élève",
+  "بوابة التلميذ موقوفة حالياً":"L’espace élève est actuellement désactivé",
+  "تقبّل":"Acceptée",
+  "ترفض":"Refusée",
+  "ملغى":"Annulée"
+});
 Object.assign(DICT.en,{
   "القائمة":"Menu",
-  "إغلاق القائمة":"Close menu"
+  "إغلاق القائمة":"Close menu",
+  "بوابة التلميذ":"Student portal",
+  "تفعيل بوابة التلميذ":"Enable student portal",
+  "يمكن للتلاميذ الدخول ومتابعة حصصهم وطلب مواعيد من هنا.":"Students can sign in, track their hours, and request a lesson slot.",
+  "دعوة إلى بوابة التلميذ":"Invite to the student portal",
+  "أُرسلت الدعوة":"Invitation sent",
+  "الحساب مفعّل":"Account is active",
+  "انسخ الرابط":"Copy link",
+  "تم نسخ الرابط":"Link copied",
+  "إرسال عبر واتساب":"Send via WhatsApp",
+  "الدعوة صالحة 7 أيام":"The invitation is valid for 7 days",
+  "بوابة التلميذ موقوفة. فعّلها من الإعدادات.":"The student portal is turned off. Enable it in Settings.",
+  "ما قدرناش نرسلو الدعوة، عاود جرب":"Could not send the invitation, try again",
+  "طلبات الحجز":"Booking requests",
+  "نوع الطلب":"Type",
+  "حجز":"Booking",
+  "إلغاء حصة":"Cancellation",
+  "قبول":"Approve",
+  "رفض":"Reject",
+  "ما كاين حتى طلب حجز":"No booking requests",
+  "المونيتور المعيّن":"Assigned instructor",
+  "البريد الإلكتروني للتلميذ":"Student email",
+  "اختياري — لإرسال الدعوة":"Optional — used to send the invite",
+  "الدخول إلى بوابة التلميذ":"Student portal sign-in",
+  "بوابة التلميذ موقوفة حالياً":"The student portal is currently off",
+  "تقبّل":"Approved",
+  "ترفض":"Rejected",
+  "ملغى":"Cancelled"
 });
 const _t=s=>{if(typeof s!=='string')return s;if(LANG==='ar'){if(DICT_AR[s]!==undefined)return DICT_AR[s];const a=s.match(/^(\s*)([\s\S]*?)(\s*)$/);return a[2]&&DICT_AR[a[2]]!==undefined?a[1]+DICT_AR[a[2]]+a[3]:s;}const d=DICT[LANG];if(d[s]!==undefined)return d[s];const m=s.match(/^(\s*)([\s\S]*?)(\s*)$/);if(m[2]&&d[m[2]]!==undefined)return m[1]+d[m[2]]+m[3];return s;};
 const lbl=o=>new Proxy(o,{get:(o2,k)=>(typeof k==='string'&&Object.prototype.hasOwnProperty.call(o2,k))?_t(o2[k]):o2[k]});
@@ -579,15 +635,18 @@ function NarsaDocsModal({c,onClose}){
 }
 
 
-const BASIC=['name','firstName','lastName','cin','phone','address','license','price','codeHours','driveHours','stage','medical','notes','nationality','birthDate','birthPlace','narsaRef','examKind','permitNo','permitIssuePlace','permitIssueDate','contractNo','contractDate'];
+const BASIC=['name','firstName','lastName','cin','phone','email','address','license','price','codeHours','driveHours','stage','medical','notes','nationality','birthDate','birthPlace','narsaRef','examKind','permitNo','permitIssuePlace','permitIssueDate','contractNo','contractDate','monitorId'];
 function CandidateModal({id,onClose,startNarsa}){
   const {db,upd,user,L}=useC();
   const c=db.candidates.find(x=>x.id===id);
   const [tab,setTab]=useState('info');
-  const [f,setF]=useState(c?Object.assign({},c):{name:'',firstName:'',lastName:'',cin:'',phone:'',address:'',license:'B',price:0,codeHours:10,driveHours:20,stage:'reg',medical:false,notes:'',nationality:'مغربية',birthDate:'',birthPlace:'',narsaRef:'',examKind:'first',permitNo:'',permitIssuePlace:'',permitIssueDate:'',contractNo:'',contractDate:''});
+  const [f,setF]=useState(c?Object.assign({},c):{name:'',firstName:'',lastName:'',cin:'',phone:'',email:'',address:'',license:'B',price:0,codeHours:10,driveHours:20,stage:'reg',medical:false,notes:'',nationality:'مغربية',birthDate:'',birthPlace:'',narsaRef:'',examKind:'first',permitNo:'',permitIssuePlace:'',permitIssueDate:'',contractNo:'',contractDate:'',monitorId:''});
   const [ex,setEx]=useState({type:'code',date:today(),result:'في الانتظار'});
   const [pay,setPay]=useState({amount:'',date:today(),note:''});
   const [narsaOpen,setNarsaOpen]=useState(!!startNarsa);
+  const [invite,setInvite]=useState(null);
+  const [inviting,setInviting]=useState(false);
+  const [copied,setCopied]=useState(false);
   const set=(k,v)=>setF(Object.assign({},f,{[k]:v}));
   const staffDel=user.role==='manager';
   const save=()=>{
@@ -613,6 +672,22 @@ function CandidateModal({id,onClose,startNarsa}){
   return <Modal title={c?c.name:_t('مترشح جديد')} onClose={onClose} wide>
     {c&&user.role!=='monitor'&&<div className="row narsa-actions" style={{marginTop:0,marginBottom:10}}>
       <button type="button" className="b pri" data-oq-narsa-open="" onClick={()=>setNarsaOpen(true)}>{_t("طباعة الوثائق")}</button>
+      <button type="button" className="b" data-oq-portal-invite="" disabled={inviting} onClick={async()=>{
+        setInviting(true);setCopied(false);
+        try{const r=await OQ.api('POST','/api/portal/invite',{cid:c.id,email:(f.email||c.email||'')});setInvite(r);}
+        catch(e){const code=e.body&&e.body.error;alert(_t(code==='portal_disabled'?'بوابة التلميذ موقوفة. فعّلها من الإعدادات.':code==='username_taken'?'اسم المستخدم مستعمل من قبل':'ما قدرناش نرسلو الدعوة، عاود جرب'));}
+        finally{setInviting(false);}
+      }}>{_t("دعوة إلى بوابة التلميذ")}</button>
+    </div>}
+    {invite&&<div className="al ok" data-oq-portal-invite-result="" style={{marginBottom:10}}>
+      <b>{invite.alreadyActive?_t("الحساب مفعّل"):_t("أُرسلت الدعوة")}</b>
+      {invite.username&&<div className="meta">{_t("اسم المستخدم")}: <b dir="ltr">{invite.username}</b></div>}
+      {invite.url&&<div className="meta" dir="ltr" style={{overflowWrap:'anywhere'}}>{invite.url}</div>}
+      {!invite.alreadyActive&&<div className="meta">{_t("الدعوة صالحة 7 أيام")}</div>}
+      <div className="row" style={{marginTop:8}}>
+        {invite.url&&<button type="button" className="b" onClick={()=>{const u=invite.url||invite.loginUrl;if(!u)return;if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(u).then(()=>setCopied(true)).catch(()=>{});else{const i=document.createElement('input');i.value=u;document.body.appendChild(i);i.select();document.execCommand('copy');i.remove();setCopied(true);}}}>{copied?_t("تم نسخ الرابط"):_t("انسخ الرابط")}</button>}
+        {invite.whatsappUrl&&<a className="b wa" target="_blank" rel="noreferrer" href={invite.whatsappUrl}>{_t("إرسال عبر واتساب")}</a>}
+      </div>
     </div>}
     {c&&<div className="row" style={{marginTop:0,marginBottom:10}}>
       <span className="bd info">{stageLbl[c.stage]}</span>
@@ -632,6 +707,8 @@ function CandidateModal({id,onClose,startNarsa}){
         <F l={_t("مكان الازدياد")}><input value={f.birthPlace||''} onChange={e=>set('birthPlace',e.target.value)}/></F>
         <F l={_t("رقم تسجيل المرشح (Référence web)")}><input value={f.narsaRef||''} onChange={e=>set('narsaRef',e.target.value)}/></F>
         <F l={_t("الهاتف")}><input value={f.phone} onChange={e=>set('phone',e.target.value)}/></F>
+        <F l={_t("البريد الإلكتروني للتلميذ")}><input type="email" dir="ltr" data-oq-candidate-email="" value={f.email||''} placeholder={_t("اختياري — لإرسال الدعوة")} onChange={e=>set('email',e.target.value)}/></F>
+        <F l={_t("المونيتور المعيّن")}><select data-oq-candidate-monitor="" value={f.monitorId||''} onChange={e=>set('monitorId',e.target.value)}><option value="">{_t("— اختار —")}</option>{db.monitors.map(m=><option key={m.id} value={m.id}>{m.name}</option>)}</select></F>
         <F l={_t("العنوان")}><input value={f.address} onChange={e=>set('address',e.target.value)}/></F>
         <F l={_t("نوع الرخصة")}><select value={f.license} onChange={e=>set('license',e.target.value)}>{LICENSES.map(l=><option key={l}>{l}</option>)}</select></F>
         <F l={_t("ثمن الباقة (د.م)")}><input type="number" value={f.price} onChange={e=>set('price',e.target.value)}/></F>
@@ -823,6 +900,40 @@ function Finance(){
 }
 
 /* ================= الطلبات والإشعارات ================= */
+
+function BookingsInbox(){
+  const [rows,setRows]=useState(null);
+  const [err,setErr]=useState('');
+  const [busy,setBusy]=useState('');
+  const load=()=>OQ.api('GET','/api/portal/requests').then(r=>setRows(r.requests||[])).catch(e=>setErr(e.body&&e.body.error||'error'));
+  useEffect(()=>{load();},[]);
+  const act=async(id,ok)=>{
+    setBusy(id+(ok?'a':'r'));
+    try{await OQ.api('POST','/api/portal/requests/'+id+'/'+(ok?'approve':'reject'),{});await load();}
+    catch(e){alert(_t('ما قدرناش نرسلو الدعوة، عاود جرب'));}
+    finally{setBusy('');}
+  };
+  const pending=(rows||[]).filter(r=>r.status==='pending');
+  const rest=(rows||[]).filter(r=>r.status!=='pending');
+  const kind=r=>r.kind==='cancel'?_t('إلغاء حصة'):_t('حجز');
+  const st=s=>s==='pending'?_t('في الانتظار'):s==='approved'?_t('تقبّل'):s==='rejected'?_t('ترفض'):s==='cancelled'?_t('ملغى'):s;
+  return <div>
+    <h2>{_t("طلبات الحجز")}</h2>
+    {err&&<div className="al bad">{err}</div>}
+    <div className="tw"><table><thead><tr><th>{_t("نوع الطلب")}</th><th>{_t("المترشح")}</th><th>{_t("التاريخ")}</th><th>{_t("الساعة")}</th><th>{_t("النوع")}</th><th>{_t("المونيتور")}</th><th>{_t("الحالة")}</th><th></th></tr></thead><tbody>
+      {!rows&&<tr><td colSpan="8" className="empty">{_t("كنحملو…")}</td></tr>}
+      {rows&&!rows.length&&<tr><td colSpan="8" className="empty">{_t("ما كاين حتى طلب حجز")}</td></tr>}
+      {pending.concat(rest).map(r=><tr key={r.id} data-oq-booking-row={r.id}>
+        <td>{kind(r)}</td><td>{r.studentName}</td><td>{r.date}</td><td>{r.time}</td><td>{r.type==='code'?_t('كود (نظري)'):_t('تطبيقي (سياقة)')}</td><td>{r.monitorName||'—'}</td>
+        <td><span className={'bd '+(r.status==='pending'?'warn':r.status==='approved'?'ok':r.status==='rejected'?'bad':'')}>{st(r.status)}</span></td>
+        <td>{r.status==='pending'&&<span className="row">
+          <button type="button" className="b pri" data-oq-booking-approve={r.id} disabled={!!busy} onClick={()=>act(r.id,true)}>{_t("قبول")}</button>
+          <button type="button" className="b del" data-oq-booking-reject={r.id} disabled={!!busy} onClick={()=>act(r.id,false)}>{_t("رفض")}</button>
+        </span>}</td>
+      </tr>)}
+    </tbody></table></div>
+  </div>;
+}
 function Requests(){
   const {db,upd,notify}=useC();
   const decide=(r,status)=>upd(n=>{const x=n.requests.find(y=>y.id===r.id);x.status=status;notify(n,'m:'+r.monitorId,status==='approved'?_t('تقبل طلب التغيير ديالك. غادي يتعدل الجدول.'):_t('ترفض طلب التغيير ديالك.'));});
@@ -1025,6 +1136,7 @@ function AdminSettings(){
   const {db,upd,replace}=useC();
   const [school,setSchool]=useState(db.settings.school);
   const [lim,setLim]=useState(db.settings.absLimit);
+  const [portalOn,setPortalOn]=useState(db.settings.studentPortal!==false);
   const [legal,setLegal]=useState({address:db.settings.address||'',phone:db.settings.phone||'',fax:db.settings.fax||'',email:db.settings.email||'',city:db.settings.city||'',licenseNo:db.settings.licenseNo||'',nationalRegNo:db.settings.nationalRegNo||'',patente:db.settings.patente||'',rc:db.settings.rc||'',rcCity:db.settings.rcCity||'',legalFirst:db.settings.legalFirst||'',legalLast:db.settings.legalLast||'',legalAddress:db.settings.legalAddress||'',legalPhone:db.settings.legalPhone||''});
   const setL=(k,v)=>setLegal(Object.assign({},legal,{[k]:v}));
   const exp=()=>{const b=new Blob([JSON.stringify(db,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='backup-'+today()+'.json';a.click();};
@@ -1033,7 +1145,14 @@ function AdminSettings(){
     <div className="card"><h3>{_t("المدرسة")}</h3><div className="fg">
       <F l={_t("اسم المدرسة")}><input value={school} onChange={e=>setSchool(e.target.value)}/></F>
       <F l={_t("عدد الغيابات قبل التنبيه")}><input type="number" min="1" value={lim} onChange={e=>setLim(e.target.value)}/></F>
-    </div><button className="b pri" onClick={()=>upd(n=>{n.settings.school=school||'Otoqol';n.settings.absLimit=Math.max(1,Number(lim)||3);Object.keys(legal).forEach(k=>{n.settings[k]=legal[k];});})}>{_t("حفظ")}</button></div>
+    </div>
+    <div className="card" data-oq-student-portal="" style={{marginTop:12,padding:0,border:0,boxShadow:'none'}}>
+      <label className="row" style={{gap:10,alignItems:'center'}}>
+        <input type="checkbox" checked={portalOn} onChange={e=>setPortalOn(e.target.checked)}/>
+        <span><b>{_t("تفعيل بوابة التلميذ")}</b><div className="meta">{_t("يمكن للتلاميذ الدخول ومتابعة حصصهم وطلب مواعيد من هنا.")}</div></span>
+      </label>
+    </div>
+    <button className="b pri" onClick={()=>upd(n=>{n.settings.school=school||'Otoqol';n.settings.absLimit=Math.max(1,Number(lim)||3);n.settings.studentPortal=portalOn;Object.keys(legal).forEach(k=>{n.settings[k]=legal[k];});})}>{_t("حفظ")}</button></div>
     <div className="card" data-oq-narsa-school="">
       <h3>{_t("بيانات المؤسسة (NARSA)")}</h3>
       <p className="meta">{_t("تُستعمل هذه الحقول لملء وثائق NARSA الرسمية.")}</p>
@@ -1095,6 +1214,7 @@ function App(){
   const [send,setSend]=useState(null);
   const [lang,setLangS]=useState(LANG);
   const [menuOpen,setMenuOpen]=useState(false);
+  const [portalPend,setPortalPend]=useState(0);
   const setLang=l=>{LANG=l;try{localStorage.setItem('ae_lang',l);}catch(e){}setLangS(l);};
   useEffect(()=>{document.documentElement.lang=lang;document.documentElement.dir=lang==='ar'?'rtl':'ltr';},[lang]);
   useEffect(()=>{try{localStorage.setItem(KEY,JSON.stringify(db));}catch(e){}OQ.changed(db);},[db]);
@@ -1116,6 +1236,14 @@ function App(){
       });
     });
   });
+  useEffect(()=>{
+    if(!user || user.role==='monitor') return;
+    let stop=false;
+    const load=()=>OQ.api('GET','/api/portal/requests').then(r=>{if(!stop)setPortalPend(r.pending||0);}).catch(()=>{});
+    load();
+    const tmr=setInterval(load,20000);
+    return ()=>{stop=true;clearInterval(tmr);};
+  },[user&&user.role]);
   const upd=fn=>setDb(d=>{const n=JSON.parse(JSON.stringify(d));fn(n);return n;});
   const L=(n,text)=>{n.log.unshift({id:uid(),date:new Date().toISOString(),user:user?user.name:'',text:text});if(n.log.length>300)n.log.length=300;};
   const notify=(n,to,text,cid)=>{n.notifs.unshift({id:uid(),to:to,text:text,cid:cid||'',date:new Date().toISOString(),read:false});if(n.notifs.length>500)n.notifs.length=500;};
@@ -1146,13 +1274,13 @@ function App(){
   const unread=db.notifs.filter(n=>!n.read&&visibleNotif(user,n)).length;
   const pend=db.requests.filter(r=>r.status==='pending').length;
   const NAV={
-    manager:[['home',_t('🏠 لوحة القيادة')],['candidates',_t('👥 المترشحون')],['sessions',_t('📅 الحصص')],['monitors',_t('🧑‍🏫 المونيتورات')],['vehicles',_t('🚗 السيارات')],['finance',_t('💰 المالية')],['requests',_t('🔁 الطلبات')],['notifs',_t('🔔 الإشعارات')],['settings',_t('⚙️ الإعدادات')]],
-    secretary:[['home',_t('🏠 لوحة القيادة')],['candidates',_t('👥 المترشحون')],['sessions',_t('📅 الحصص')],['vehicles',_t('🚗 السيارات')],['finance',_t('💰 المالية')],['requests',_t('🔁 الطلبات')],['notifs',_t('🔔 الإشعارات')],['settings',_t('⚙️ الإعدادات')]],
+    manager:[['home',_t('🏠 لوحة القيادة')],['candidates',_t('👥 المترشحون')],['sessions',_t('📅 الحصص')],['monitors',_t('🧑‍🏫 المونيتورات')],['vehicles',_t('🚗 السيارات')],['finance',_t('💰 المالية')],['requests',_t('🔁 الطلبات')],['bookings','📥 '+_t('طلبات الحجز')],['notifs',_t('🔔 الإشعارات')],['settings',_t('⚙️ الإعدادات')]],
+    secretary:[['home',_t('🏠 لوحة القيادة')],['candidates',_t('👥 المترشحون')],['sessions',_t('📅 الحصص')],['vehicles',_t('🚗 السيارات')],['finance',_t('💰 المالية')],['requests',_t('🔁 الطلبات')],['bookings','📥 '+_t('طلبات الحجز')],['notifs',_t('🔔 الإشعارات')],['settings',_t('⚙️ الإعدادات')]],
     monitor:[['home',_t('📅 برنامجي')],['mycands',_t('👥 مترشحيني')],['mystats',_t('📊 إحصائياتي')],['notifs',_t('🔔 الإشعارات')],['settings',_t('⚙️ الإعدادات')]]
   }[user.role];
   const mon=user.role==='monitor';
   const PAGES={
-    home:mon?<MySchedule/>:<Dashboard/>,candidates:<Candidates/>,sessions:<Sessions/>,monitors:<Monitors/>,vehicles:<Vehicles/>,finance:<Finance/>,requests:<Requests/>,notifs:<Notifs/>,settings:<Settings/>,mycands:<MyCands/>,mystats:<MyStats/>
+    home:mon?<MySchedule/>:<Dashboard/>,candidates:<Candidates/>,sessions:<Sessions/>,monitors:<Monitors/>,vehicles:<Vehicles/>,finance:<Finance/>,requests:<Requests/>,bookings:<BookingsInbox/>,notifs:<Notifs/>,settings:<Settings/>,mycands:<MyCands/>,mystats:<MyStats/>
   };
   const allowed=NAV.some(x=>x[0]===page)?page:'home';
   return <Ctx.Provider value={{db:db,upd:upd,user:user,L:L,notify:notify,mark:mark,replace:setDb,openSend:setSend,lang:lang,setLang:setLang,logout:logout}}>
@@ -1162,7 +1290,7 @@ function App(){
       <div className="u"><span>{_t(user.name)}{user.role==='monitor'?' ('+_t('مونيتور')+')':''}</span><button type="button" data-oq-logout="" onClick={logout} style={{background:'#fff',color:'var(--p2)',border:0,borderRadius:8,padding:'6px 12px',fontWeight:700,cursor:'pointer',fontSize:13}}>⎋ {_t('تسجيل الخروج')}</button></div>
     </div>
     <div className={'nav-back'+(menuOpen?' on':'')} data-oq-nav-back="" onClick={()=>setMenuOpen(false)}></div>
-    <div className={'nav'+(menuOpen?' open':'')} id="oq-nav" data-oq-nav="">{NAV.map(x=><button key={x[0]} className={allowed===x[0]?'on':''} onClick={()=>{setPage(x[0]);setMenuOpen(false);}}>{x[1]}{x[0]==='notifs'&&unread>0&&<span className="cnt">{unread}</span>}{x[0]==='requests'&&pend>0&&<span className="cnt">{pend}</span>}</button>)}</div>
+    <div className={'nav'+(menuOpen?' open':'')} id="oq-nav" data-oq-nav="">{NAV.map(x=><button key={x[0]} className={allowed===x[0]?'on':''} onClick={()=>{setPage(x[0]);setMenuOpen(false);}}>{x[1]}{x[0]==='notifs'&&unread>0&&<span className="cnt">{unread}</span>}{x[0]==='requests'&&pend>0&&<span className="cnt">{pend}</span>}{x[0]==='bookings'&&portalPend>0&&<span className="cnt" data-oq-portal-pend="">{portalPend}</span>}</button>)}</div>
     <div className="wrap" key={allowed}>{PAGES[allowed]}</div>
     {send&&<SendModal s={send.s} mode={send.mode} onClose={()=>setSend(null)}/>}
   </Ctx.Provider>;
@@ -1338,6 +1466,7 @@ function SchoolGate(){
     try{sessionStorage.removeItem('ae_user');if(u)localStorage.setItem('ae_user',JSON.stringify(u));}catch(e){}
   };
   const enter=async(sch,user)=>{
+    if(user&&user.role==='student'){location.replace('/portal');return;}
     pend.current.user=user||null;
     const r=await OQ.api('GET','/api/db');
     if(!r.data){const lg=legacyData(sch);if(lg){setSchool(sch);setServer(r);setLegacy(lg);setPhase('import');return;}}
@@ -1366,6 +1495,7 @@ function SchoolGate(){
       code==='school_pending'?_t('طلبك قيد المراجعة. ستتمكن من الدخول بعد الموافقة.'):
       code==='school_rejected'?_t('لم تتم الموافقة على طلب هذه المدرسة.'):
       code==='ambiguous_login'?_t('تعذر تحديد الحساب. تواصل مع الدعم.'):
+      code==='portal_disabled'?_t('بوابة التلميذ موقوفة حالياً'):
       e.status===403?_t('هاد الحساب موقوف، تواصل معانا'):
       e.status===429?_t('بزاف ديال المحاولات، عاود من بعد شوية'):
       _t('ما قدرناش نتواصلو مع السيرفر'));}
@@ -1449,6 +1579,7 @@ function SchoolGate(){
     {err&&<div className="al bad">{err}</div>}
     <button type="button" className="b pri" style={{width:'100%'}} disabled={busy} onClick={go}>{busy?_t('…'):_t('دخول')}</button>
     <button type="button" className="fp-link" data-oq-forgot-link="" onClick={()=>{setFpStep('user');setFpUn(un);setErr('');setFpMsg('');setFpCode('');setFpPw('');setFpPw2('');}}>{_t('نسيت كلمة السر؟')}</button>
+    <a className="fp-link" href="/portal" data-oq-portal-link="" style={{display:'block',textAlign:'center',marginTop:8}}>{_t('الدخول إلى بوابة التلميذ')}</a>
     <a className="fp-link" href="/signup" data-oq-signup-link="" style={{display:'block',textAlign:'center',marginTop:8}}>{_t('إنشاء حساب لمدرستك')}</a>
   </div></div>;
 }
