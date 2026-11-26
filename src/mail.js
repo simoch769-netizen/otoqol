@@ -204,21 +204,150 @@ async function sendViaSmtp({ to, subject, text, html }) {
   return { sent: true, via: isCapture() ? 'capture' : 'smtp' };
 }
 
-async function sendResetEmail({ to, code }) {
+async function sendMail({ to, subject, text, html, kind }) {
+  const label = kind || subject || 'email';
   if (!isConfigured()) {
-    console.warn('[mail] mail not configured — password reset email not sent');
+    console.warn('[mail] mail not configured — not sent: ' + label);
     return { sent: false, reason: 'not_configured' };
   }
-  const { subject, text, html } = buildEmail(code);
   try {
     // Prefer Brevo HTTPS when the key is set (SMTP is often blocked). Capture mode stays on SMTP for local tests.
     if (hasBrevo() && !isCapture()) return await sendViaBrevo({ to, subject, text, html });
     return await sendViaSmtp({ to, subject, text, html });
   } catch (e) {
     const reason = e && (e.name === 'AbortError' || /aborted/i.test(String(e && e.message))) ? 'timeout' : 'send_failed';
-    console.error('[mail] failed to send password reset email:', e && e.message);
+    console.error('[mail] failed to send ' + label + ':', e && e.message);
     return { sent: false, reason };
   }
 }
 
-module.exports = { isConfigured, sendResetEmail, buildEmail, senderFrom, BREVO_URL };
+async function sendResetEmail({ to, code }) {
+  const { subject, text, html } = buildEmail(code);
+  return sendMail({ to, subject, text, html, kind: 'password reset email' });
+}
+
+function ownerEmail() {
+  return process.env.OWNER_EMAIL || DEFAULT_USER;
+}
+
+function publicUrl() {
+  return String(process.env.PUBLIC_URL || 'https://otoqol.com').trim().replace(/\/+$/, '');
+}
+
+function wrapEmail({ titleAr, titleFr, bodyHtml, bodyText }) {
+  const subject = titleAr + ' — ' + titleFr + ' | Otoqol';
+  const text = [
+    'Otoqol',
+    'إدارة مدارس السياقة · Gestion d’auto-écoles',
+    '',
+    titleAr,
+    titleFr,
+    '',
+    bodyText,
+    '',
+    'فريق Otoqol',
+    '',
+    'واتساب / WhatsApp : +212 716-396333',
+    'إنستغرام / Instagram : @otoqol_officiel',
+    'البريد / E-mail : contact.otoqol@gmail.com',
+  ].join('\n');
+  const html = `<!DOCTYPE html>
+<html lang="ar">
+<body style="margin:0;background:#f1f5f9;font-family:Tahoma,Arial,sans-serif;color:#0f172a;">
+  <div style="max-width:520px;margin:24px auto;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;">
+    <div style="background:#0f766e;color:#ffffff;padding:20px 24px;text-align:center;border-bottom:4px solid #2DD4BF;">
+      <div style="font-size:24px;font-weight:700;letter-spacing:0.5px;">Otoqol</div>
+      <div style="font-size:13px;opacity:0.9;margin-top:4px;">إدارة مدارس السياقة · Gestion d’auto-écoles</div>
+    </div>
+    <div style="padding:24px;">
+      <h1 style="font-size:18px;margin:0 0 4px;text-align:right;direction:rtl;">${escapeHtml(titleAr)}</h1>
+      <p style="margin:0 0 16px;color:#64748b;text-align:left;direction:ltr;">${escapeHtml(titleFr)}</p>
+      ${bodyHtml}
+      <p style="margin:20px 0 0;font-weight:700;">فريق Otoqol</p>
+    </div>
+    <div style="padding:16px 24px;background:#f8fafc;color:#64748b;font-size:12px;border-top:1px solid #e2e8f0;line-height:1.7;">
+      واتساب / WhatsApp : +212 716-396333<br>
+      إنستغرام / Instagram : @otoqol_officiel<br>
+      البريد / E-mail : contact.otoqol@gmail.com
+    </div>
+  </div>
+</body>
+</html>`;
+  return { subject, text, html };
+}
+
+function row(labelAr, labelFr, value) {
+  const v = String(value == null ? '' : value);
+  return {
+    html: `<p style="margin:0 0 2px;text-align:right;direction:rtl;"><b>${escapeHtml(labelAr)}:</b> ${escapeHtml(v)}</p>
+      <p style="margin:0 0 10px;color:#64748b;text-align:left;direction:ltr;font-size:13px;">${escapeHtml(labelFr)} : ${escapeHtml(v)}</p>`,
+    text: labelAr + ' / ' + labelFr + ' : ' + v,
+  };
+}
+
+function buildOwnerSignupEmail(info) {
+  const link = publicUrl() + '/owner';
+  const fields = [
+    row('اسم المدرسة', 'École', info.name),
+    row('رمز المدرسة', 'Code', info.code),
+    row('المدينة', 'Ville', info.city),
+    row('اسم المدير', 'Responsable', info.managerName),
+    row('البريد الإلكتروني', 'E-mail', info.email),
+    row('الهاتف', 'Téléphone', info.phone),
+    row('اسم المستخدم', 'Identifiant', info.username),
+  ];
+  const bodyHtml = fields.map(f => f.html).join('') +
+    `<p style="margin:16px 0 6px;text-align:right;direction:rtl;">لمراجعة الطلب والموافقة أو الرفض:</p>
+     <p style="margin:0 0 12px;color:#64748b;text-align:left;direction:ltr;">Pour examiner la demande (approuver ou refuser) :</p>
+     <p style="text-align:center;margin:16px 0;"><a href="${escapeHtml(link)}" style="display:inline-block;background:#0f766e;color:#fff;text-decoration:none;padding:12px 20px;border-radius:10px;font-weight:700;">${escapeHtml(link)}</a></p>`;
+  const bodyText = fields.map(f => f.text).join('\n') + '\n\n' +
+    'لمراجعة الطلب والموافقة أو الرفض / Pour examiner la demande :\n' + link;
+  return wrapEmail({
+    titleAr: 'طلب تسجيل مدرسة جديدة',
+    titleFr: 'Nouvelle demande d’inscription',
+    bodyHtml,
+    bodyText,
+  });
+}
+
+function buildApprovedEmail(info) {
+  const link = publicUrl() + '/app';
+  const bodyHtml =
+    `<p style="margin:0 0 6px;text-align:right;direction:rtl;">تمت الموافقة على حساب مدرستك في Otoqol.</p>
+     <p style="margin:0 0 16px;color:#64748b;text-align:left;direction:ltr;">Le compte de votre auto-école sur Otoqol a été approuvé.</p>` +
+    row('رمز المدرسة', 'Code de l’école', info.code).html +
+    `<p style="margin:16px 0 6px;text-align:right;direction:rtl;">سجّل الدخول من الرابط التالي باسم المستخدم الذي اخترته عند التسجيل (لا نرسل كلمة السر في البريد).</p>
+     <p style="margin:0 0 12px;color:#64748b;text-align:left;direction:ltr;">Connectez-vous via le lien ci-dessous avec l’identifiant choisi à l’inscription (le mot de passe n’est pas envoyé par e-mail).</p>
+     <p style="text-align:center;margin:16px 0;"><a href="${escapeHtml(link)}" style="display:inline-block;background:#0f766e;color:#fff;text-decoration:none;padding:12px 20px;border-radius:10px;font-weight:700;">${escapeHtml(link)}</a></p>`;
+  const bodyText = [
+    'تمت الموافقة على حساب مدرستك في Otoqol.',
+    'Le compte de votre auto-école sur Otoqol a été approuvé.',
+    '',
+    'رمز المدرسة / Code de l’école : ' + info.code,
+    '',
+    'رابط تسجيل الدخول / Lien de connexion :',
+    link,
+    '',
+    'سجّل الدخول باسم المستخدم الذي اخترته عند التسجيل. لا نرسل كلمة السر في البريد.',
+    'Connectez-vous avec l’identifiant choisi à l’inscription. Le mot de passe n’est pas envoyé par e-mail.',
+  ].join('\n');
+  return wrapEmail({
+    titleAr: 'تمت الموافقة على حساب مدرستك',
+    titleFr: 'Votre compte a été approuvé',
+    bodyHtml,
+    bodyText,
+  });
+}
+
+async function sendOwnerSignupNotice(info) {
+  const { subject, text, html } = buildOwnerSignupEmail(info);
+  return sendMail({ to: ownerEmail(), subject, text, html, kind: 'owner signup notice' });
+}
+
+async function sendSchoolApprovedEmail({ to, code, name }) {
+  const { subject, text, html } = buildApprovedEmail({ code, name });
+  return sendMail({ to, subject, text, html, kind: 'school approved email' });
+}
+
+module.exports = { isConfigured, sendResetEmail, sendMail, sendOwnerSignupNotice, sendSchoolApprovedEmail,
+  buildEmail, buildOwnerSignupEmail, buildApprovedEmail, senderFrom, ownerEmail, publicUrl, BREVO_URL };

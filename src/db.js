@@ -49,28 +49,88 @@ CREATE TABLE IF NOT EXISTS sessions (
 );
 CREATE INDEX IF NOT EXISTS idx_sessions_exp ON sessions(expires_at);
 `);
+
+// Multi-school signup: status + contact columns (existing schools stay active/inactive).
+(function migrateSchools() {
+  const cols = new Set(db.prepare('PRAGMA table_info(schools)').all().map(c => c.name));
+  const add = (name, sql) => { if (!cols.has(name)) db.exec(sql); };
+  add('status', "ALTER TABLE schools ADD COLUMN status TEXT NOT NULL DEFAULT 'active'");
+  add('city', 'ALTER TABLE schools ADD COLUMN city TEXT');
+  add('contact_name', 'ALTER TABLE schools ADD COLUMN contact_name TEXT');
+  add('contact_email', 'ALTER TABLE schools ADD COLUMN contact_email TEXT');
+  add('contact_phone', 'ALTER TABLE schools ADD COLUMN contact_phone TEXT');
+  add('decided_at', 'ALTER TABLE schools ADD COLUMN decided_at TEXT');
+  db.prepare("UPDATE schools SET status = CASE WHEN active = 1 THEN 'active' ELSE 'inactive' END WHERE status IS NULL OR status = ''").run();
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_schools_status ON schools(status)`);
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_schools_email ON schools(contact_email)`);
+})();
+
 const HISTORY_MAX_BYTES = Number(process.env.HISTORY_MAX_MB || 100) * 1024 * 1024; // per school, protects the disk
 
 const genLicence = () => 'OTQ-' + crypto.randomBytes(8).toString('hex').toUpperCase().match(/.{4}/g).join('-');
 const genPassword = () => crypto.randomBytes(6).toString('base64url');
 const normCode = c => String(c || '').trim().toLowerCase();
 
-function createSchool({ code, name, password }) {
+const STATUSES = new Set(['pending', 'active', 'rejected', 'inactive']);
+function schoolStatus(s) {
+  if (!s) return null;
+  const st = String(s.status || '').trim();
+  if (STATUSES.has(st)) return st;
+  return s.active ? 'active' : 'inactive';
+}
+
+const RESERVED_CODES = new Set(['app', 'api', 'owner', 'signup', 'assets', 'admin', 'login', 'healthz', 'www', 'static', 'otoqol', 'config']);
+const AR_LATIN = { 'ا':'a','أ':'a','إ':'i','آ':'a','ب':'b','ت':'t','ث':'th','ج':'j','ح':'h','خ':'kh','د':'d','ذ':'dh','ر':'r','ز':'z','س':'s','ش':'sh','ص':'s','ض':'d','ط':'t','ظ':'z','ع':'a','غ':'gh','ف':'f','ق':'q','ك':'k','ل':'l','م':'m','ن':'n','ه':'h','و':'w','ي':'y','ى':'a','ة':'a','ء':'','ئ':'y','ؤ':'w','ﻻ':'la' };
+
+function slugFromName(name) {
+  let s = String(name || '').trim().toLowerCase();
+  s = [...s].map(ch => (Object.prototype.hasOwnProperty.call(AR_LATIN, ch) ? AR_LATIN[ch] : ch)).join('');
+  s = s.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 32);
+  if (!s || s.length < 2) s = 'school';
+  if (!/^[a-z0-9]/.test(s)) s = 's' + s;
+  return s.slice(0, 32);
+}
+
+function isValidCode(code) {
+  return /^[a-z0-9][a-z0-9_-]{1,39}$/.test(code) && !RESERVED_CODES.has(code);
+}
+
+function allocateCode(name, wanted) {
+  let base = wanted != null && String(wanted).trim() !== '' ? normCode(wanted) : slugFromName(name);
+  if (!isValidCode(base)) {
+    if (wanted != null && String(wanted).trim() !== '') throw new Error('invalid_code');
+    base = 'school';
+  }
+  if (!findSchool(base) && isValidCode(base)) return base;
+  if (wanted != null && String(wanted).trim() !== '') throw new Error('code_taken');
+  for (let i = 2; i < 1000; i++) {
+    const cand = (base.slice(0, 36) + '-' + i).slice(0, 40);
+    if (isValidCode(cand) && !findSchool(cand)) return cand;
+  }
+  const cand = (base.slice(0, 24) + '-' + crypto.randomBytes(3).toString('hex')).slice(0, 40);
+  if (!isValidCode(cand) || findSchool(cand)) throw new Error('code_taken');
+  return cand;
+}
+
+function createSchool({ code, name, password, active, status, city, contact_name, contact_email, contact_phone }) {
   code = normCode(code);
-  if (!/^[a-z0-9][a-z0-9_-]{1,39}$/.test(code)) throw new Error('code must be 2-40 chars: a-z 0-9 _ -');
+  if (!isValidCode(code)) throw new Error('code must be 2-40 chars: a-z 0-9 _ -');
   const generated = !password;
   password = password || genPassword();
   if (String(password).length < 6) throw new Error('password must be at least 6 chars');
+  const st = STATUSES.has(status) ? status : (active === 0 || active === false ? 'inactive' : 'active');
+  const isActive = st === 'active' ? 1 : 0;
   const licence = genLicence();
   const hash = bcrypt.hashSync(String(password), 11);
   const tx = db.transaction(() => {
-    const r = db.prepare('INSERT INTO schools(code,name,licence_key,password_hash) VALUES (?,?,?,?)').run(code, name || code, licence, hash);
+    const r = db.prepare('INSERT INTO schools(code,name,licence_key,password_hash,active,status,city,contact_name,contact_email,contact_phone) VALUES (?,?,?,?,?,?,?,?,?,?)')
+      .run(code, name || code, licence, hash, isActive, st, city || null, contact_name || null, contact_email || null, contact_phone || null);
     db.prepare('INSERT INTO school_data(school_id,version,data,updated_at) VALUES (?,0,NULL,NULL)').run(r.lastInsertRowid);
     return r.lastInsertRowid;
   });
   const id = tx();
   // only echo the password when it was generated here (never echo one the caller chose)
-  return { id, code, name: name || code, licence_key: licence, ...(generated ? { password } : {}) };
+  return { id, code, name: name || code, licence_key: licence, status: st, active: !!isActive, ...(generated ? { password } : {}) };
 }
 
 const findSchool = ident => {
@@ -78,8 +138,14 @@ const findSchool = ident => {
   return db.prepare('SELECT * FROM schools WHERE code = ? COLLATE NOCASE OR licence_key = ? COLLATE NOCASE').get(s, s);
 };
 const getSchoolById = id => db.prepare('SELECT * FROM schools WHERE id = ?').get(id);
-const listSchools = () => db.prepare(`SELECT s.id,s.code,s.name,s.licence_key,s.active,s.created_at,d.version,d.updated_at,length(d.data) AS bytes
-  FROM schools s JOIN school_data d ON d.school_id=s.id ORDER BY s.id`).all();
+const listSchools = () => db.prepare(`SELECT s.id,s.code,s.name,s.licence_key,s.active,s.status,s.city,s.contact_name,s.contact_email,s.contact_phone,s.created_at,s.decided_at,d.version,d.updated_at,length(d.data) AS bytes
+  FROM schools s JOIN school_data d ON d.school_id=s.id ORDER BY CASE s.status WHEN 'pending' THEN 0 WHEN 'active' THEN 1 WHEN 'inactive' THEN 2 ELSE 3 END, s.id`).all();
+
+const findByEmail = email => {
+  const e = String(email || '').trim();
+  if (!e) return null;
+  return db.prepare(`SELECT * FROM schools WHERE contact_email = ? COLLATE NOCASE AND status IN ('pending','active') ORDER BY id`).get(e);
+};
 
 function setPassword(ident, password) {
   const s = findSchool(ident); if (!s) throw new Error('school not found');
@@ -92,8 +158,17 @@ function setPassword(ident, password) {
 }
 function setActive(ident, active) {
   const s = findSchool(ident); if (!s) throw new Error('school not found');
-  db.prepare('UPDATE schools SET active=?, token_gen=token_gen+1 WHERE id=?').run(active ? 1 : 0, s.id);
-  return { code: s.code, active: !!active };
+  const st = active ? 'active' : 'inactive';
+  db.prepare("UPDATE schools SET active=?, status=?, decided_at=datetime('now'), token_gen=token_gen+1 WHERE id=?").run(active ? 1 : 0, st, s.id);
+  return { code: s.code, active: !!active, status: st };
+}
+
+function setStatus(ident, status) {
+  const s = findSchool(ident); if (!s) throw new Error('school not found');
+  if (!STATUSES.has(status)) throw new Error('invalid_status');
+  const active = status === 'active' ? 1 : 0;
+  db.prepare("UPDATE schools SET status=?, active=?, decided_at=datetime('now'), token_gen=token_gen+1 WHERE id=?").run(status, active, s.id);
+  return { code: s.code, status, active: !!active };
 }
 function checkPassword(school, password) {
   return bcrypt.compareSync(String(password || ''), school.password_hash);
@@ -140,5 +215,6 @@ const getHistory = (schoolId, hid) => db.prepare('SELECT * FROM history WHERE sc
 
 async function backupFile(dest) { await db.backup(dest); return dest; }
 
-module.exports = { db, DB_FILE, DATA_DIR, createSchool, findSchool, getSchoolById, listSchools, setPassword, setActive,
-  checkPassword, getData, getVersion, putData, addSession, hasSession, delSession, purgeSessions, snapshot, listHistory, getHistory, backupFile, normCode };
+module.exports = { db, DB_FILE, DATA_DIR, createSchool, findSchool, getSchoolById, listSchools, findByEmail, setPassword, setActive, setStatus, schoolStatus,
+  checkPassword, getData, getVersion, putData, addSession, hasSession, delSession, purgeSessions, snapshot, listHistory, getHistory, backupFile, normCode,
+  allocateCode, slugFromName, isValidCode, RESERVED_CODES, STATUSES };

@@ -9,6 +9,7 @@ const rateLimit = require('express-rate-limit');
 const jwt = require('jsonwebtoken');
 const store = require('./db');
 const mail = require('./mail');
+const onboard = require('./onboard');
 
 const PORT = Number(process.env.PORT || 3000);
 const HOST = process.env.HOST || '0.0.0.0';
@@ -70,7 +71,7 @@ const loginLimiter = rateLimit({ windowMs: 15 * 60_000, skipSuccessfulRequests: 
   message: { error: 'too_many_attempts' } });
 // second limiter per account (username), across all IPs: slows distributed guessing of short in-app passwords
 const accountLimiter = rateLimit({ windowMs: 15 * 60_000, skipSuccessfulRequests: true, limit: Number(process.env.LOGIN_PER_ACCOUNT_15MIN || 30), standardHeaders: false, legacyHeaders: false,
-  keyGenerator: req => 'acct:' + String((req.body && (req.body.username || req.body.school)) || '').trim().toLowerCase().slice(0, 100),
+  keyGenerator: req => 'acct:' + String((req.body && req.body.school) || '').trim().toLowerCase().slice(0, 40) + ':' + String((req.body && (req.body.username || req.body.school)) || '').trim().toLowerCase().slice(0, 100),
   validate: { keyGeneratorIpFallback: false }, message: { error: 'too_many_attempts' } });
 app.use('/api', apiLimiter);
 
@@ -122,7 +123,8 @@ app.post('/api/login', loginLimiter, (req, res) => {
   // always run bcrypt to keep timing similar
   const ok = s ? store.checkPassword(s, password) : (store.checkPassword({ password_hash: DUMMY_HASH }, password), false);
   if (!s || !ok) return res.status(401).json({ error: 'bad_credentials' });
-  if (!s.active) return res.status(403).json({ error: 'school_inactive' });
+  const blocked = onboard.statusError(s, store);
+  if (blocked) return res.status(403).json({ error: blocked });
   const token = sign(s, null);
   res.cookie(COOKIE, token, cookieOpts);
   res.json({ school: pub(s), token: req.body.wantToken ? token : undefined });
@@ -214,15 +216,16 @@ const pubUser = u => u && ({ id: u.id, name: u.name, role: u.role });
 
 app.post('/api/signin', loginLimiter, accountLimiter, (req, res) => {
   const { school, username, password } = req.body || {};
-  // one install per school: `school` is optional, default = this deployment's school
+  // `school` is optional: empty / omitted uses this deployment's default school (DEFAULT_SCHOOL_CODE / first active).
   if ((school !== undefined && school !== null && typeof school !== 'string') || typeof username !== 'string' || typeof password !== 'string' ||
       !username.trim() || !password || (school && school.length > 100) || username.length > 100 || password.length > 200)
     return res.status(400).json({ error: 'bad_request' });
   const s = school && school.trim() ? store.findSchool(school) : defaultSchool();
   if (!s) { store.checkPassword({ password_hash: DUMMY_HASH }, password); return res.status(401).json({ error: 'bad_credentials' }); }
+  const blocked = onboard.statusError(s, store);
+  if (blocked) { store.checkPassword({ password_hash: DUMMY_HASH }, password); return res.status(403).json({ error: blocked }); }
   let data = parseData(s.id);
   let user = findAppUser(data, username, password), setup = false;
-  if (user && !s.active) return res.status(403).json({ error: 'school_inactive' });
   // one-time migration: plain-text in-app passwords -> bcrypt (the app keeps working, passwords are no longer readable)
   if (user && !isHash(user.rec.password)) {
     const cur = store.getData(s.id);
@@ -238,7 +241,6 @@ app.post('/api/signin', loginLimiter, accountLimiter, (req, res) => {
     else { const m = (data.users || []).find(x => x && x.role === 'manager' && !isOff(x)); if (m) user = { id: m.id, name: m.name, role: 'manager', owner: true }; }
   }
   if (!user) return res.status(401).json({ error: 'bad_credentials' });
-  if (!s.active) return res.status(403).json({ error: 'school_inactive' });
   res.cookie(COOKIE, sign(s, user), cookieOpts);
   res.json({ school: pub(s), user: pubUser(user), setup });
 });
@@ -334,7 +336,7 @@ const forgotIpLimiter = rateLimit({
 });
 const forgotAccountLimiter = rateLimit({
   windowMs: 15 * 60_000, limit: Number(process.env.FORGOT_PER_ACCOUNT_15MIN || 3),
-  keyGenerator: req => 'fp:' + String((req.body && req.body.username) || '').trim().toLowerCase().slice(0, 100),
+  keyGenerator: req => 'fp:' + String((req.body && req.body.school) || '').trim().toLowerCase().slice(0, 40) + ':' + String((req.body && req.body.username) || '').trim().toLowerCase().slice(0, 100),
   validate: { keyGeneratorIpFallback: false },
   standardHeaders: false, legacyHeaders: false, message: { error: 'too_many_attempts' },
 });
@@ -502,11 +504,16 @@ admin.post('/schools/:code/restore/:hid', wrap(req => {
 app.use('/api/admin', admin);
 
 app.get('/healthz', (req, res) => res.json({ ok: true }));
+onboard.install(app, { store, mail, hashPw, JWT_SECRET, JWT_OPTS, cookieOpts, PROD });
+
 app.use('/api', (req, res) => res.status(404).json({ error: 'not_found' }));
 const PUBLIC = path.join(__dirname, '..', 'public');
 // the app lives at /app (any /app/... path too, so a refresh never 404s); the landing page is /
 const sendApp = (req, res) => { res.set('Cache-Control', 'no-cache'); res.sendFile(path.join(PUBLIC, 'app', 'index.html')); };
 app.get(['/app', '/app/', '/app/{*rest}'], sendApp);
+const sendPage = file => (req, res) => { res.set('Cache-Control', 'no-cache'); res.sendFile(path.join(PUBLIC, file)); };
+app.get(['/signup', '/signup/'], sendPage('signup.html'));
+app.get(['/owner', '/owner/'], sendPage('owner.html'));
 app.use(express.static(PUBLIC, { index: 'index.html', maxAge: 0, redirect: false }));
 
 app.use((err, req, res, next) => {
