@@ -335,7 +335,6 @@ Object.assign(DICT.fr,{
   "المونيتور المعيّن":"Moniteur assigné",
   "البريد الإلكتروني للتلميذ":"E-mail de l’élève",
   "اختياري — لإرسال الدعوة":"Facultatif — pour envoyer l’invitation",
-  "الدخول إلى بوابة التلميذ":"Accéder à l’espace élève",
   "بوابة التلميذ موقوفة حالياً":"L’espace élève est actuellement désactivé",
   "تقبّل":"Acceptée",
   "ترفض":"Refusée",
@@ -366,7 +365,6 @@ Object.assign(DICT.en,{
   "المونيتور المعيّن":"Assigned instructor",
   "البريد الإلكتروني للتلميذ":"Student email",
   "اختياري — لإرسال الدعوة":"Optional — used to send the invite",
-  "الدخول إلى بوابة التلميذ":"Student portal sign-in",
   "بوابة التلميذ موقوفة حالياً":"The student portal is currently off",
   "تقبّل":"Approved",
   "ترفض":"Rejected",
@@ -1895,7 +1893,6 @@ function SchoolGate(){
     {err&&<div className="al bad">{err}</div>}
     <button type="button" className="b pri" style={{width:'100%'}} disabled={busy} onClick={go}>{busy?_t('…'):_t('دخول')}</button>
     <button type="button" className="fp-link" data-oq-forgot-link="" onClick={()=>{setFpStep('user');setFpUn(un);setErr('');setFpMsg('');setFpCode('');setFpPw('');setFpPw2('');}}>{_t('نسيت كلمة السر؟')}</button>
-    <a className="fp-link" href="/portal" data-oq-portal-link="" style={{display:'block',textAlign:'center',marginTop:8}}>{_t('الدخول إلى بوابة التلميذ')}</a>
     <a className="fp-link" href="/signup" data-oq-signup-link="" style={{display:'block',textAlign:'center',marginTop:8}}>{_t('إنشاء حساب لمدرستك')}</a>
   </div></div>;
 }
