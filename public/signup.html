@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Otoqol — إنشاء حساب</title>
+<meta name="description" content="طلب فتح حساب مدرسة سياقة على Otoqol.">
+<link rel="icon" type="image/svg+xml" href="/assets/otoqol-icon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Tajawal:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script>try{var l=localStorage.getItem('ae_lang');if(l==='fr'||l==='en'){document.documentElement.lang=l;document.documentElement.dir='ltr';}}catch(e){}</script>
+<style>
+:root{--teal:#0F766E;--deep:#115E59;--aqua:#2DD4BF;--ink:#0F172A;--slate:#64748B;--line:#E2E8F0;--paper:#F8FAFC;--mint:#ECFDF8;--bad:#991b1b;--badbg:#fee2e2;--ok:#166534;--okbg:#dcfce7}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Tajawal,Inter,system-ui,sans-serif;color:var(--ink);background:linear-gradient(180deg,var(--mint) 0%,#fff 50%);min-height:100vh;line-height:1.6}
+html[dir=ltr] body{font-family:Inter,system-ui,sans-serif}
+a{color:var(--teal);text-decoration:none;font-weight:600}
+.wrap{max-width:560px;margin:0 auto;padding:24px 20px 48px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:28px}
+.brand img{height:34px;width:auto;display:block}
+.act{display:flex;align-items:center;gap:10px}
+select.lg{appearance:none;-webkit-appearance:none;border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 30px 8px 12px;font:inherit;font-size:14px;cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-size:16px;background-position:right 9px center}
+html[dir=rtl] select.lg{padding:8px 12px 8px 30px;background-position:left 9px center}
+.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:28px 24px;box-shadow:0 10px 40px rgba(15,23,42,.06)}
+h1{font-family:Tajawal,Outfit,sans-serif;font-size:26px;margin-bottom:6px}
+html[dir=ltr] h1{font-family:Outfit,Inter,sans-serif}
+.sub{color:var(--slate);margin-bottom:20px}
+label{display:block;margin-bottom:12px;font-size:14px;color:var(--slate)}
+label span{display:block;margin-bottom:4px;font-weight:600;color:var(--ink)}
+input{width:100%;border:1px solid var(--line);border-radius:10px;padding:11px 12px;font:inherit;font-size:16px;color:var(--ink);background:#fff}
+input:focus{outline:2px solid var(--aqua);border-color:var(--teal)}
+.hint{font-size:12px;color:var(--slate);font-weight:400;margin-top:4px}
+.al{border-radius:10px;padding:10px 12px;margin:0 0 14px;font-size:14px}
+.al.bad{background:var(--badbg);color:var(--bad)}
+.al.ok{background:var(--okbg);color:var(--ok)}
+.btn{display:inline-flex;align-items:center;justify-content:center;width:100%;border:0;border-radius:12px;padding:13px 20px;font:inherit;font-weight:700;font-size:16px;cursor:pointer;background:var(--teal);color:#fff}
+.btn:hover{background:var(--deep)}
+.btn:disabled{opacity:.65;cursor:default}
+.links{margin-top:16px;text-align:center;font-size:14px}
+.okbox{text-align:center;padding:8px 0}
+.code{direction:ltr;font-family:Consolas,Menlo,monospace;font-size:22px;font-weight:700;letter-spacing:1px;color:var(--teal);background:var(--mint);border-radius:10px;padding:12px;margin:14px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="brand" href="/" aria-label="Otoqol"><img src="/assets/otoqol-logo.svg" alt="Otoqol" width="112" height="34"></a>
+    <div class="act">
+      <select class="lg" id="lang" aria-label="Language"><option value="ar">العربية</option><option value="fr">Français</option><option value="en">English</option></select>
+    </div>
+  </header>
+  <div class="card" id="form-card" data-oq-signup="">
+    <h1 data-t="title">إنشاء حساب لمدرستك</h1>
+    <p class="sub" data-t="sub">املأ البيانات التالية. سيُراجع الطلب قبل تفعيل الحساب.</p>
+    <form id="form" autocomplete="on">
+      <label><span data-t="name">اسم المدرسة</span><input name="name" required maxlength="80"></label>
+      <label><span data-t="city">المدينة</span><input name="city" required maxlength="80"></label>
+      <label><span data-t="manager">الاسم الكامل للمدير</span><input name="managerName" required maxlength="80" autocomplete="name"></label>
+      <label><span data-t="email">البريد الإلكتروني</span><input name="email" type="email" required maxlength="120" dir="ltr" autocomplete="email"></label>
+      <label><span data-t="phone">الهاتف</span><input name="phone" type="tel" required maxlength="20" dir="ltr" autocomplete="tel"></label>
+      <label><span data-t="username">اسم المستخدم</span><input name="username" required maxlength="40" dir="ltr" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false"></label>
+      <label><span data-t="password">كلمة السر</span><input name="password" type="password" required minlength="6" maxlength="200" dir="ltr" autocomplete="new-password"></label>
+      <label><span data-t="password2">تأكيد كلمة السر</span><input name="password2" type="password" required minlength="6" maxlength="200" dir="ltr" autocomplete="new-password"></label>
+      <label><span data-t="code">رمز المدرسة (اختياري)</span><input name="code" maxlength="40" dir="ltr" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder=""><div class="hint" data-t="code_hint">إن تركته فارغًا يُنشأ الرمز تلقائيًا من اسم المدرسة.</div></label>
+      <div class="al bad" id="err" hidden></div>
+      <button type="submit" class="btn" id="go" data-t="submit">إرسال الطلب</button>
+    </form>
+    <p class="links"><a href="/app" data-t="login">تسجيل الدخول</a> · <a href="/" data-t="home">الصفحة الرئيسية</a></p>
+  </div>
+  <div class="card okbox" id="ok-card" hidden data-oq-signup-success="">
+    <h1 data-t="ok_title">تم استلام طلبك</h1>
+    <p class="sub" data-t="ok_sub">طلبك بانتظار الموافقة. ستتلقى رسالة على بريدك عند تفعيل الحساب.</p>
+    <p class="sub" data-t="ok_keep">رمز مدرستك هو التالي. احتفظ به؛ ستحتاجه لتسجيل الدخول بعد الموافقة.</p>
+    <div class="code" id="ok-code" data-oq-signup-code></div>
+    <p class="links"><a href="/app" data-t="login">تسجيل الدخول</a> · <a href="/" data-t="home">الصفحة الرئيسية</a></p>
+  </div>
+</div>
+<script>
+(function(){
+  var T={
+    ar:{title:"إنشاء حساب لمدرستك",sub:"املأ البيانات التالية. سيُراجع الطلب قبل تفعيل الحساب.",name:"اسم المدرسة",city:"المدينة",manager:"الاسم الكامل للمدير",email:"البريد الإلكتروني",phone:"الهاتف",username:"اسم المستخدم",password:"كلمة السر",password2:"تأكيد كلمة السر",code:"رمز المدرسة (اختياري)",code_hint:"إن تركته فارغًا يُنشأ الرمز تلقائيًا من اسم المدرسة.",submit:"إرسال الطلب",login:"تسجيل الدخول",home:"الصفحة الرئيسية",ok_title:"تم استلام طلبك",ok_sub:"طلبك بانتظار الموافقة. ستتلقى رسالة على بريدك عند تفعيل الحساب.",ok_keep:"رمز مدرستك هو التالي. احتفظ به؛ ستحتاجه لتسجيل الدخول بعد الموافقة.",
+      fill:"املأ جميع الخانات",mismatch:"كلمتا السر غير متطابقتين",weak:"كلمة السر يجب ألا تقل عن 6 أحرف",
+      invalid_name:"اسم المدرسة غير صالح",invalid_city:"المدينة غير صالحة",invalid_manager_name:"اسم المدير غير صالح",
+      invalid_email:"البريد الإلكتروني غير صالح",invalid_phone:"رقم الهاتف غير صالح",invalid_username:"اسم المستخدم غير صالح",
+      weak_password:"كلمة السر يجب ألا تقل عن 6 أحرف",invalid_code:"رمز المدرسة غير صالح",code_taken:"رمز المدرسة مستعمل، اختر رمزًا آخر",
+      email_used:"هذا البريد مرتبط بطلب أو حساب قائم",too_many:"محاولات كثيرة، أعد المحاولة بعد قليل",server:"تعذّر الاتصال بالخادم",doc:"Otoqol — إنشاء حساب"},
+    fr:{title:"Créer un compte pour votre école",sub:"Renseignez les informations ci-dessous. La demande sera examinée avant l’activation du compte.",name:"Nom de l’école",city:"Ville",manager:"Nom complet du responsable",email:"E-mail",phone:"Téléphone",username:"Identifiant",password:"Mot de passe",password2:"Confirmation du mot de passe",code:"Code de l’école (facultatif)",code_hint:"S’il est laissé vide, le code est généré automatiquement à partir du nom de l’école.",submit:"Envoyer la demande",login:"Connexion",home:"Accueil",ok_title:"Demande bien reçue",ok_sub:"Votre demande est en attente d’approbation. Vous recevrez un e-mail lorsque le compte sera activé.",ok_keep:"Voici le code de votre école. Conservez-le ; il vous servira à vous connecter après l’approbation.",
+      fill:"Veuillez remplir tous les champs",mismatch:"Les mots de passe ne correspondent pas",weak:"Le mot de passe doit contenir au moins 6 caractères",
+      invalid_name:"Nom de l’école invalide",invalid_city:"Ville invalide",invalid_manager_name:"Nom du responsable invalide",
+      invalid_email:"E-mail invalide",invalid_phone:"Numéro de téléphone invalide",invalid_username:"Identifiant invalide",
+      weak_password:"Le mot de passe doit contenir au moins 6 caractères",invalid_code:"Code d’école invalide",code_taken:"Ce code est déjà utilisé, choisissez-en un autre",
+      email_used:"Cet e-mail est déjà lié à une demande ou un compte",too_many:"Trop de tentatives, réessayez plus tard",server:"Impossible de joindre le serveur",doc:"Otoqol — Créer un compte"},
+    en:{title:"Create an account for your school",sub:"Fill in the details below. The request will be reviewed before the account is activated.",name:"School name",city:"City",manager:"Manager’s full name",email:"Email",phone:"Phone",username:"Username",password:"Password",password2:"Confirm password",code:"School code (optional)",code_hint:"If left empty, the code is generated automatically from the school name.",submit:"Submit request",login:"Log in",home:"Home",ok_title:"Your request has been received",ok_sub:"Your request is awaiting approval. You will receive an email when the account is activated.",ok_keep:"This is your school code. Keep it; you will need it to log in after approval.",
+      fill:"Please fill in all fields",mismatch:"Passwords do not match",weak:"Password must be at least 6 characters",
+      invalid_name:"Invalid school name",invalid_city:"Invalid city",invalid_manager_name:"Invalid manager name",
+      invalid_email:"Invalid email",invalid_phone:"Invalid phone number",invalid_username:"Invalid username",
+      weak_password:"Password must be at least 6 characters",invalid_code:"Invalid school code",code_taken:"This school code is already taken, choose another",
+      email_used:"This email is already linked to a request or account",too_many:"Too many attempts, try again later",server:"Could not reach the server",doc:"Otoqol — Create an account"}
+  };
+  function apply(l){
+    if(!T[l])l='ar';
+    var d=T[l];
+    document.documentElement.lang=l;document.documentElement.dir=l==='ar'?'rtl':'ltr';
+    document.querySelectorAll('[data-t]').forEach(function(el){if(d[el.getAttribute('data-t')])el.textContent=d[el.getAttribute('data-t')];});
+    document.title=d.doc;
+    document.getElementById('lang').value=l;
+  }
+  var lang='ar';try{lang=localStorage.getItem('ae_lang')||'ar';}catch(e){}
+  apply(lang);
+  document.getElementById('lang').addEventListener('change',function(e){var v=e.target.value;try{localStorage.setItem('ae_lang',v);}catch(x){}apply(v);});
+  var form=document.getElementById('form'), err=document.getElementById('err'), go=document.getElementById('go');
+  function showErr(k){var d=T[document.documentElement.lang]||T.ar;err.hidden=false;err.textContent=d[k]||d.server;}
+  form.addEventListener('submit',function(e){
+    e.preventDefault();
+    err.hidden=true;
+    var d=T[document.documentElement.lang]||T.ar;
+    var f=form.elements;
+    if(!f.name.value.trim()||!f.city.value.trim()||!f.managerName.value.trim()||!f.email.value.trim()||!f.phone.value.trim()||!f.username.value.trim()||!f.password.value){showErr('fill');return;}
+    if(f.password.value!==f.password2.value){showErr('mismatch');return;}
+    if(f.password.value.length<6){showErr('weak');return;}
+    go.disabled=true;
+    fetch('/api/signup',{method:'POST',headers:{'Content-Type':'application/json','X-Otoqol':'1'},credentials:'same-origin',body:JSON.stringify({
+      name:f.name.value.trim(),city:f.city.value.trim(),managerName:f.managerName.value.trim(),email:f.email.value.trim(),
+      phone:f.phone.value.trim(),username:f.username.value.trim(),password:f.password.value,code:f.code.value.trim()
+    })}).then(function(r){return r.json().then(function(j){return {ok:r.ok,s:r.status,j:j};});}).then(function(x){
+      if(!x.ok){
+        if(x.s===429)return showErr('too_many');
+        return showErr((x.j&&x.j.error)||'server');
+      }
+      document.getElementById('form-card').hidden=true;
+      document.getElementById('ok-card').hidden=false;
+      document.getElementById('ok-code').textContent=x.j.code||'';
+      try{if(x.j.code)localStorage.setItem('oq_school_code',x.j.code);}catch(e){}
+    }).catch(function(){showErr('server');}).then(function(){go.disabled=false;});
+  });
+})();
+</script>
+</body>
+</html>
