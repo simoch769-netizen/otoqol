@@ -32,7 +32,7 @@ async function api(m, u, body, cookie) { const r = await fetch(B + u, { method: 
 const arabicLeft = page => page.evaluate(() => {
   const AR = /[\u0600-\u06FF]/; const out = new Set();
   const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
-  while (w.nextNode()) { const n = w.currentNode; const el = n.parentElement; if (!el || el.closest('option') || el.closest('select')) continue;
+  while (w.nextNode()) { const n = w.currentNode; const el = n.parentElement; if (!el || el.closest('option') || el.closest('select') || el.closest('[data-oq-tpl-ar]')) continue;
     const st = getComputedStyle(el); if (st.display === 'none' || st.visibility === 'hidden') continue;
     if (AR.test(n.nodeValue)) out.add(n.nodeValue.trim().slice(0, 80)); }
   document.querySelectorAll('input[placeholder],textarea[placeholder]').forEach(i => { if (AR.test(i.placeholder)) out.add('[placeholder] ' + i.placeholder); });
@@ -105,8 +105,8 @@ const arabicLeft = page => page.evaluate(() => {
       }
     }
     // WhatsApp templates (all modes)
-    const msgs = await page.evaluate(() => { const db = JSON.parse(localStorage.autoecole_db_v1); const s = db.sessions[1], c = db.candidates[1];
-      return ['confirm', 'update', 'cancel'].map(m => sessionMsg(db, s, c, m)).concat([absMsg(db, c, s), absMsg(db, c, null)]); });
+    const msgs = await page.evaluate(uiLang => { const db = JSON.parse(localStorage.autoecole_db_v1); const s = db.sessions[1], c = Object.assign({}, db.candidates[1], { msgLang: uiLang });
+      return ['confirm', 'update', 'cancel'].map(m => sessionMsg(db, s, c, m)).concat([absMsg(db, c, s), absMsg(db, c, null)]); }, lang);
     if (lang !== 'ar') { const bad = msgs.filter(m => AR.test(m)); if (bad.length) leftovers['whatsapp'] = bad; } else t('[ar] WhatsApp templates in Arabic', msgs.every(m => AR.test(m)));
     console.log(`--- [${lang}] sample WhatsApp: ` + JSON.stringify(msgs[0]));
     // monitor role
