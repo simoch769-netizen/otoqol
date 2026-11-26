@@ -95,6 +95,7 @@ h3{margin:4px 0 10px}
 <body>
 <div id="root"><p style="text-align:center;margin-top:20vh;font-family:Tahoma,sans-serif">جارٍ التحميل... (يتطلب الاتصال بالإنترنت في المرة الأولى)</p></div>
 <script src="/assets/otoqol-drive.js"></script>
+<script src="/narsa-docs.js"></script>
 <script type="text/babel">
 
 const {useState,useEffect}=React;
@@ -159,6 +160,112 @@ Object.assign(DICT.en,{
   "جاري الحفظ…":"Saving…",
   "جاري الاسترجاع…":"Restoring…"
 });
+
+Object.assign(DICT.fr,{
+  "طباعة الوثائق":"Imprimer documents",
+  "اختر الوثيقة":"Choisissez le document",
+  "عقد التكوين (3 نظائر أصلية)":"Contrat de formation (3 originaux)",
+  "طلب اجتياز امتحان رخصة السياقة":"Demande de passage d'examen du permis de conduire",
+  "شهادة نهاية التكوين":"Attestation de fin de formation",
+  "عدد النظائر الأصلية":"Nombre d'originaux",
+  "نوع الطلب":"Type de demande",
+  "لأول مرة":"Pour la première fois",
+  "لتمديد رخصة السياقة":"Pour l'extension du permis de conduire",
+  "رقم العقد":"N° du contrat",
+  "تاريخ العقد":"Date du contrat",
+  "مكان التحرير":"Lieu d'établissement",
+  "تاريخ التحرير":"Date d'établissement",
+  "مدرب التكوين النظري":"Moniteur de la formation théorique",
+  "رقم رخصة المدرب النظري":"N° de licence du moniteur théorique",
+  "مدرب التكوين التطبيقي":"Moniteur de la formation pratique",
+  "رقم رخصة المدرب التطبيقي":"N° de licence du moniteur pratique",
+  "رقم لوحة مركبة التكوين":"Immatriculation du véhicule de formation",
+  "تعذر الطباعة: بيانات ناقصة":"Impression impossible : données manquantes",
+  "أكمل البيانات التالية قبل الطباعة:":"Complétez les informations suivantes avant d'imprimer :",
+  "بعض البيانات الناقصة توجد في إعدادات المؤسسة. اطلب من المدير إكمالها في الإعدادات.":"Certaines informations manquantes se trouvent dans les paramètres de l'établissement. Demandez au gérant de les compléter.",
+  "يُرجى السماح بالنوافذ المنبثقة للطباعة":"Veuillez autoriser les fenêtres contextuelles pour imprimer",
+  "بيانات المؤسسة (NARSA)":"Informations de l'établissement (NARSA)",
+  "عنوان المؤسسة":"Adresse de l'établissement",
+  "هاتف المؤسسة":"Téléphone de l'établissement",
+  "الفاكس":"Fax",
+  "البريد الإلكتروني للمؤسسة":"E-mail de l'établissement",
+  "المدينة":"Ville",
+  "رقم رخصة المؤسسة":"N° d'agrément de l'établissement",
+  "رقم القيد في السجل الوطني":"N° au registre national",
+  "رقم القيد في سجل الضريبة المهنية":"N° à la taxe professionnelle",
+  "رقم القيد في السجل التجاري":"N° au registre de commerce",
+  "مدينة السجل التجاري":"Ville du registre de commerce",
+  "الممثل القانوني":"Représentant légal",
+  "الاسم الشخصي للممثل القانوني":"Prénom du représentant légal",
+  "الاسم العائلي للممثل القانوني":"Nom du représentant légal",
+  "عنوان الممثل القانوني":"Adresse du représentant légal",
+  "هاتف الممثل القانوني":"Téléphone du représentant légal",
+  "الاسم الشخصي":"Prénom",
+  "الاسم العائلي":"Nom de famille",
+  "الجنسية":"Nationalité",
+  "تاريخ الازدياد":"Date de naissance",
+  "مكان الازدياد":"Lieu de naissance",
+  "رقم تسجيل المرشح (Référence web)":"N° d'enregistrement du candidat (Référence web)",
+  "رقم رخصة السياقة الحالية":"N° du permis actuel",
+  "مكان تسليم الرخصة":"Lieu de délivrance du permis",
+  "تاريخ تسليم الرخصة":"Date de délivrance du permis",
+  "تُستعمل هذه الحقول لملء وثائق NARSA الرسمية.":"Ces champs servent à remplir les documents officiels NARSA.",
+  "طباعة أو تحميل PDF":"Imprimer ou télécharger le PDF",
+  "تعذر تحميل وحدة الوثائق":"Impossible de charger le module de documents"
+});
+Object.assign(DICT.en,{
+  "طباعة الوثائق":"Print documents",
+  "اختر الوثيقة":"Choose the document",
+  "عقد التكوين (3 نظائر أصلية)":"Training contract (3 originals)",
+  "طلب اجتياز امتحان رخصة السياقة":"Application to sit the driving-licence exam",
+  "شهادة نهاية التكوين":"End-of-training certificate",
+  "عدد النظائر الأصلية":"Number of originals",
+  "نوع الطلب":"Application type",
+  "لأول مرة":"For the first time",
+  "لتمديد رخصة السياقة":"To extend the driving licence",
+  "رقم العقد":"Contract number",
+  "تاريخ العقد":"Contract date",
+  "مكان التحرير":"Place of issue",
+  "تاريخ التحرير":"Date of issue",
+  "مدرب التكوين النظري":"Theory instructor",
+  "رقم رخصة المدرب النظري":"Theory instructor licence number",
+  "مدرب التكوين التطبيقي":"Practical instructor",
+  "رقم رخصة المدرب التطبيقي":"Practical instructor licence number",
+  "رقم لوحة مركبة التكوين":"Training vehicle plate",
+  "تعذر الطباعة: بيانات ناقصة":"Cannot print: missing information",
+  "أكمل البيانات التالية قبل الطباعة:":"Complete the following information before printing:",
+  "بعض البيانات الناقصة توجد في إعدادات المؤسسة. اطلب من المدير إكمالها في الإعدادات.":"Some of the missing information is in the school settings. Ask the manager to complete it there.",
+  "يُرجى السماح بالنوافذ المنبثقة للطباعة":"Please allow pop-up windows to print",
+  "بيانات المؤسسة (NARSA)":"School information (NARSA)",
+  "عنوان المؤسسة":"School address",
+  "هاتف المؤسسة":"School phone",
+  "الفاكس":"Fax",
+  "البريد الإلكتروني للمؤسسة":"School email",
+  "المدينة":"City",
+  "رقم رخصة المؤسسة":"School licence number",
+  "رقم القيد في السجل الوطني":"National registry number",
+  "رقم القيد في سجل الضريبة المهنية":"Professional tax number",
+  "رقم القيد في السجل التجاري":"Trade register number",
+  "مدينة السجل التجاري":"Trade-register city",
+  "الممثل القانوني":"Legal representative",
+  "الاسم الشخصي للممثل القانوني":"Legal representative first name",
+  "الاسم العائلي للممثل القانوني":"Legal representative last name",
+  "عنوان الممثل القانوني":"Legal representative address",
+  "هاتف الممثل القانوني":"Legal representative phone",
+  "الاسم الشخصي":"First name",
+  "الاسم العائلي":"Family name",
+  "الجنسية":"Nationality",
+  "تاريخ الازدياد":"Date of birth",
+  "مكان الازدياد":"Place of birth",
+  "رقم تسجيل المرشح (Référence web)":"Candidate registration number (Référence web)",
+  "رقم رخصة السياقة الحالية":"Current licence number",
+  "مكان تسليم الرخصة":"Licence place of issue",
+  "تاريخ تسليم الرخصة":"Licence date of issue",
+  "تُستعمل هذه الحقول لملء وثائق NARSA الرسمية.":"These fields are used to fill official NARSA documents.",
+  "طباعة أو تحميل PDF":"Print or download PDF",
+  "تعذر تحميل وحدة الوثائق":"Could not load the documents module"
+});
+
 const _t=s=>{if(typeof s!=='string')return s;if(LANG==='ar'){if(DICT_AR[s]!==undefined)return DICT_AR[s];const a=s.match(/^(\s*)([\s\S]*?)(\s*)$/);return a[2]&&DICT_AR[a[2]]!==undefined?a[1]+DICT_AR[a[2]]+a[3]:s;}const d=DICT[LANG];if(d[s]!==undefined)return d[s];const m=s.match(/^(\s*)([\s\S]*?)(\s*)$/);if(m[2]&&d[m[2]]!==undefined)return m[1]+d[m[2]]+m[3];return s;};
 const lbl=o=>new Proxy(o,{get:(o2,k)=>(typeof k==='string'&&Object.prototype.hasOwnProperty.call(o2,k))?_t(o2[k]):o2[k]});
 const KEY='autoecole_db_v1';
@@ -179,7 +286,7 @@ const wa=(phone,text)=>{let p=(phone||'').replace(/\D/g,'');if(p.startsWith('00'
 const statusLbl=lbl({planned:'مبرمجة',present:'حاضر',late:'متأخر',absent:'غائب'});
 const typeLbl=lbl({code:'كود (نظري)',conduite:'تطبيقي (سياقة)'});
 const stageLbl=lbl({reg:'مرحلة التسجيل',code:'مرحلة الكود',drive:'مرحلة السياقة',done:'حصل على الرخصة'});
-const LICENSES=['B','A','A1','C','D','EC'];
+const LICENSES=['AM','A1','A','B','C','D','EB','EC','ED'];
 const daysLeft=s=>s?Math.ceil((new Date(s+'T00:00:00')-new Date(today()+'T00:00:00'))/864e5):null;
 const counted=a=>a.status==='present'||a.status==='late';
 
@@ -367,14 +474,71 @@ function Sessions(){
 }
 
 /* ================= المترشحون ================= */
-const BASIC=['name','cin','phone','address','license','price','codeHours','driveHours','stage','medical','notes'];
+
+function narsaMissingLabel(m){return LANG==='fr'?(m.fr||m.key):LANG==='en'?(m.en||m.key):(m.ar||m.key);}
+function NarsaDocsModal({c,onClose}){
+  const {db}=useC();
+  const engine=typeof OtoqolNarsa!=='undefined'?OtoqolNarsa:(typeof window!=='undefined'?window.OtoqolNarsa:null);
+  const ctx0=(engine&&engine.context(db,c.id,{}).ctx)||{};
+  const [type,setType]=useState('contrat');
+  const [copies,setCopies]=useState(3);
+  const [examKind,setExamKind]=useState(c.examKind||'first');
+  const [o,setO]=useState({contractNo:ctx0.contractNo||'',contractDate:ctx0.contractDate||'',city:ctx0.schoolCity||'',issueDate:ctx0.issueDate||'',theoryInstructor:ctx0.theoryInstructor||'',theoryLicense:ctx0.theoryLicense||'',practicalInstructor:ctx0.practicalInstructor||'',practicalLicense:ctx0.practicalLicense||'',vehiclePlate:ctx0.vehiclePlate||'',permitNo:c.permitNo||'',permitIssuePlace:c.permitIssuePlace||'',permitIssueDate:c.permitIssueDate||''});
+  const [missing,setMissing]=useState(null);
+  const set=(k,v)=>setO(Object.assign({},o,{[k]:v}));
+  const go=()=>{
+    if(!engine)return alert(_t('تعذر تحميل وحدة الوثائق'));
+    const r=engine.build(db,c.id,{type:type,copies:copies,lang:LANG,overrides:Object.assign({},o,{examKind:examKind})});
+    if(!r.ok){setMissing(r.missing||[]);return;}
+    setMissing(null);
+    const w=window.open('','_blank');if(!w)return alert(_t('يُرجى السماح بالنوافذ المنبثقة للطباعة'));
+    w.document.write(r.html);w.document.close();
+  };
+  const schoolMiss=(missing||[]).some(m=>/^school_|^legal_/.test(m.key));
+  return <Modal title={_t('طباعة الوثائق')} onClose={onClose} wide>
+    <div data-oq-narsa-modal="">
+      <F l={_t("اختر الوثيقة")}><select data-oq-narsa-type="" value={type} onChange={e=>setType(e.target.value)}>
+        <option value="contrat">{_t("عقد التكوين (3 نظائر أصلية)")}</option>
+        <option value="demande">{_t("طلب اجتياز امتحان رخصة السياقة")}</option>
+        <option value="attestation">{_t("شهادة نهاية التكوين")}</option>
+      </select></F>
+      {type==='contrat'&&<F l={_t("عدد النظائر الأصلية")}><select data-oq-narsa-copies="" value={copies} onChange={e=>setCopies(Number(e.target.value))}><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></F>}
+      {type==='demande'&&<F l={_t("نوع الطلب")}><select data-oq-narsa-examkind="" value={examKind} onChange={e=>setExamKind(e.target.value)}><option value="first">{_t("لأول مرة")}</option><option value="extension">{_t("لتمديد رخصة السياقة")}</option></select></F>}
+      <div className="fg">
+        {type==='contrat'&&<F l={_t("رقم العقد")}><input value={o.contractNo} onChange={e=>set('contractNo',e.target.value)}/></F>}
+        {(type==='contrat'||type==='attestation')&&<F l={_t("تاريخ العقد")}><input type="date" value={o.contractDate} onChange={e=>set('contractDate',e.target.value)}/></F>}
+        {(type==='contrat'||type==='attestation')&&<F l={_t("مكان التحرير")}><input value={o.city} onChange={e=>set('city',e.target.value)}/></F>}
+        {type==='attestation'&&<F l={_t("تاريخ التحرير")}><input type="date" value={o.issueDate} onChange={e=>set('issueDate',e.target.value)}/></F>}
+        {type==='attestation'&&<F l={_t("مدرب التكوين النظري")}><input value={o.theoryInstructor} onChange={e=>set('theoryInstructor',e.target.value)}/></F>}
+        {type==='attestation'&&<F l={_t("رقم رخصة المدرب النظري")}><input value={o.theoryLicense} onChange={e=>set('theoryLicense',e.target.value)}/></F>}
+        {type==='attestation'&&<F l={_t("مدرب التكوين التطبيقي")}><input value={o.practicalInstructor} onChange={e=>set('practicalInstructor',e.target.value)}/></F>}
+        {type==='attestation'&&<F l={_t("رقم رخصة المدرب التطبيقي")}><input value={o.practicalLicense} onChange={e=>set('practicalLicense',e.target.value)}/></F>}
+        {type==='attestation'&&<F l={_t("رقم لوحة مركبة التكوين")}><input value={o.vehiclePlate} onChange={e=>set('vehiclePlate',e.target.value)}/></F>}
+        {type==='demande'&&examKind==='extension'&&<F l={_t("رقم رخصة السياقة الحالية")}><input value={o.permitNo} onChange={e=>set('permitNo',e.target.value)}/></F>}
+        {type==='demande'&&examKind==='extension'&&<F l={_t("مكان تسليم الرخصة")}><input value={o.permitIssuePlace} onChange={e=>set('permitIssuePlace',e.target.value)}/></F>}
+        {type==='demande'&&examKind==='extension'&&<F l={_t("تاريخ تسليم الرخصة")}><input type="date" value={o.permitIssueDate} onChange={e=>set('permitIssueDate',e.target.value)}/></F>}
+      </div>
+      {missing&&missing.length>0&&<div className="al bad" data-oq-narsa-missing="">
+        <b>{_t("تعذر الطباعة: بيانات ناقصة")}</b>
+        <div>{_t("أكمل البيانات التالية قبل الطباعة:")}</div>
+        <ul>{missing.map(m=><li key={m.key}>{narsaMissingLabel(m)}</li>)}</ul>
+        {schoolMiss&&<div>{_t("بعض البيانات الناقصة توجد في إعدادات المؤسسة. اطلب من المدير إكمالها في الإعدادات.")}</div>}
+      </div>}
+      <div className="row"><button className="b pri" data-oq-narsa-print="" onClick={go}>{_t("طباعة أو تحميل PDF")}</button><button className="b" onClick={onClose}>{_t("إلغاء")}</button></div>
+    </div>
+  </Modal>;
+}
+
+
+const BASIC=['name','firstName','lastName','cin','phone','address','license','price','codeHours','driveHours','stage','medical','notes','nationality','birthDate','birthPlace','narsaRef','examKind','permitNo','permitIssuePlace','permitIssueDate','contractNo','contractDate'];
 function CandidateModal({id,onClose}){
   const {db,upd,user,L}=useC();
   const c=db.candidates.find(x=>x.id===id);
   const [tab,setTab]=useState('info');
-  const [f,setF]=useState(c?Object.assign({},c):{name:'',cin:'',phone:'',address:'',license:'B',price:0,codeHours:10,driveHours:20,stage:'reg',medical:false,notes:''});
+  const [f,setF]=useState(c?Object.assign({},c):{name:'',firstName:'',lastName:'',cin:'',phone:'',address:'',license:'B',price:0,codeHours:10,driveHours:20,stage:'reg',medical:false,notes:'',nationality:'مغربية',birthDate:'',birthPlace:'',narsaRef:'',examKind:'first',permitNo:'',permitIssuePlace:'',permitIssueDate:'',contractNo:'',contractDate:''});
   const [ex,setEx]=useState({type:'code',date:today(),result:'في الانتظار'});
   const [pay,setPay]=useState({amount:'',date:today(),note:''});
+  const [narsaOpen,setNarsaOpen]=useState(false);
   const set=(k,v)=>setF(Object.assign({},f,{[k]:v}));
   const staffDel=user.role==='manager';
   const save=()=>{
@@ -399,6 +563,7 @@ function CandidateModal({id,onClose}){
   const sess=c?db.sessions.filter(s=>s.att.some(a=>a.cid===c.id)).sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time)):[];
   return <Modal title={c?c.name:_t('مترشح جديد')} onClose={onClose} wide>
     {c&&<div className="row" style={{marginTop:0,marginBottom:10}}>
+      {user.role!=='monitor'&&<button type="button" className="b pri" data-oq-narsa-open="" onClick={()=>setNarsaOpen(true)}>{_t("طباعة الوثائق")}</button>}
       <span className="bd info">{stageLbl[c.stage]}</span>
       <span className="bd">{_t("كود")} {hoursDone(db,c.id,'code')}/{c.codeHours} {_t("س")}</span>
       <span className="bd">{_t("سياقة")} {hoursDone(db,c.id,'conduite')}/{c.driveHours} {_t("س")}</span>
@@ -409,6 +574,12 @@ function CandidateModal({id,onClose}){
       <div className="fg">
         <F l={_t("الاسم الكامل")}><input value={f.name} onChange={e=>set('name',e.target.value)}/></F>
         <F l={_t("رقم البطاقة الوطنية")}><input value={f.cin} onChange={e=>set('cin',e.target.value)}/></F>
+        <F l={_t("الاسم الشخصي")}><input value={f.firstName||''} onChange={e=>set('firstName',e.target.value)}/></F>
+        <F l={_t("الاسم العائلي")}><input value={f.lastName||''} onChange={e=>set('lastName',e.target.value)}/></F>
+        <F l={_t("الجنسية")}><input value={f.nationality||''} onChange={e=>set('nationality',e.target.value)}/></F>
+        <F l={_t("تاريخ الازدياد")}><input type="date" value={f.birthDate||''} onChange={e=>set('birthDate',e.target.value)}/></F>
+        <F l={_t("مكان الازدياد")}><input value={f.birthPlace||''} onChange={e=>set('birthPlace',e.target.value)}/></F>
+        <F l={_t("رقم تسجيل المرشح (Référence web)")}><input value={f.narsaRef||''} onChange={e=>set('narsaRef',e.target.value)}/></F>
         <F l={_t("الهاتف")}><input value={f.phone} onChange={e=>set('phone',e.target.value)}/></F>
         <F l={_t("العنوان")}><input value={f.address} onChange={e=>set('address',e.target.value)}/></F>
         <F l={_t("نوع الرخصة")}><select value={f.license} onChange={e=>set('license',e.target.value)}>{LICENSES.map(l=><option key={l}>{l}</option>)}</select></F>
@@ -456,6 +627,7 @@ function CandidateModal({id,onClose}){
       {db.notes.filter(n=>n.cid===c.id).map(n=><div key={n.id} className="nt"><div className="meta">{n.date} · {nm(db.monitors,n.monitorId)}</div>{n.text}</div>)}
       {!db.notes.some(n=>n.cid===c.id)&&<div className="empty">{_t("ما كاين حتى ملاحظة")}</div>}
     </div>}
+    {narsaOpen&&c&&<NarsaDocsModal c={c} onClose={()=>setNarsaOpen(false)}/>}
   </Modal>;
 }
 
@@ -801,13 +973,36 @@ function AdminSettings(){
   const {db,upd,replace}=useC();
   const [school,setSchool]=useState(db.settings.school);
   const [lim,setLim]=useState(db.settings.absLimit);
+  const [legal,setLegal]=useState({address:db.settings.address||'',phone:db.settings.phone||'',fax:db.settings.fax||'',email:db.settings.email||'',city:db.settings.city||'',licenseNo:db.settings.licenseNo||'',nationalRegNo:db.settings.nationalRegNo||'',patente:db.settings.patente||'',rc:db.settings.rc||'',rcCity:db.settings.rcCity||'',legalFirst:db.settings.legalFirst||'',legalLast:db.settings.legalLast||'',legalAddress:db.settings.legalAddress||'',legalPhone:db.settings.legalPhone||''});
+  const setL=(k,v)=>setLegal(Object.assign({},legal,{[k]:v}));
   const exp=()=>{const b=new Blob([JSON.stringify(db,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='backup-'+today()+'.json';a.click();};
   const imp=e=>{const fl=e.target.files[0];if(!fl)return;const r=new FileReader();r.onload=()=>{try{const o=JSON.parse(r.result);if(!Array.isArray(o.candidates))throw 1;if(!confirm(_t('غادي تتعوض كل الداتا الحالية بالنسخة الاحتياطية. كمل؟')))return;replace(Object.assign(defaultDB(),o));alert(_t('تم الاسترجاع'));}catch(x){alert(_t('ملف غير صالح'));}};r.readAsText(fl);e.target.value='';};
   return <div>
     <div className="card"><h3>{_t("المدرسة")}</h3><div className="fg">
       <F l={_t("اسم المدرسة")}><input value={school} onChange={e=>setSchool(e.target.value)}/></F>
       <F l={_t("عدد الغيابات قبل التنبيه")}><input type="number" min="1" value={lim} onChange={e=>setLim(e.target.value)}/></F>
-    </div><button className="b pri" onClick={()=>upd(n=>{n.settings.school=school||'Otoqol';n.settings.absLimit=Math.max(1,Number(lim)||3);})}>{_t("حفظ")}</button></div>
+    </div><button className="b pri" onClick={()=>upd(n=>{n.settings.school=school||'Otoqol';n.settings.absLimit=Math.max(1,Number(lim)||3);Object.keys(legal).forEach(k=>{n.settings[k]=legal[k];});})}>{_t("حفظ")}</button></div>
+    <div className="card" data-oq-narsa-school="">
+      <h3>{_t("بيانات المؤسسة (NARSA)")}</h3>
+      <p className="meta">{_t("تُستعمل هذه الحقول لملء وثائق NARSA الرسمية.")}</p>
+      <div className="fg">
+        <F l={_t("عنوان المؤسسة")}><input value={legal.address} onChange={e=>setL('address',e.target.value)}/></F>
+        <F l={_t("هاتف المؤسسة")}><input value={legal.phone} onChange={e=>setL('phone',e.target.value)}/></F>
+        <F l={_t("الفاكس")}><input value={legal.fax} onChange={e=>setL('fax',e.target.value)}/></F>
+        <F l={_t("البريد الإلكتروني للمؤسسة")}><input type="email" dir="ltr" value={legal.email} onChange={e=>setL('email',e.target.value)}/></F>
+        <F l={_t("المدينة")}><input value={legal.city} onChange={e=>setL('city',e.target.value)}/></F>
+        <F l={_t("رقم رخصة المؤسسة")}><input value={legal.licenseNo} onChange={e=>setL('licenseNo',e.target.value)}/></F>
+        <F l={_t("رقم القيد في السجل الوطني")}><input value={legal.nationalRegNo} onChange={e=>setL('nationalRegNo',e.target.value)}/></F>
+        <F l={_t("رقم القيد في سجل الضريبة المهنية")}><input value={legal.patente} onChange={e=>setL('patente',e.target.value)}/></F>
+        <F l={_t("رقم القيد في السجل التجاري")}><input value={legal.rc} onChange={e=>setL('rc',e.target.value)}/></F>
+        <F l={_t("مدينة السجل التجاري")}><input value={legal.rcCity} onChange={e=>setL('rcCity',e.target.value)}/></F>
+        <F l={_t("الاسم الشخصي للممثل القانوني")}><input value={legal.legalFirst} onChange={e=>setL('legalFirst',e.target.value)}/></F>
+        <F l={_t("الاسم العائلي للممثل القانوني")}><input value={legal.legalLast} onChange={e=>setL('legalLast',e.target.value)}/></F>
+        <F l={_t("عنوان الممثل القانوني")}><input value={legal.legalAddress} onChange={e=>setL('legalAddress',e.target.value)}/></F>
+        <F l={_t("هاتف الممثل القانوني")}><input value={legal.legalPhone} onChange={e=>setL('legalPhone',e.target.value)}/></F>
+      </div>
+      <button className="b pri" onClick={()=>upd(n=>{n.settings.school=school||'Otoqol';n.settings.absLimit=Math.max(1,Number(lim)||3);Object.keys(legal).forEach(k=>{n.settings[k]=legal[k];});})}>{_t("حفظ")}</button>
+    </div>
     <div className="card" data-oq-team-accounts=""><h3>{_t("حسابات الفريق")}</h3><p className="meta">{_t("أضف بريدًا إلكترونيًا لكل حساب حتى يتمكن من استرجاع كلمة السر.")}</p>{db.users.map(u=><PwRow key={u.id} u={u}/>)}</div>
     <div className="card"><h3>{_t("النسخ الاحتياطي")}</h3>
       <p className="meta">{_t("الداتا كتتحفظ أوتوماتيكيا فهاد المتصفح. دير نسخة احتياطية بشكل منتظم (مرة فالأسبوع على الأقل).")}</p>
