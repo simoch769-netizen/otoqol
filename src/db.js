@@ -270,6 +270,7 @@ function accountsInSchoolData(data, school) {
   };
   add(data.users);
   add(data.monitors, 'monitor');
+  add(data.portalUsers, 'student');
   return out;
 }
 function findAccountsByUsername(username) {

@@ -11,6 +11,7 @@ const store = require('./db');
 const mail = require('./mail');
 const onboard = require('./onboard');
 const narsa = require('../public/narsa-docs.js');
+const portal = require('./portal');
 
 const PORT = Number(process.env.PORT || 3000);
 const HOST = process.env.HOST || '0.0.0.0';
@@ -169,15 +170,21 @@ function findAppUser(data, username, password) {
     const x = (list || []).find(y => y && typeof y === 'object' && nz(y.username).toLowerCase() === un && !isOff(y));
     return x ? { rec: x, role: role || x.role } : null;
   };
-  const cands = [pick(data.users), pick(data.monitors, 'monitor')].filter(Boolean);
-  for (const c of cands) if (pwMatches(c.rec.password, password)) return { id: c.rec.id, name: c.rec.name, role: c.role, rec: c.rec };
+  const cands = [pick(data.users), pick(data.monitors, 'monitor'), pick(data.portalUsers, 'student')].filter(Boolean);
+  for (const c of cands) if (pwMatches(c.rec.password, password)) return { id: c.rec.id, name: c.rec.name, role: c.role, rec: c.rec, cid: c.rec.cid };
   if (!cands.length) bcrypt.compareSync(nz(password), DUMMY_HASH); // same cost whether the username exists or not
   return null;
 }
-const hasUsername = (data, un) => !!data && [...(data.users || []), ...(data.monitors || [])].some(x => x && nz(x.username).toLowerCase() === un);
+const hasUsername = (data, un) => !!data && [...(data.users || []), ...(data.monitors || []), ...(data.portalUsers || [])].some(x => x && nz(x.username).toLowerCase() === un);
 /** The session's app user as it is NOW in the data (null if removed, disabled or password changed). */
 function currentAppUser(data, u) {
   if (!data) return u.id === 'u1' && u.owner ? { role: 'manager' } : null;  // fresh school: only the setup owner
+  if (u.role === 'student') {
+    const x = (data.portalUsers || []).find(y => y && y.id === u.id);
+    if (!x || isOff(x) || !x.activatedAt) return null;
+    if (pwTag(x.password) !== u.tag) return null;
+    return { role: 'student', cid: x.cid };
+  }
   const list = u.role === 'monitor' ? (data.monitors || []) : (data.users || []);
   const x = list.find(y => y && y.id === u.id);
   if (!x || isOff(x)) return null;
@@ -187,7 +194,7 @@ function currentAppUser(data, u) {
 /** Hash every plain-text in-app password; keep stored hashes for blank/unchanged ones. Returns true if something changed. */
 function securePasswords(data, stored) {
   let changed = false;
-  for (const k of ['users', 'monitors']) {
+  for (const k of ['users', 'monitors', 'portalUsers']) {
     const old = new Map(((stored && stored[k]) || []).filter(x => x && typeof x === 'object').map(x => [x.id, x]));
     for (const x of (data[k] || [])) {
       if (!x || typeof x !== 'object') continue;
@@ -205,7 +212,9 @@ function securePasswords(data, stored) {
 const redact = data => {
   if (!data) return data;
   const strip = list => Array.isArray(list) ? list.map(x => (x && typeof x === 'object') ? { ...x, password: '' } : x) : list;
-  return { ...data, users: strip(data.users), monitors: strip(data.monitors) };
+  const out = { ...data, users: strip(data.users), monitors: strip(data.monitors), portalUsers: strip(data.portalUsers) };
+  delete out.portalInvites;
+  return out;
 };
 /** The deployment's school: DEFAULT_SCHOOL_CODE, else SEED_SCHOOL_CODE, else the first active school. */
 function defaultSchool() {
@@ -213,7 +222,7 @@ function defaultSchool() {
   if (code) return store.findSchool(code);
   return store.db.prepare('SELECT * FROM schools WHERE active = 1 ORDER BY id LIMIT 1').get();
 }
-const pubUser = u => u && ({ id: u.id, name: u.name, role: u.role });
+const pubUser = u => u && ({ id: u.id, name: u.name, role: u.role, cid: u.cid || undefined });
 
 function finishSignin(res, s, user, setup) {
   res.cookie(COOKIE, sign(s, user), cookieOpts);
@@ -228,7 +237,7 @@ function migratePlainPasswords(s, data, username, password) {
   return { data, user: findAppUser(data, username, password) };
 }
 function sessionUser(found) {
-  return { id: found.id, name: found.name, role: found.role, tag: pwTag(found.rec.password) };
+  return { id: found.id, name: found.name, role: found.role, tag: pwTag(found.rec.password), cid: found.cid || found.rec && found.rec.cid };
 }
 
 app.post('/api/signin', loginLimiter, accountLimiter, (req, res) => {
@@ -252,6 +261,10 @@ app.post('/api/signin', loginLimiter, accountLimiter, (req, res) => {
       let data = parseData(s.id);
       const mig = migratePlainPasswords(s, data, username, password);
       if (!mig.user) return res.status(500).json({ error: 'server_error' });
+      if (mig.user.role === 'student') {
+        if (!portal.portalEnabled(mig.data && mig.data.settings) || !mig.user.rec.activatedAt)
+          return res.status(403).json({ error: 'portal_disabled' });
+      }
       return finishSignin(res, s, sessionUser(mig.user), false);
     }
     // wrong password for the in-app username: still allow the "admin" + school-password fallback on other schools
@@ -300,7 +313,7 @@ function validEmail(v) {
 }
 /** Optional email on staff / monitors. Empty is cleared; invalid format rejects the whole write. */
 function sanitizeEmails(data) {
-  for (const k of ['users', 'monitors']) {
+  for (const k of ['users', 'monitors', 'candidates', 'portalUsers']) {
     for (const x of (data[k] || [])) {
       if (!x || typeof x !== 'object') continue;
       if (x.email == null || x.email === '') { delete x.email; continue; }
@@ -318,7 +331,7 @@ function findAccountByUsername(data, username) {
     const x = (list || []).find(y => y && typeof y === 'object' && nz(y.username).toLowerCase() === un && !isOff(y));
     return x ? { rec: x, role: role || x.role } : null;
   };
-  return pick(data.users) || pick(data.monitors, 'monitor');
+  return pick(data.users) || pick(data.monitors, 'monitor') || pick(data.portalUsers, 'student');
 }
 
 const RESET_TTL_MS = Number(process.env.RESET_CODE_TTL_MS || 15 * 60_000);
@@ -365,7 +378,7 @@ function updateAccountPassword(schoolId, role, userId, hashed) {
     const cur = store.getData(schoolId);
     if (!cur || cur.data == null) return false;
     const data = JSON.parse(cur.data);
-    const list = role === 'monitor' ? data.monitors : data.users;
+    const list = role === 'student' ? data.portalUsers : role === 'monitor' ? data.monitors : data.users;
     const rec = (list || []).find(x => x && x.id === userId);
     if (!rec || isOff(rec)) return false;
     rec.password = hashed;
@@ -404,6 +417,7 @@ app.post('/api/forgot-password', forgotIpLimiter, forgotAccountLimiter, async (r
   const acc = hits[0];
   const s = acc.school;
   if (!s || !s.active) return forgotGeneric(res);
+  if (acc.role === 'student' && !(acc.rec && acc.rec.activatedAt)) return forgotGeneric(res);
   const email = acc.rec ? normEmail(acc.rec.email) : '';
   if (!email || !validEmail(email) || email === '') return forgotGeneric(res);
   if (!mail.isConfigured()) {
@@ -462,9 +476,20 @@ app.get('/api/config', auth, (req, res) => {
 app.get('/api/me', auth, (req, res) => {
 
   const d = store.getVersion(req.school.id);
+  const data = cachedData(req.school.id);
   const u = req.appUser && { ...pubUser(req.appUser), role: req.role };
+  if (u && req.role === 'student') {
+    const pu = (data && data.portalUsers || []).find(x => x && x.id === req.appUser.id);
+    if (pu) { u.cid = pu.cid; u.username = pu.username; }
+  }
+  const portalInfo = data ? {
+    enabled: portal.portalEnabled(data.settings),
+    pending: (req.role === 'manager' || req.role === 'secretary' || req.role === 'owner')
+      ? (data.bookings || []).filter(b => b && b.status === 'pending').length
+      : undefined,
+  } : undefined;
   res.set('Cache-Control', 'no-store');
-  res.json({ school: pub(req.school), user: u || null, version: d.version, empty: !!d.empty, updated_at: d.updated_at });
+  res.json({ school: pub(req.school), user: u || null, version: d.version, empty: !!d.empty, updated_at: d.updated_at, portal: portalInfo });
 });
 
 // ---------- data ----------
@@ -472,6 +497,7 @@ app.get('/api/me', auth, (req, res) => {
 // The redacted JSON is built once per data version and reused (many devices poll the same school).
 const bodyCache = new Map();
 app.get('/api/db', auth, (req, res) => {
+  if (req.role === 'student') return res.status(403).json({ error: 'forbidden' });
   const v = store.getVersion(req.school.id);
   let c = bodyCache.get(req.school.id);
   if (!c || c.version !== v.version) {
@@ -482,13 +508,14 @@ app.get('/api/db', auth, (req, res) => {
   res.set('Cache-Control', 'no-store'); res.type('application/json').send(c.body);
 });
 app.get('/api/db/version', auth, (req, res) => {
+  if (req.role === 'student') return res.status(403).json({ error: 'forbidden' });
   const d = store.getVersion(req.school.id);
   res.set('Cache-Control', 'no-store');
   res.json({ version: d.version, updated_at: d.updated_at });
 });
 function validDB(o) {
   if (!o || typeof o !== 'object' || Array.isArray(o)) return false;
-  for (const k of ['users', 'monitors', 'vehicles', 'candidates', 'sessions', 'payments', 'expenses', 'notifs', 'requests', 'notes', 'log'])
+  for (const k of ['users', 'monitors', 'vehicles', 'candidates', 'sessions', 'payments', 'expenses', 'notifs', 'requests', 'notes', 'log', 'portalUsers', 'bookings', 'portalInvites'])
     if (o[k] !== undefined && !Array.isArray(o[k])) return false;
   if (o.settings !== undefined && (!o.settings || typeof o.settings !== 'object' || Array.isArray(o.settings))) return false;
   return Array.isArray(o.candidates) && Array.isArray(o.users);
@@ -496,12 +523,22 @@ function validDB(o) {
 // What each role may NOT change through the API (same limits as the app's screens): taken from the stored copy.
 const LOCKED = { secretary: ['users', 'monitors', 'settings'], monitor: ['users', 'monitors', 'settings', 'vehicles', 'payments', 'expenses'] };
 app.put('/api/db', auth, (req, res) => {
+  if (req.role === 'student') return res.status(403).json({ error: 'forbidden' });
   const { version, data } = req.body || {};
   if (!Number.isInteger(version) || version < 0) return res.status(400).json({ error: 'version_required' });
   if (!validDB(data)) return res.status(400).json({ error: 'invalid_data' });
   const cur = store.getData(req.school.id);
   if (cur.version !== version) return res.status(409).json({ error: 'version_conflict', version: cur.version });
   const stored = cur.data == null ? null : JSON.parse(cur.data);
+  const SERVER_OWNED = ['portalUsers', 'bookings', 'portalInvites'];
+  if (stored) {
+    for (const k of SERVER_OWNED) {
+      if (stored[k] === undefined) delete data[k];
+      else data[k] = stored[k];
+    }
+  } else {
+    for (const k of SERVER_OWNED) delete data[k];
+  }
   const locked = (req.role === 'manager' || req.role === 'owner') ? null : (LOCKED[req.role] || LOCKED.monitor);
   if (locked) {
     if (!stored) return res.status(403).json({ error: 'forbidden' });
@@ -612,6 +649,13 @@ app.get('/api/narsa/docs', auth, (req, res) => {
   res.json({ ok: true, type: out.type, title: out.title, filename: out.filename, copies: out.copies, html: out.html });
 });
 
+portal.install(app, {
+  store, mail, auth, hashPw, nz, JWT_SECRET,
+  pwTag, validEmail, finishSignin, cachedData,
+  bump: schoolId => { dataCache.delete(schoolId); bodyCache.delete(schoolId); },
+  publicUrl: mail.publicUrl,
+});
+
 app.use('/api', (req, res) => res.status(404).json({ error: 'not_found' }));
 const PUBLIC = path.join(__dirname, '..', 'public');
 // the app lives at /app (any /app/... path too, so a refresh never 404s); the landing page is /
@@ -621,6 +665,8 @@ const sendPage = file => (req, res) => { res.set('Cache-Control', 'no-cache'); r
 app.get(['/signup', '/signup/'], sendPage('signup.html'));
 app.get(['/owner/setup', '/owner/setup/'], sendPage('owner-setup.html'));
 app.get(['/owner', '/owner/'], sendPage('owner.html'));
+const sendPortal = (req, res) => { res.set('Cache-Control', 'no-cache'); res.sendFile(path.join(PUBLIC, 'portal', 'index.html')); };
+app.get(['/portal', '/portal/', '/portal/{*rest}'], sendPortal);
 app.use(express.static(PUBLIC, { index: 'index.html', maxAge: 0, redirect: false }));
 
 app.use((err, req, res, next) => {

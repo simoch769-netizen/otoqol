@@ -350,5 +350,28 @@ async function sendSchoolApprovedEmail({ to, name, username }) {
   return sendMail({ to, subject, text, html, kind: 'school approved email' });
 }
 
+
+function buildStudentInviteEmail({ name, schoolName, username, url, alreadyActive }) {
+  const school = String(schoolName || 'Otoqol');
+  const who = String(name || '');
+  const user = String(username || '');
+  const link = String(url || '');
+  const titleAr = alreadyActive ? 'رابط بوابة التلميذ' : 'دعوة إلى بوابة التلميذ';
+  const titleFr = alreadyActive ? 'Lien vers votre espace élève' : 'Invitation à l’espace élève';
+  const bodyText = alreadyActive
+    ? ('مرحبا ' + who + '،\n\nيمكنك الدخول إلى بوابة التلميذ لمدرسة ' + school + ' من هذا الرابط:\n' + link + '\n\nاسم المستخدم: ' + user + '\n\n— Otoqol')
+    : ('مرحبا ' + who + '،\n\nدعَتك مدرسة ' + school + ' إلى بوابة التلميذ. افتح الرابط التالي وعيّن كلمة السر:\n' + link + '\n\nاسم المستخدم: ' + user + '\nصالح لمدة 7 أيام.\n\n— Otoqol');
+  const bodyHtml = alreadyActive
+    ? ('<p>مرحبا ' + escapeHtml(who) + '،</p><p>يمكنك الدخول إلى بوابة التلميذ لمدرسة <b>' + escapeHtml(school) + '</b> من الرابط التالي:</p><p><a href="' + escapeHtml(link) + '">' + escapeHtml(link) + '</a></p><p>اسم المستخدم: <b dir="ltr">' + escapeHtml(user) + '</b></p>')
+    : ('<p>مرحبا ' + escapeHtml(who) + '،</p><p>دعَتك مدرسة <b>' + escapeHtml(school) + '</b> إلى بوابة التلميذ. افتح الرابط وعيّن كلمة السر:</p><p><a href="' + escapeHtml(link) + '">' + escapeHtml(link) + '</a></p><p>اسم المستخدم: <b dir="ltr">' + escapeHtml(user) + '</b></p><p>الدعوة صالحة لمدة 7 أيام.</p>');
+  return wrapEmail({ titleAr, titleFr, bodyHtml, bodyText });
+}
+
+async function sendStudentInviteEmail(info) {
+  const { subject, text, html } = buildStudentInviteEmail(info);
+  return sendMail({ to: info.to, subject, text, html, kind: 'student portal invite' });
+}
+
 module.exports = { isConfigured, sendResetEmail, sendMail, sendOwnerSignupNotice, sendSchoolApprovedEmail,
+  sendStudentInviteEmail, buildStudentInviteEmail,
   buildEmail, buildOwnerSignupEmail, buildApprovedEmail, senderFrom, ownerEmail, publicUrl, BREVO_URL };
