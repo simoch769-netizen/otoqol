@@ -12,6 +12,7 @@ const mail = require('./mail');
 const onboard = require('./onboard');
 const narsa = require('../public/narsa-docs.js');
 const portal = require('./portal');
+const dues = require('./dues');
 
 const PORT = Number(process.env.PORT || 3000);
 const HOST = process.env.HOST || '0.0.0.0';
@@ -515,7 +516,7 @@ app.get('/api/db/version', auth, (req, res) => {
 });
 function validDB(o) {
   if (!o || typeof o !== 'object' || Array.isArray(o)) return false;
-  for (const k of ['users', 'monitors', 'vehicles', 'candidates', 'sessions', 'payments', 'expenses', 'notifs', 'requests', 'notes', 'log', 'portalUsers', 'bookings', 'portalInvites'])
+  for (const k of ['users', 'monitors', 'vehicles', 'candidates', 'sessions', 'payments', 'expenses', 'notifs', 'requests', 'notes', 'log', 'portalUsers', 'bookings', 'portalInvites', 'reminders'])
     if (o[k] !== undefined && !Array.isArray(o[k])) return false;
   if (o.settings !== undefined && (!o.settings || typeof o.settings !== 'object' || Array.isArray(o.settings))) return false;
   return Array.isArray(o.candidates) && Array.isArray(o.users);
@@ -530,7 +531,7 @@ app.put('/api/db', auth, (req, res) => {
   const cur = store.getData(req.school.id);
   if (cur.version !== version) return res.status(409).json({ error: 'version_conflict', version: cur.version });
   const stored = cur.data == null ? null : JSON.parse(cur.data);
-  const SERVER_OWNED = ['portalUsers', 'bookings', 'portalInvites'];
+  const SERVER_OWNED = ['portalUsers', 'bookings', 'portalInvites', 'reminders'];
   if (stored) {
     for (const k of SERVER_OWNED) {
       if (stored[k] === undefined) delete data[k];
@@ -654,6 +655,10 @@ portal.install(app, {
   pwTag, validEmail, finishSignin, cachedData,
   bump: schoolId => { dataCache.delete(schoolId); bodyCache.delete(schoolId); },
   publicUrl: mail.publicUrl,
+});
+dues.install(app, {
+  store, mail, auth, cachedData,
+  bump: schoolId => { dataCache.delete(schoolId); bodyCache.delete(schoolId); },
 });
 
 app.use('/api', (req, res) => res.status(404).json({ error: 'not_found' }));

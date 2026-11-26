@@ -372,6 +372,21 @@ async function sendStudentInviteEmail(info) {
   return sendMail({ to: info.to, subject, text, html, kind: 'student portal invite' });
 }
 
+
+function buildDebtReminderEmail({ name, schoolName, amount, lang, text }) {
+  const school = String(schoolName || 'Otoqol');
+  const titleAr = 'تذكير بمستحقات التكوين';
+  const titleFr = 'Rappel de solde de formation';
+  const bodyText = String(text || '');
+  const htmlBody = '<p>' + escapeHtml(bodyText).replace(/\n/g, '<br>') + '</p>';
+  return wrapEmail({ titleAr, titleFr, bodyHtml: htmlBody, bodyText });
+}
+
+async function sendDebtReminderEmail(info) {
+  const { subject, text, html } = buildDebtReminderEmail(info);
+  return sendMail({ to: info.to, subject, text, html, kind: 'debt reminder email' });
+}
+
 module.exports = { isConfigured, sendResetEmail, sendMail, sendOwnerSignupNotice, sendSchoolApprovedEmail,
-  sendStudentInviteEmail, buildStudentInviteEmail,
+  sendStudentInviteEmail, buildStudentInviteEmail, sendDebtReminderEmail, buildDebtReminderEmail,
   buildEmail, buildOwnerSignupEmail, buildApprovedEmail, senderFrom, ownerEmail, publicUrl, BREVO_URL };
