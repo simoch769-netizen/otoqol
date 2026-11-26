@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
 <title>Otoqol — إنشاء حساب المالك</title>
 <link rel="icon" type="image/svg+xml" href="/assets/otoqol-icon.svg">
@@ -35,6 +35,17 @@ input:focus{outline:2px solid var(--aqua);border-color:var(--teal)}
 .btn:hover{background:var(--deep)}
 .btn:disabled{opacity:.65;cursor:default}
 .links{margin-top:16px;text-align:center;font-size:14px}
+
+html,body{max-width:100%;overflow-x:hidden}
+@media (max-width:640px){
+  .wrap{padding:16px 14px 32px}
+  header{flex-wrap:wrap;gap:8px;margin-bottom:18px}
+  .act{width:100%;justify-content:flex-end}
+  h1{font-size:22px}
+  .card{padding:20px 16px}
+  .btn{min-height:44px}
+  input,select.lg{font-size:16px;min-height:44px}
+}
 </style>
 </head>
 <body>
