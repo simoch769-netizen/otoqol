@@ -30,9 +30,9 @@ async function req(m, u, body, h = {}) {
   await req('POST', '/api/logout', {}); cookie = '';
   t('after logout -> 401', (await req('GET', '/api/db')).s === 401);
 
-  // ---------- single sign-in (/api/signin): school code + in-app username/password ----------
+  // ---------- single sign-in (/api/signin): username + password ----------
   const si = (u, p, sc = S) => req('POST', '/api/signin', { school: sc, username: u, password: p });
-  t('signin WITHOUT school -> default school of this install', (await req('POST', '/api/signin', { username: 'admin', password: '1234' })).j?.school?.code === S.toLowerCase()); cookie = '';
+  t('signin by username finds the school', (await req('POST', '/api/signin', { username: 'admin', password: '1234' })).j?.school?.code === S.toLowerCase()); cookie = '';
   t('signin without school, wrong password -> 401', (await req('POST', '/api/signin', { username: 'admin', password: 'nope' })).s === 401);
   let r = await si('admin', '1234');
   t('signin admin/1234 -> 200 + cookie + manager', r.s === 200 && r.j.user.role === 'manager' && r.j.user.id === 'u1' && /otq_sess/.test(cookie), JSON.stringify(r.j));
@@ -41,7 +41,7 @@ async function req(m, u, body, h = {}) {
   await req('POST', '/api/logout', {}); cookie = '';
   t('signin same normalisation as the app (ADMIN + Arabic digits)', (await si('  ADMIN ', '١٢٣٤')).s === 200); cookie = '';
   t('signin wrong password -> 401', (await si('admin', 'nope')).s === 401);
-  t('signin unknown school -> 401', (await si('admin', '1234', 'no-such-school-xyz')).s === 401);
+  t('signin unknown username -> 401', (await si('no-such-user-xyz', '1234')).s === 401);
   t('admin + school password refused while in-app admin exists', (await si('admin', P)).s === 401);
   t('signin missing username -> 400', (await req('POST', '/api/signin', { school: S, password: '1234' })).s === 400);
   t('signin without X-Otoqol header -> 403', (await req('POST', '/api/signin', { school: S, username: 'admin', password: '1234' }, { 'X-Otoqol': '' })).s === 403);
@@ -70,7 +70,8 @@ async function req(m, u, body, h = {}) {
     const auth = { Authorization: 'Bearer ' + AT };
     const cr = await req('POST', '/api/admin/schools', { code, name: 'Fresh', password: FP }, auth); cookie = '';
     t('admin API creates fresh school', cr.s === 200, JSON.stringify(cr.j));
-    t('fresh school: admin/1234 refused (no data yet)', (await si('admin', '1234', code)).s === 401);
+    const a1234 = await si('admin', '1234', code);
+    t('admin/1234 still signs into the school that has that in-app account', a1234.s === 200 && a1234.j.school.code === S.toLowerCase() && a1234.j.setup !== true);
     t('fresh school: other username + school password refused', (await si('boss', FP, code)).s === 401);
     r = await si('admin', FP, code); t('fresh school: admin + school password -> setup', r.s === 200 && r.j.setup === true && r.j.user.id === 'u1' && r.j.user.role === 'manager', JSON.stringify(r.j));
     t('fresh school setup session valid', (await req('GET', '/api/me')).s === 200); cookie = '';

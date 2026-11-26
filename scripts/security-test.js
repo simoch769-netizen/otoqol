@@ -113,7 +113,9 @@ const plainDB = () => ({ settings: { school: 'Sec', absLimit: 3 },
 
     // ---- input handling
     t('SQL injection in username -> plain 401', (await signin("admin' OR '1'='1", "x' OR '1'='1", nextIp())).s === 401);
-    t('SQL injection in school -> plain 401', (await req('POST', '/api/signin', { school: "x' OR 1=1 --", username: 'admin', password: '1234' }, nextIp())).s === 401);
+    const injSch = await req('POST', '/api/signin', { school: "x' OR 1=1 --", username: 'admin', password: '1234' }, nextIp());
+    t('SQL injection in unused school field is ignored (no 500)', injSch.s === 200 && injSch.j?.user?.role === 'manager');
+    t('SQL injection in school on legacy /api/login -> plain 401', (await req('POST', '/api/login', { school: "x' OR 1=1 --", password: '1234' }, nextIp())).s === 401);
     t('non-string fields -> 400', (await req('POST', '/api/signin', { username: { $ne: 1 }, password: ['1'] }, nextIp())).s === 400);
     const bad = await req('POST', '/api/signin', '{"username":', nextIp());
     t('malformed JSON -> 400 without stack trace', bad.s === 400 && !/at |node_modules|Error:/.test(bad.text));

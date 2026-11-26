@@ -130,8 +130,6 @@ const signupBody = (over = {}) => ({
     t('signup missing name -> 400', (await req('POST', '/api/signup', signupBody({ name: '' }))).j?.error === 'invalid_name');
     t('signup bad email -> 400', (await req('POST', '/api/signup', signupBody({ email: 'not-an-email' }))).j?.error === 'invalid_email');
     t('signup short password -> 400', (await req('POST', '/api/signup', signupBody({ password: '123' }))).j?.error === 'weak_password');
-    t('signup reserved code -> 400', (await req('POST', '/api/signup', signupBody({ code: 'owner' }))).j?.error === 'invalid_code');
-    t('signup taken demo code -> 400', (await req('POST', '/api/signup', signupBody({ code: 'demo' }))).j?.error === 'code_taken');
 
     const before = readCapture().length;
     const created = await req('POST', '/api/signup', signupBody());
@@ -143,16 +141,16 @@ const signupBody = (over = {}) => ({
     t('owner email has school details and /owner link', !!(notice && mailHas(notice, /مدرسة الأمل/) && mailHas(notice, /\/owner/) && mailHas(notice, /أحمد بن علي/) && mailHas(notice, /manager\.amal@example\.com/)));
     t('owner email does not contain the client password', mailLacksPassword(notice, 'AmalPass1'));
 
-    const dup = await req('POST', '/api/signup', signupBody({ code: 'other-code', email: 'manager.amal@example.com' }));
+    const dup = await req('POST', '/api/signup', signupBody({ email: 'manager.amal@example.com', username: 'ahmad2' }));
     t('duplicate contact email rejected', dup.s === 400 && dup.j.error === 'email_used');
+    const dupUser = await req('POST', '/api/signup', signupBody({ email: 'other.amal@example.com', username: 'AHMAD', phone: '0612345679' }));
+    t('duplicate username rejected (case-insensitive)', dupUser.s === 400 && dupUser.j.error === 'username_taken');
 
-    // pending cannot sign in (empty school uses demo; explicit code is pending)
-    const pendLogin = await req('POST', '/api/signin', { school: code, username: 'ahmad', password: 'AmalPass1' });
+    const pendLogin = await req('POST', '/api/signin', { username: 'ahmad', password: 'AmalPass1' });
     t('pending school login -> 403 school_pending', pendLogin.s === 403 && pendLogin.j.error === 'school_pending', JSON.stringify(pendLogin.j));
 
-    // default/demo school still works with empty code
     const demoSi = await req('POST', '/api/signin', { username: 'admin', password: SCHOOL_PW });
-    t('empty school code still signs into default demo (fresh setup)', demoSi.s === 200 && demoSi.j.school.code === 'demo' && demoSi.j.setup === true, JSON.stringify(demoSi.j));
+    t('demo school still works with admin + school password (fresh setup)', demoSi.s === 200 && demoSi.j.school.code === 'demo' && demoSi.j.setup === true, JSON.stringify(demoSi.j));
     // seed school has no in-app users yet — admin+school password is the setup path. Good.
 
     // owner auth
@@ -175,9 +173,9 @@ const signupBody = (over = {}) => ({
     t('approve pending school -> active', appr.s === 200 && appr.j.school.status === 'active');
     const welcome = await waitForMail(beforeAppr);
     t('client approval email goes to the manager', !!(welcome && welcome.to === 'manager.amal@example.com'));
-    t('approval email has school code and /app link, no password', !!(welcome && mailHas(welcome, new RegExp(code)) && mailHas(welcome, /\/app/) && mailLacksPassword(welcome, 'AmalPass1')));
+    t('approval email has username and /app link, no school code, no password', !!(welcome && mailHas(welcome, /ahmad/) && mailHas(welcome, /\/app/) && !mailHas(welcome, /رمز المدرسة/) && !mailHas(welcome, /Code de l.école/) && !mailHas(welcome, new RegExp('\\b'+code+'\\b')) && mailLacksPassword(welcome, 'AmalPass1')));
 
-    const okLogin = await req('POST', '/api/signin', { school: code, username: 'ahmad', password: 'AmalPass1' });
+    const okLogin = await req('POST', '/api/signin', { username: 'ahmad', password: 'AmalPass1' });
     t('approved school signs in with its own manager', okLogin.s === 200 && okLogin.j.user.role === 'manager' && okLogin.j.school.code === code, JSON.stringify(okLogin.j));
     t('session cookie issued', !!okLogin.ck);
     const me = await req('GET', '/api/me', undefined, {}, okLogin.ck);
@@ -186,45 +184,65 @@ const signupBody = (over = {}) => ({
     // second school + forgot-password per school
     const b2 = signupBody({
       name: 'Auto Ecole Najah', city: 'Rabat', managerName: 'Sara Naji',
-      email: 'sara.najah@example.com', phone: '0611223344', username: 'sara', password: 'NajahPass1', code: 'najah',
+      email: 'sara.najah@example.com', phone: '0611223344', username: 'sara', password: 'NajahPass1',
     });
     const s2 = await req('POST', '/api/signup', b2);
-    t('second school can choose its code', s2.s === 200 && s2.j.code === 'najah');
-    await req('POST', '/api/owner/schools/najah/approve', {}, {}, ock);
+    t('second school gets an auto code from its name', s2.s === 200 && s2.j.code === 'auto-ecole-najah');
+    const code2 = s2.j.code;
+    await req('POST', '/api/owner/schools/' + code2 + '/approve', {}, {}, ock);
     const fpBefore = readCapture().length;
-    const fp = await req('POST', '/api/forgot-password', { school: 'najah', username: 'sara' });
-    t('forgot-password for the second school -> generic ok', fp.s === 200 && fp.j.ok === true);
+    const fp = await req('POST', '/api/forgot-password', { username: 'sara' });
+    t('forgot-password resolves school from username -> generic ok', fp.s === 200 && fp.j.ok === true);
     const fpMail = await waitForMail(fpBefore);
     t('reset email went to the second school manager only', !!(fpMail && fpMail.to === 'sara.najah@example.com'));
     const resetCode = (fpMail && String(fpMail.text || '').match(/(?:^|\n)(\d{6})(?:\n|$)/) || [])[1];
     t('reset email contains a 6-digit code', !!resetCode);
-    const reset = await req('POST', '/api/reset-password', { school: 'najah', username: 'sara', code: resetCode, password: 'NajahPass2' });
-    t('reset-password with school code works', reset.s === 200 && reset.j.ok === true);
-    t('new password works on that school', (await req('POST', '/api/signin', { school: 'najah', username: 'sara', password: 'NajahPass2' })).s === 200);
-    t('old password fails on that school', (await req('POST', '/api/signin', { school: 'najah', username: 'sara', password: 'NajahPass1' })).s === 401);
-    t('other school manager password unchanged', (await req('POST', '/api/signin', { school: code, username: 'ahmad', password: 'AmalPass1' })).s === 200);
+    const reset = await req('POST', '/api/reset-password', { username: 'sara', code: resetCode, password: 'NajahPass2' });
+    t('reset-password resolves school from username', reset.s === 200 && reset.j.ok === true);
+    t('new password works on that school', (await req('POST', '/api/signin', { username: 'sara', password: 'NajahPass2' })).s === 200);
+    t('old password fails on that school', (await req('POST', '/api/signin', { username: 'sara', password: 'NajahPass1' })).s === 401);
+    t('other school manager password unchanged', (await req('POST', '/api/signin', { username: 'ahmad', password: 'AmalPass1' })).s === 200);
 
     // reject + deactivate
     const s3 = await req('POST', '/api/signup', signupBody({
       name: 'Ecole Atlas', city: 'Fes', managerName: 'Omar', email: 'omar.atlas@example.com',
-      phone: '0699887766', username: 'omar', password: 'AtlasPass1', code: 'atlas',
+      phone: '0699887766', username: 'omar', password: 'AtlasPass1',
     }));
-    t('third school signup ok', s3.s === 200 && s3.j.code === 'atlas');
-    const rej = await req('POST', '/api/owner/schools/atlas/reject', {}, {}, ock);
+    t('third school signup ok', s3.s === 200 && s3.j.code === 'ecole-atlas');
+    const rej = await req('POST', '/api/owner/schools/ecole-atlas/reject', {}, {}, ock);
     t('reject pending school', rej.s === 200 && rej.j.school.status === 'rejected');
-    t('rejected login -> school_rejected', (await req('POST', '/api/signin', { school: 'atlas', username: 'omar', password: 'AtlasPass1' })).j?.error === 'school_rejected');
+    t('rejected login -> school_rejected', (await req('POST', '/api/signin', { username: 'omar', password: 'AtlasPass1' })).j?.error === 'school_rejected');
 
-    const deact = await req('POST', '/api/owner/schools/najah/deactivate', {}, {}, ock);
+    const deact = await req('POST', '/api/owner/schools/' + code2 + '/deactivate', {}, {}, ock);
     t('deactivate an active school', deact.s === 200 && deact.j.school.status === 'inactive');
-    t('deactivated login -> school_inactive', (await req('POST', '/api/signin', { school: 'najah', username: 'sara', password: 'NajahPass2' })).j?.error === 'school_inactive');
-    const act = await req('POST', '/api/owner/schools/najah/activate', {}, {}, ock);
+    t('deactivated login -> school_inactive', (await req('POST', '/api/signin', { username: 'sara', password: 'NajahPass2' })).j?.error === 'school_inactive');
+    const act = await req('POST', '/api/owner/schools/' + code2 + '/activate', {}, {}, ock);
     t('activate a deactivated school', act.s === 200 && act.j.school.status === 'active');
-    t('reactivated school can sign in', (await req('POST', '/api/signin', { school: 'najah', username: 'sara', password: 'NajahPass2' })).s === 200);
+    t('reactivated school can sign in', (await req('POST', '/api/signin', { username: 'sara', password: 'NajahPass2' })).s === 200);
 
-    const added = await req('POST', '/api/owner/schools', { name: 'Ecole Manual', code: 'manual1', managerUsername: 'manal', managerPassword: 'ManualPw1' }, {}, ock);
-    t('owner can add a school account', added.s === 200 && added.j.school && added.j.school.code === 'manual1' && added.j.school.status === 'active', JSON.stringify(added.j));
-    t('manually added school signs in', (await req('POST', '/api/signin', { school: 'manual1', username: 'manal', password: 'ManualPw1' })).s === 200 && (await req('POST', '/api/signin', { school: 'manual1', username: 'manal', password: 'ManualPw1' })).j.user.role === 'manager');
-    t('add school rejects taken code', (await req('POST', '/api/owner/schools', { name: 'Ecole X2', code: 'manual1', managerUsername: 'xxuser', managerPassword: 'ManualPw2' }, {}, ock)).j?.error === 'code_taken');
+    const added = await req('POST', '/api/owner/schools', { name: 'Ecole Manual', managerUsername: 'manal', managerPassword: 'ManualPw1' }, {}, ock);
+    t('owner can add a school account', added.s === 200 && added.j.school && added.j.school.code === 'ecole-manual' && added.j.school.status === 'active', JSON.stringify(added.j));
+    t('manually added school signs in', (await req('POST', '/api/signin', { username: 'manal', password: 'ManualPw1' })).s === 200 && (await req('POST', '/api/signin', { username: 'manal', password: 'ManualPw1' })).j.user.role === 'manager');
+    t('add school rejects taken username', (await req('POST', '/api/owner/schools', { name: 'Ecole X2', managerUsername: 'Manal', managerPassword: 'ManualPw2' }, {}, ock)).j?.error === 'username_taken');
+
+    const AH = { Authorization: 'Bearer ' + ADMIN };
+    const staff = (un, pw) => ({ settings: { school: 'Dup', absLimit: 3 }, users: [{ id: 'u1', name: 'M', role: 'manager', username: un, password: pw }], monitors: [], vehicles: [], candidates: [], sessions: [], payments: [], expenses: [], notifs: [], requests: [], notes: [], log: [] });
+    const d1 = await req('POST', '/api/admin/schools', { code: 'dup1', name: 'Dup One', password: 'DupSchool1!' }, AH);
+    const d2 = await req('POST', '/api/admin/schools', { code: 'dup2', name: 'Dup Two', password: 'DupSchool2!' }, AH);
+    t('admin can create fixture schools', d1.s === 200 && d2.s === 200);
+    t('admin import same username different passwords', (await req('PUT', '/api/admin/schools/dup1/import', { data: staff('shareduser', 'DupPassA1') }, AH)).s === 200
+      && (await req('PUT', '/api/admin/schools/dup2/import', { data: staff('shareduser', 'DupPassB1') }, AH)).s === 200);
+    t('duplicate username: matching password picks the right school', (await req('POST', '/api/signin', { username: 'shareduser', password: 'DupPassB1' })).j?.school?.code === 'dup2');
+    t('duplicate username: other password picks the other school', (await req('POST', '/api/signin', { username: 'shareduser', password: 'DupPassA1' })).j?.school?.code === 'dup1');
+    t('duplicate username + same password is ambiguous', (await req('PUT', '/api/admin/schools/dup2/import', { data: staff('shareduser', 'DupPassA1') }, AH)).s === 200
+      && (await req('POST', '/api/signin', { username: 'shareduser', password: 'DupPassA1' })).j?.error === 'ambiguous_login');
+
+    const manalLogin = await req('POST', '/api/signin', { username: 'manal', password: 'ManualPw1' });
+    const cur = await req('GET', '/api/db', undefined, {}, manalLogin.ck);
+    const data = cur.j.data;
+    data.monitors = [{ id: 'm9', name: 'X', username: 'sara', password: 'MonitorPw1' }];
+    const takenPut = await req('PUT', '/api/db', { version: cur.j.version, data }, {}, manalLogin.ck);
+    t('manager cannot add a monitor username used in another school', takenPut.s === 400 && takenPut.j.error === 'username_taken');
 
     const lo = await req('POST', '/api/owner/logout', {}, {}, ock);
     t('owner logout', lo.s === 200);
@@ -257,15 +275,13 @@ const signupBody = (over = {}) => ({
         await page.fill('input[name=username]', 'youssef');
         await page.fill('input[name=password]', 'NourPass1');
         await page.fill('input[name=password2]', 'NourPass1');
-        await page.fill('input[name=code]', 'nour');
         await page.click('button[type=submit]');
         await page.waitForSelector('[data-oq-signup-success]', { timeout: 10000 });
-        t('signup UI shows awaiting-approval message and code', (await page.locator('[data-oq-signup-code]').innerText()).trim() === 'nour');
+        t('signup UI shows awaiting-approval message and no school code', (await page.locator('[data-oq-signup-success]').count()) === 1 && (await page.locator('[data-oq-signup-code]').count()) === 0 && !/رمز مدرستك|ستحتاجه لتسجيل الدخول/.test(await page.locator('[data-oq-signup-success]').innerText()));
         await page.screenshot({ path: path.join(SHOTS, 'signup-success-ar.png'), fullPage: true });
 
         await page.goto(B + '/app'); await page.waitForSelector('[data-oq-signin]');
-        t('login UI has school code field and signup link', (await page.locator('[data-oq-signin] [data-oq-school]').count()) === 1 && (await page.locator('[data-oq-signup-link]').count()) === 1);
-        await page.fill('[data-oq-signin] [data-oq-school]', 'nour');
+        t('login UI is username + password only, with signup link', (await page.locator('[data-oq-signin] input').count()) === 2 && (await page.locator('[data-oq-signin] [data-oq-school]').count()) === 0 && (await page.locator('[data-oq-signup-link]').count()) === 1);
         await page.fill('[data-oq-signin] input[name=username]', 'youssef');
         await page.fill('[data-oq-signin] input[name=password]', 'NourPass1');
         await page.click('[data-oq-signin] button.b.pri');
@@ -281,12 +297,15 @@ const signupBody = (over = {}) => ({
         await page.click('#go');
         await page.waitForSelector('[data-oq-owner-list]', { timeout: 10000 });
         t('owner dashboard shows totals', (await page.locator('[data-oq-totals]').count()) === 1 && (await page.locator('[data-oq-total=schools]').count()) === 1);
-        t('owner UI lists the pending school', (await page.locator('[data-oq-school=nour][data-oq-status=pending]').count()) === 1);
+        t('owner add-school form has no school-code field', (await page.locator('[data-oq-add-school] input[name=code]').count()) === 0);
+        const nourCard = page.locator('.sch', { hasText: 'مدرسة النور' });
+        t('owner UI lists the pending school', (await nourCard.count()) === 1 && (await nourCard.getAttribute('data-oq-status')) === 'pending');
         t('owner UI has add-school form', (await page.locator('[data-oq-add-school]').count()) === 1);
         await page.screenshot({ path: path.join(SHOTS, 'owner-list-ar.png'), fullPage: true });
-        await page.click('[data-oq-approve=nour]');
-        await page.waitForSelector('[data-oq-school=nour][data-oq-status=active]', { timeout: 10000 });
-        t('owner can approve from the UI', (await page.locator('[data-oq-school=nour][data-oq-status=active]').count()) === 1);
+        const nourCode = await nourCard.getAttribute('data-oq-school');
+        await page.click('[data-oq-approve="'+nourCode+'"]');
+        await page.waitForSelector('[data-oq-school="'+nourCode+'"][data-oq-status=active]', { timeout: 10000 });
+        t('owner can approve from the UI', (await page.locator('[data-oq-school="'+nourCode+'"][data-oq-status=active]').count()) === 1);
         await page.screenshot({ path: path.join(SHOTS, 'owner-approved-ar.png'), fullPage: true });
       } finally { await browser.close(); }
     }

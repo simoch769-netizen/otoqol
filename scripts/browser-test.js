@@ -8,7 +8,7 @@ const SHOTS = __dirname + '/../test-shots/';
 let fails = 0; const t = (n, ok, x) => { console.log((ok ? 'PASS ' : 'FAIL ') + n + (x ? '  ' + x : '')); if (!ok) fails++; };
 const api = async (u, cookie) => (await fetch(B + u, { headers: { Cookie: cookie } })).json();
 async function cookieOf(ctx) { const c = (await ctx.cookies()).find(x => x.name === 'otq_sess'); return c ? 'otq_sess=' + c.value : ''; }
-/** Sign-in screen: optional school code (empty = default school) + username + password. */
+/** Sign-in screen: username + password only. */
 async function signIn(page, base, user, pass, opts = {}) {
   if (!opts.noGoto) await page.goto(base + '/app');
   await page.waitForSelector('[data-oq-signin]', { timeout: 30000 });
@@ -68,12 +68,24 @@ const waitSaved = page => page.waitForSelector('[data-oq-sync=ok]', { timeout: 1
   await pa.click('.nav button:has-text("المالية")'); await waitSaved(pa);
   await pa.click('.top [data-oq-logout]'); await pa.waitForSelector('[data-oq-signin]', { timeout: 15000 });
   t('header logout (from Finance) -> sign-in screen, still at /app', new URL(pa.url()).pathname === '/app');
-  t('sign-in screen: optional school code + username + password', (await pa.locator('[data-oq-signin] input').count()) === 3 && (await pa.locator('[data-oq-signin] [data-oq-school]').count()) === 1);
+  t('sign-in screen: username + password only', (await pa.locator('[data-oq-signin] input').count()) === 2 && (await pa.locator('[data-oq-signin] [data-oq-school]').count()) === 0);
   t('sign-in screen has a signup link', (await pa.locator('[data-oq-signup-link]').count()) === 1);
   t('logout cleared the session cookie', !(await cookieOf(A)));
   await signIn(pa, B, 'admin', 'wrong', { noGoto: true });
   await pa.waitForSelector('[data-oq-signin] .al.bad', { timeout: 10000 }); await pa.screenshot({ path: SHOTS + '3-signin-error.png' });
   t('wrong password -> error on the same screen', /غير صحيحة/.test(await pa.locator('[data-oq-signin] .al.bad').innerText()));
+  // first-time setup leaves the secretary password blank; set one via the API before checking her role
+  {
+    const r = await fetch(B + '/api/signin', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Otoqol': '1' }, body: JSON.stringify({ username: 'admin', password: 'Demo2026!' }) });
+    const m = String(r.headers.get('set-cookie') || '').match(/otq_sess=([^;]+)/);
+    const ck = m ? 'otq_sess=' + m[1] : '';
+    const db = await (await fetch(B + '/api/db', { headers: { Cookie: ck } })).json();
+    const sec = (db.data.users || []).find(u => u && (u.role === 'secretary' || String(u.username).toLowerCase() === 'secretary'));
+    if (sec) sec.password = '1234';
+    const put = await fetch(B + '/api/db', { method: 'PUT', headers: { 'Content-Type': 'application/json', 'X-Otoqol': '1', Cookie: ck }, body: JSON.stringify({ version: db.version, data: db.data }) });
+    if (!put.ok) throw new Error('could not set secretary password: ' + put.status);
+    await fetch(B + '/api/logout', { method: 'POST', headers: { 'X-Otoqol': '1', 'Content-Type': 'application/json', Cookie: ck }, body: '{}' });
+  }
   // role permissions still apply: secretary has no "monitors" page
   await signIn(pa, B, 'secretary', '1234', { noGoto: true }); await pa.waitForSelector('.nav', { timeout: 20000 });
   t('secretary signed in with role permissions (no monitors page)', (await pa.locator('.nav button:has-text("المدربون")').count()) === 0 && (await pa.locator('.nav button:has-text("المترشحون")').count()) === 1);
