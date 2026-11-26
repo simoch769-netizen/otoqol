@@ -136,6 +136,7 @@ html,body{max-width:100%;overflow-x:hidden}
 <div id="root"><p style="text-align:center;margin-top:20vh;font-family:Tahoma,sans-serif">جارٍ التحميل... (يتطلب الاتصال بالإنترنت في المرة الأولى)</p></div>
 <script src="/assets/otoqol-drive.js"></script>
 <script src="/narsa-docs.js"></script>
+<script src="/templates.js"></script>
 <script type="text/babel">
 
 const {useState,useEffect}=React;
@@ -417,6 +418,75 @@ Object.assign(DICT.en,{
   "البريد":"Email",
   "الكل":"All"
 });
+
+Object.assign(DICT.fr,{
+  "قوالب الرسائل":"Modèles de messages",
+  "لغة المدرسة الافتراضية":"Langue par défaut de l’école",
+  "اللغة المفضلة للرسائل":"Langue préférée des messages",
+  "لغة الواجهة":"Langue de l’interface",
+  "حسب لغة المدرسة":"Selon la langue de l’école",
+  "الحقول المتاحة":"Champs disponibles",
+  "معاينة":"Aperçu",
+  "استعادة النص الافتراضي":"Rétablir le texte par défaut",
+  "تم حفظ القالب":"Modèle enregistré",
+  "تم استعادة النص الافتراضي":"Texte par défaut rétabli",
+  "تعذر حفظ القالب":"Impossible d’enregistrer le modèle",
+  "تذكير المستحقات":"Rappel de créances",
+  "تذكير الحصة":"Rappel de cours",
+  "تأكيد الحصة":"Confirmation de cours",
+  "تغيير الحصة":"Modification de cours",
+  "إلغاء الحصة":"Annulation de cours",
+  "رفض الحجز":"Refus de réservation",
+  "استدعاء الامتحان":"Convocation à l’examen",
+  "ترحيب وتسجيل":"Bienvenue / inscription",
+  "دعوة بوابة التلميذ":"Invitation à l’espace élève",
+  "وصل الأداء":"Reçu de paiement",
+  "إشعار الغياب":"Avis d’absence",
+  "إرسال الترحيب عبر واتساب":"Envoyer le message de bienvenue via WhatsApp",
+  "استدعاء عبر واتساب":"Convocation WhatsApp",
+  "إرسال الوصل عبر واتساب":"Envoyer le reçu via WhatsApp",
+  "تذكير الحصة عبر واتساب":"Rappel de cours via WhatsApp",
+  "إعلام عبر واتساب":"Prévenir via WhatsApp",
+  "العربية":"Arabe",
+  "الفرنسية":"Français",
+  "الإنجليزية":"Anglais",
+  "نص القالب":"Texte du modèle",
+  "تُستخدم هذه القوالب في واتساب والبريد حسب لغة كل مترشح.":"Ces modèles sont utilisés pour WhatsApp et l’e-mail selon la langue de chaque candidat."
+});
+Object.assign(DICT.en,{
+  "قوالب الرسائل":"Message templates",
+  "لغة المدرسة الافتراضية":"School default language",
+  "اللغة المفضلة للرسائل":"Preferred message language",
+  "لغة الواجهة":"Interface language",
+  "حسب لغة المدرسة":"Use the school default",
+  "الحقول المتاحة":"Available placeholders",
+  "معاينة":"Preview",
+  "استعادة النص الافتراضي":"Reset to default",
+  "تم حفظ القالب":"Template saved",
+  "تم استعادة النص الافتراضي":"Default text restored",
+  "تعذر حفظ القالب":"Could not save the template",
+  "تذكير المستحقات":"Debt reminder",
+  "تذكير الحصة":"Lesson reminder",
+  "تأكيد الحصة":"Lesson confirmed",
+  "تغيير الحصة":"Lesson changed",
+  "إلغاء الحصة":"Lesson cancelled",
+  "رفض الحجز":"Booking rejected",
+  "استدعاء الامتحان":"Exam convocation",
+  "ترحيب وتسجيل":"Welcome / registration",
+  "دعوة بوابة التلميذ":"Student portal invite",
+  "وصل الأداء":"Payment receipt",
+  "إشعار الغياب":"Absence notice",
+  "إرسال الترحيب عبر واتساب":"Send welcome via WhatsApp",
+  "استدعاء عبر واتساب":"WhatsApp convocation",
+  "إرسال الوصل عبر واتساب":"Send receipt via WhatsApp",
+  "تذكير الحصة عبر واتساب":"Lesson reminder via WhatsApp",
+  "إعلام عبر واتساب":"Notify via WhatsApp",
+  "العربية":"Arabic",
+  "الفرنسية":"French",
+  "الإنجليزية":"English",
+  "نص القالب":"Template text",
+  "تُستخدم هذه القوالب في واتساب والبريد حسب لغة كل مترشح.":"These templates are used for WhatsApp and email in each candidate’s language."
+});
 const _t=s=>{if(typeof s!=='string')return s;if(LANG==='ar'){if(DICT_AR[s]!==undefined)return DICT_AR[s];const a=s.match(/^(\s*)([\s\S]*?)(\s*)$/);return a[2]&&DICT_AR[a[2]]!==undefined?a[1]+DICT_AR[a[2]]+a[3]:s;}const d=DICT[LANG];if(d[s]!==undefined)return d[s];const m=s.match(/^(\s*)([\s\S]*?)(\s*)$/);if(m[2]&&d[m[2]]!==undefined)return m[1]+d[m[2]]+m[3];return s;};
 const lbl=o=>new Proxy(o,{get:(o2,k)=>(typeof k==='string'&&Object.prototype.hasOwnProperty.call(o2,k))?_t(o2[k]):o2[k]});
 const KEY='autoecole_db_v1';
@@ -434,6 +504,19 @@ const dayLbl=d=>new Date(d+'T00:00:00').toLocaleDateString(LANG==='ar'?'ar-MA':L
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
 const emailOk=s=>{s=String(s||'').trim();return !s||(s.length<=120&&/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(s));};
 const wa=(phone,text)=>{let p=(phone||'').replace(/\D/g,'');if(p.startsWith('00'))p=p.slice(2);else if(p.startsWith('0'))p='212'+p.slice(1);else if(p.length===9&&/^[5-7]/.test(p))p='212'+p;return 'https://wa.me/'+p+'?text='+encodeURIComponent(text);};
+const tplLang=(c,db)=>{const T=window.OQTemplates;return T?T.studentLang(c,db&&db.settings,db&&db.messageTemplates):(c&&c.msgLang)||'ar';};
+const tplVars=(db,c,extra)=>{
+  const school=(db.settings&&db.settings.school)||'Otoqol';
+  return Object.assign({school:school,student:(c&&c.name)||'',phone:(db.settings&&db.settings.phone)||''},extra||{});
+};
+const tplText=(type,db,c,extra)=>{
+  const T=window.OQTemplates;if(!T)return '';
+  const lang=tplLang(c,db);
+  const vars=tplVars(db,c,extra);
+  if(vars.type==='code'||vars.type==='conduite'||vars.type==='drive')vars.type=T.typeLabel(vars.type,lang);
+  return T.render(type,vars,lang,db.messageTemplates);
+};
+const tplWa=(type,db,c,extra)=>{if(!c||!c.phone)return '';return wa(c.phone,tplText(type,db,c,extra));};
 const statusLbl=lbl({planned:'مبرمجة',present:'حاضر',late:'متأخر',absent:'غائب'});
 const typeLbl=lbl({code:'كود (نظري)',conduite:'تطبيقي (سياقة)'});
 const stageLbl=lbl({reg:'مرحلة التسجيل',code:'مرحلة الكود',drive:'مرحلة السياقة',done:'حصل على الرخصة'});
@@ -487,11 +570,20 @@ function Prompt({title,label,okLabel,onOk,onClose,required}){
 /* ================= الحصص ================= */
 const hFmt=t=>{const p=String(t).split(':');return Number(p[0])+'h'+(p[1]&&p[1]!=='00'?p[1]:'');};
 const sessionMsg=(db,s,c,mode)=>{
+  const T=window.OQTemplates;
+  const typ=T?T.sessionTypeForMode(mode):(mode==='cancel'?'lesson_cancelled':mode==='update'?'lesson_changed':mode==='remind'?'lesson_reminder':'lesson_confirmed');
+  const mon=db.monitors.find(x=>x.id===s.monitorId);
+  const text=tplText(typ,db,c,{date:s.date,time:hFmt(s.time),instructor:mon?mon.name:'',type:s.type});
+  if(text)return text;
   const kind=s.type==='code'?_t('wa:الكود'):_t('wa:السياقة');
   const line=(mode==='cancel'?_t('wa:الحصة ديال {k} تلغات:'):mode==='update'?_t('wa:الحصة ديال {k} تبدلات:'):_t('wa:الحصة ديال {k} تأكدات:')).replace('{k}',kind);
   return _t('wa:السلام ')+c.name+_t('wa:،')+'\n\n'+line+'\n'+s.date+' · '+hFmt(s.time)+'\n\n'+db.settings.school;
 };
-const absMsg=(db,c,s)=>_t('wa:السلام ')+c.name+_t('wa:،')+'\n\n'+(s?_t('wa:كنتي غايب(ة) فحصة {k} ديال {d}.').replace('{k}',s.type==='code'?_t('wa:الكود'):_t('wa:السياقة')).replace('{d}',s.date+' · '+hFmt(s.time)):_t('wa:كنتي غايب(ة) فالحصة الأخيرة ديالك.'))+'\n'+_t('wa:عافاك تواصل معانا باش نحددو موعد جديد.')+'\n\n'+db.settings.school;
+const absMsg=(db,c,s)=>{
+  const text=tplText('absence',db,c,{date:s?s.date:'',type:s?s.type:'',time:s?hFmt(s.time):''});
+  if(text)return text;
+  return _t('wa:السلام ')+c.name+_t('wa:،')+'\n\n'+(s?_t('wa:كنتي غايب(ة) فحصة {k} ديال {d}.').replace('{k}',s.type==='code'?_t('wa:الكود'):_t('wa:السياقة')).replace('{d}',s.date+' · '+hFmt(s.time)):_t('wa:كنتي غايب(ة) فالحصة الأخيرة ديالك.'))+'\n'+_t('wa:عافاك تواصل معانا باش نحددو موعد جديد.')+'\n\n'+db.settings.school;
+};
 function SendModal({s,mode,onClose}){
   const {db}=useC();
   const [done,setDone]=useState({});
@@ -576,6 +668,7 @@ function SessionCard({s,monitorMode}){
       {veh&&<span className="meta">🚗 {veh.plate}</span>}
       <span className="sp"></span>
       {!isMon&&<button className="b wa" title={_t("واتساب لكل المترشحين")} onClick={()=>openSend({mode:'new',s:s})}><WaIcon/></button>}
+      {!isMon&&<button type="button" className="b wa" data-oq-lesson-remind="" title={_t("تذكير الحصة عبر واتساب")} onClick={()=>openSend({mode:'remind',s:s})}>{_t("تذكير الحصة")}</button>}
       {!isMon&&<><button className="b" onClick={()=>setEdit(true)}>{_t("تعديل")}</button><button className="b del" onClick={del}>{_t("حذف")}</button></>}
       {isMon&&!pending&&<button className="b" onClick={()=>setReq(true)}>{_t("طلب تغيير")}</button>}
       {isMon&&pending&&<span className="bd warn">{_t("طلب التغيير فالانتظار")}</span>}
@@ -681,12 +774,12 @@ function NarsaDocsModal({c,onClose}){
 }
 
 
-const BASIC=['name','firstName','lastName','cin','phone','email','address','license','price','codeHours','driveHours','stage','medical','notes','nationality','birthDate','birthPlace','narsaRef','examKind','permitNo','permitIssuePlace','permitIssueDate','contractNo','contractDate','monitorId'];
+const BASIC=['name','firstName','lastName','cin','phone','email','msgLang','address','license','price','codeHours','driveHours','stage','medical','notes','nationality','birthDate','birthPlace','narsaRef','examKind','permitNo','permitIssuePlace','permitIssueDate','contractNo','contractDate','monitorId'];
 function CandidateModal({id,onClose,startNarsa}){
   const {db,upd,user,L}=useC();
   const c=db.candidates.find(x=>x.id===id);
   const [tab,setTab]=useState('info');
-  const [f,setF]=useState(c?Object.assign({},c):{name:'',firstName:'',lastName:'',cin:'',phone:'',email:'',address:'',license:'B',price:0,codeHours:10,driveHours:20,stage:'reg',medical:false,notes:'',nationality:'مغربية',birthDate:'',birthPlace:'',narsaRef:'',examKind:'first',permitNo:'',permitIssuePlace:'',permitIssueDate:'',contractNo:'',contractDate:'',monitorId:''});
+  const [f,setF]=useState(c?Object.assign({},c):{name:'',firstName:'',lastName:'',cin:'',phone:'',email:'',msgLang:'',address:'',license:'B',price:0,codeHours:10,driveHours:20,stage:'reg',medical:false,notes:'',nationality:'مغربية',birthDate:'',birthPlace:'',narsaRef:'',examKind:'first',permitNo:'',permitIssuePlace:'',permitIssueDate:'',contractNo:'',contractDate:'',monitorId:''});
   const [ex,setEx]=useState({type:'code',date:today(),result:'في الانتظار'});
   const [pay,setPay]=useState({amount:'',date:today(),note:''});
   const [narsaOpen,setNarsaOpen]=useState(!!startNarsa);
@@ -754,6 +847,12 @@ function CandidateModal({id,onClose,startNarsa}){
         <F l={_t("رقم تسجيل المرشح (Référence web)")}><input value={f.narsaRef||''} onChange={e=>set('narsaRef',e.target.value)}/></F>
         <F l={_t("الهاتف")}><input value={f.phone} onChange={e=>set('phone',e.target.value)}/></F>
         <F l={_t("البريد الإلكتروني للتلميذ")}><input type="email" dir="ltr" data-oq-candidate-email="" value={f.email||''} placeholder={_t("اختياري — لإرسال الدعوة")} onChange={e=>set('email',e.target.value)}/></F>
+        <F l={_t("اللغة المفضلة للرسائل")}><select data-oq-candidate-msglang="" className="lg" value={f.msgLang||''} onChange={e=>set('msgLang',e.target.value)}>
+          <option value="">{_t("حسب لغة المدرسة")}</option>
+          <option value="ar">{_t("العربية")}</option>
+          <option value="fr">{_t("الفرنسية")}</option>
+          <option value="en">{_t("الإنجليزية")}</option>
+        </select></F>
         <F l={_t("المونيتور المعيّن")}><select data-oq-candidate-monitor="" value={f.monitorId||''} onChange={e=>set('monitorId',e.target.value)}><option value="">{_t("— اختار —")}</option>{db.monitors.map(m=><option key={m.id} value={m.id}>{m.name}</option>)}</select></F>
         <F l={_t("العنوان")}><input value={f.address} onChange={e=>set('address',e.target.value)}/></F>
         <F l={_t("نوع الرخصة")}><select value={f.license} onChange={e=>set('license',e.target.value)}>{LICENSES.map(l=><option key={l}>{l}</option>)}</select></F>
@@ -764,11 +863,11 @@ function CandidateModal({id,onClose,startNarsa}){
         <F l={_t("الشهادة الطبية")}><select value={f.medical?'1':'0'} onChange={e=>set('medical',e.target.value==='1')}><option value="0">{_t("ناقصة")}</option><option value="1">{_t("متوفرة")}</option></select></F>
       </div>
       <F l={_t("ملاحظات")}><textarea rows="2" value={f.notes||''} onChange={e=>set('notes',e.target.value)}/></F>
-      <div className="row"><button className="b pri" onClick={save}>{_t("حفظ")}</button>{c&&staffDel&&<button className="b del" onClick={delC}>{_t("حذف المترشح")}</button>}</div>
+      <div className="row"><button className="b pri" onClick={save}>{_t("حفظ")}</button>{c&&c.phone&&user.role!=='monitor'&&<a className="b wa" data-oq-welcome-wa="" target="_blank" rel="noreferrer" href={tplWa('welcome',db,c)} title={_t("إرسال الترحيب عبر واتساب")}><WaIcon/> {_t("ترحيب وتسجيل")}</a>}{c&&staffDel&&<button className="b del" onClick={delC}>{_t("حذف المترشح")}</button>}</div>
     </div>}
     {tab==='exams'&&c&&<div>
       <div className="tw"><table><thead><tr><th>{_t("النوع")}</th><th>{_t("التاريخ")}</th><th>{_t("النتيجة")}</th><th></th></tr></thead><tbody>
-        {(c.exams||[]).map(e=><tr key={e.id}><td>{e.type==='code'?_t('كود'):_t('سياقة')}</td><td>{e.date}</td><td><select value={e.result} onChange={ev=>setExRes(e.id,ev.target.value)}><option value="في الانتظار">{_t("في الانتظار")}</option><option value="نجح">{_t("نجح")}</option><option value="رسب">{_t("رسب")}</option></select></td><td><button className="b del" onClick={()=>delEx(e.id)}>✕</button></td></tr>)}
+        {(c.exams||[]).map(e=><tr key={e.id}><td>{e.type==='code'?_t('كود'):_t('سياقة')}</td><td>{e.date}</td><td><select value={e.result} onChange={ev=>setExRes(e.id,ev.target.value)}><option value="في الانتظار">{_t("في الانتظار")}</option><option value="نجح">{_t("نجح")}</option><option value="رسب">{_t("رسب")}</option></select></td><td style={{whiteSpace:'nowrap'}}>{c.phone&&user.role!=='monitor'&&<a className="b wa" data-oq-exam-wa={e.id} target="_blank" rel="noreferrer" title={_t('استدعاء عبر واتساب')} href={tplWa('exam',db,c,{date:e.date,type:e.type})}><WaIcon/></a>}<button className="b del" onClick={()=>delEx(e.id)}>✕</button></td></tr>)}
         {!(c.exams||[]).length&&<tr><td colSpan="4" className="empty">{_t("ما كاين حتى محاولة")}</td></tr>}
       </tbody></table></div>
       <h3 style={{marginTop:14}}>{_t("محاولة جديدة")}</h3>
@@ -786,7 +885,7 @@ function CandidateModal({id,onClose,startNarsa}){
     {tab==='pay'&&c&&<div>
       <div className="grid"><div className="stat"><small>{_t("ثمن الباقة")}</small><b>{fmt(c.price)}</b></div><div className="stat"><small>{_t("المؤدى")}</small><b>{fmt(paidOf(db,c.id))}</b></div><div className="stat"><small>{_t("الباقي")}</small><b>{fmt(Math.max(0,Number(c.price)-paidOf(db,c.id)))}</b></div></div>
       <div className="tw"><table><thead><tr><th>{_t("رقم")}</th><th>{_t("التاريخ")}</th><th>{_t("المبلغ")}</th><th>{_t("ملاحظة")}</th><th></th></tr></thead><tbody>
-        {db.payments.filter(p=>p.cid===c.id).map(p=><tr key={p.id}><td>{p.no}</td><td>{p.date}</td><td>{fmt(p.amount)}</td><td>{p.note}</td><td style={{whiteSpace:'nowrap'}}><button className="b" onClick={()=>printReceipt(db,c,p)}>{_t("🖨 وصل")}</button>{staffDel&&<button className="b del" onClick={()=>delPay(p.id)}>✕</button>}</td></tr>)}
+        {db.payments.filter(p=>p.cid===c.id).map(p=><tr key={p.id}><td>{p.no}</td><td>{p.date}</td><td>{fmt(p.amount)}</td><td>{p.note}</td><td style={{whiteSpace:'nowrap'}}><button className="b" onClick={()=>printReceipt(db,c,p)}>{_t("🖨 وصل")}</button>{c.phone&&user.role!=='monitor'&&<a className="b wa" data-oq-receipt-wa={p.id} target="_blank" rel="noreferrer" title={_t("إرسال الوصل عبر واتساب")} href={tplWa('receipt',db,c,{amount:p.amount,date:p.date,paid:paidOf(db,c.id),due:Math.max(0,Number(c.price)-paidOf(db,c.id))})}><WaIcon/></a>}{staffDel&&<button className="b del" onClick={()=>delPay(p.id)}>✕</button>}</td></tr>)}
         {!db.payments.some(p=>p.cid===c.id)&&<tr><td colSpan="5" className="empty">{_t("ما كاين حتى دفعة")}</td></tr>}
       </tbody></table></div>
       <h3 style={{marginTop:14}}>{_t("دفعة جديدة")}</h3>
@@ -980,7 +1079,7 @@ function Finance(){
         <F l={_t("ملاحظة")}><input value={pay.note} onChange={e=>setPay(Object.assign({},pay,{note:e.target.value}))}/></F>
       </div><button className="b pri" onClick={addPay}>{_t("تسجيل")}</button></div>
       <div className="tw"><table><thead><tr><th>{_t("رقم")}</th><th>{_t("التاريخ")}</th><th>{_t("المترشح")}</th><th>{_t("المبلغ")}</th><th></th></tr></thead><tbody>
-        {db.payments.slice().sort((a,b)=>b.date.localeCompare(a.date)||b.no-a.no).slice(0,100).map(p=>{const c=db.candidates.find(x=>x.id===p.cid);return <tr key={p.id}><td>{p.no}</td><td>{p.date}</td><td>{c?c.name:'—'}</td><td>{fmt(p.amount)}</td><td>{c&&<button className="b" onClick={()=>printReceipt(db,c,p)}>{_t("🖨 وصل")}</button>}</td></tr>;})}
+        {db.payments.slice().sort((a,b)=>b.date.localeCompare(a.date)||b.no-a.no).slice(0,100).map(p=>{const c=db.candidates.find(x=>x.id===p.cid);return <tr key={p.id}><td>{p.no}</td><td>{p.date}</td><td>{c?c.name:'—'}</td><td>{fmt(p.amount)}</td><td>{c&&<button className="b" onClick={()=>printReceipt(db,c,p)}>{_t("🖨 وصل")}</button>}{c&&c.phone&&user.role!=='monitor'&&<a className="b wa" data-oq-receipt-wa={p.id} target="_blank" rel="noreferrer" title={_t("إرسال الوصل عبر واتساب")} href={tplWa('receipt',db,c,{amount:p.amount,date:p.date,paid:paidOf(db,c.id),due:Math.max(0,Number(c.price)-paidOf(db,c.id))})}><WaIcon/></a>}</td></tr>;})}
         {!db.payments.length&&<tr><td colSpan="5" className="empty">{_t("ما كاين حتى دفعة")}</td></tr>}
       </tbody></table></div>
     </div>}
@@ -1032,10 +1131,13 @@ function BookingsInbox(){
       {pending.concat(rest).map(r=><tr key={r.id} data-oq-booking-row={r.id}>
         <td>{kind(r)}</td><td>{r.studentName}</td><td>{r.date}</td><td>{r.time}</td><td>{r.type==='code'?_t('كود (نظري)'):_t('تطبيقي (سياقة)')}</td><td>{r.monitorName||'—'}</td>
         <td><span className={'bd '+(r.status==='pending'?'warn':r.status==='approved'?'ok':r.status==='rejected'?'bad':'')}>{st(r.status)}</span></td>
-        <td>{r.status==='pending'&&<span className="row">
+        <td><span className="row">
+          {r.status==='pending'&&<>
           <button type="button" className="b pri" data-oq-booking-approve={r.id} disabled={!!busy} onClick={()=>act(r.id,true)}>{_t("قبول")}</button>
           <button type="button" className="b del" data-oq-booking-reject={r.id} disabled={!!busy} onClick={()=>act(r.id,false)}>{_t("رفض")}</button>
-        </span>}</td>
+          </>}
+          {r.whatsappUrl&&<a className="b wa" data-oq-booking-wa={r.id} target="_blank" rel="noreferrer" title={_t("إعلام عبر واتساب")} href={r.whatsappUrl}><WaIcon/></a>}
+        </span></td>
       </tr>)}
     </tbody></table></div>
   </div>;
@@ -1238,6 +1340,91 @@ function DriveBackup({db,replace}){
     </Modal>}
   </div>;
 }
+
+function MessageTemplates(){
+  const {db}=useC();
+  const [pack,setPack]=useState(null);
+  const [type,setType]=useState('debt');
+  const [draft,setDraft]=useState({ar:'',fr:'',en:''});
+  const [defaultLang,setDefaultLang]=useState('ar');
+  const [previewLang,setPreviewLang]=useState((LANG==='fr'||LANG==='en')?LANG:'ar');
+  const [msg,setMsg]=useState('');
+  const [err,setErr]=useState('');
+  const [busy,setBusy]=useState(false);
+  const apply=j=>{
+    setPack(j);
+    setDefaultLang(j.defaultLang||'ar');
+    const cur=(j.types||[]).find(x=>x.id===type)||(j.types||[])[0];
+    if(cur){setType(cur.id);setDraft({ar:cur.values.ar||'',fr:cur.values.fr||'',en:cur.values.en||''});}
+  };
+  const load=()=>OQ.api('GET','/api/templates').then(apply).catch(()=>setErr(_t('تعذر حفظ القالب')));
+  useEffect(()=>{load();},[]);
+  useEffect(()=>{
+    if(!pack)return;
+    const cur=(pack.types||[]).find(x=>x.id===type);
+    if(cur)setDraft({ar:cur.values.ar||'',fr:cur.values.fr||'',en:cur.values.en||''});
+  },[type,pack]);
+  const current=(pack&&pack.types||[]).find(x=>x.id===type);
+  const preview=(()=>{
+    const T=window.OQTemplates;if(!T||!current)return '';
+    const sample=db.candidates&&db.candidates[0];
+    const vars=T.sampleVars({settings:db.settings,candidates:db.candidates||[],monitors:db.monitors||[]},previewLang);
+    if(sample){vars.student=sample.name;if(sample.phone)vars.phone=sample.phone;}
+    return T.render(type,vars,previewLang,{defaultLang:defaultLang,templates:{[type]:draft}});
+  })();
+  const save=()=>{
+    setBusy(true);setErr('');setMsg('');
+    OQ.api('PUT','/api/templates',{defaultLang:defaultLang,templates:{[type]:draft}}).then(j=>{
+      apply(j);setMsg(_t('تم حفظ القالب'));
+      if(OQ.pull)OQ.pull();
+    }).catch(()=>setErr(_t('تعذر حفظ القالب'))).finally(()=>setBusy(false));
+  };
+  const reset=()=>{
+    if(!confirm(_t('استعادة النص الافتراضي')+'؟'))return;
+    setBusy(true);setErr('');setMsg('');
+    OQ.api('POST','/api/templates/'+type+'/reset',{}).then(j=>{
+      apply(j);setMsg(_t('تم استعادة النص الافتراضي'));
+      if(OQ.pull)OQ.pull();
+    }).catch(()=>setErr(_t('تعذر حفظ القالب'))).finally(()=>setBusy(false));
+  };
+  return <div className="card" data-oq-templates="">
+    <h3>{_t("قوالب الرسائل")}</h3>
+    <p className="meta">{_t("تُستخدم هذه القوالب في واتساب والبريد حسب لغة كل مترشح.")}</p>
+    <div className="fg">
+      <F l={_t("لغة المدرسة الافتراضية")}><select data-oq-tpl-default-lang="" className="lg" value={defaultLang} onChange={e=>setDefaultLang(e.target.value)}>
+        <option value="ar">{_t("العربية")}</option>
+        <option value="fr">{_t("الفرنسية")}</option>
+        <option value="en">{_t("الإنجليزية")}</option>
+      </select></F>
+    </div>
+    <div className="tabs" style={{flexWrap:'wrap'}}>
+      {(pack&&pack.types||[]).map(tp=><button type="button" key={tp.id} className={type===tp.id?'on':''} data-oq-tpl-type={tp.id} onClick={()=>setType(tp.id)}>{_t(tp.labelAr)}</button>)}
+    </div>
+    {current&&<>
+      <p className="meta">{_t("الحقول المتاحة")}: {(current.placeholders||[]).map(k=>'{'+k+'}').join(' ')}</p>
+      <div className="fg">
+        <F l={_t("العربية")}><textarea data-oq-tpl-ar="" rows="7" dir="rtl" value={draft.ar} onChange={e=>setDraft(Object.assign({},draft,{ar:e.target.value}))}/></F>
+        <F l={_t("الفرنسية")}><textarea data-oq-tpl-fr="" rows="7" dir="ltr" value={draft.fr} onChange={e=>setDraft(Object.assign({},draft,{fr:e.target.value}))}/></F>
+        <F l={_t("الإنجليزية")}><textarea data-oq-tpl-en="" rows="7" dir="ltr" value={draft.en} onChange={e=>setDraft(Object.assign({},draft,{en:e.target.value}))}/></F>
+      </div>
+      <div className="row" style={{marginTop:8,marginBottom:8,alignItems:'center',flexWrap:'wrap',gap:8}}>
+        <b>{_t("معاينة")}</b>
+        <select data-oq-tpl-preview-lang="" className="lg" value={previewLang} onChange={e=>setPreviewLang(e.target.value)}>
+          <option value="ar">{_t("العربية")}</option>
+          <option value="fr">{_t("الفرنسية")}</option>
+          <option value="en">{_t("الإنجليزية")}</option>
+        </select>
+      </div>
+      <pre data-oq-tpl-preview="" style={{whiteSpace:'pre-wrap',background:'var(--bg, #f8fafc)',padding:'12px',borderRadius:8,fontFamily:'Tahoma,Arial,sans-serif'}}>{preview}</pre>
+      {err&&<div className="al bad" data-oq-tpl-err="">{err}</div>}
+      {msg&&<div className="al ok" data-oq-tpl-msg="">{msg}</div>}
+      <div className="row">
+        <button type="button" className="b pri" data-oq-tpl-save="" disabled={busy} onClick={save}>{_t("حفظ")}</button>
+        <button type="button" className="b" data-oq-tpl-reset="" disabled={busy} onClick={reset}>{_t("استعادة النص الافتراضي")}</button>
+      </div>
+    </>}
+  </div>;
+}
 function AdminSettings(){
   const {db,upd,replace}=useC();
   const [school,setSchool]=useState(db.settings.school);
@@ -1259,6 +1446,7 @@ function AdminSettings(){
       </label>
     </div>
     <button className="b pri" onClick={()=>upd(n=>{n.settings.school=school||'Otoqol';n.settings.absLimit=Math.max(1,Number(lim)||3);n.settings.studentPortal=portalOn;Object.keys(legal).forEach(k=>{n.settings[k]=legal[k];});})}>{_t("حفظ")}</button></div>
+    <MessageTemplates/>
     <div className="card" data-oq-narsa-school="">
       <h3>{_t("بيانات المؤسسة (NARSA)")}</h3>
       <p className="meta">{_t("تُستعمل هذه الحقول لملء وثائق NARSA الرسمية.")}</p>
