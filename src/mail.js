@@ -312,24 +312,25 @@ function buildOwnerSignupEmail(info) {
 
 function buildApprovedEmail(info) {
   const link = publicUrl() + '/app';
+  const username = String(info.username || '').trim();
+  const userRow = username ? row('اسم المستخدم', 'Identifiant', username).html : '';
   const bodyHtml =
     `<p style="margin:0 0 6px;text-align:right;direction:rtl;">تمت الموافقة على حساب مدرستك في Otoqol.</p>
      <p style="margin:0 0 16px;color:#64748b;text-align:left;direction:ltr;">Le compte de votre auto-école sur Otoqol a été approuvé.</p>` +
-    row('رمز المدرسة', 'Code de l’école', info.code).html +
-    `<p style="margin:16px 0 6px;text-align:right;direction:rtl;">سجّل الدخول من الرابط التالي باسم المستخدم الذي اخترته عند التسجيل (لا نرسل كلمة السر في البريد).</p>
-     <p style="margin:0 0 12px;color:#64748b;text-align:left;direction:ltr;">Connectez-vous via le lien ci-dessous avec l’identifiant choisi à l’inscription (le mot de passe n’est pas envoyé par e-mail).</p>
+    userRow +
+    `<p style="margin:16px 0 6px;text-align:right;direction:rtl;">سجّل الدخول من الرابط التالي باسم المستخدم أعلاه (لا نرسل كلمة السر في البريد).</p>
+     <p style="margin:0 0 12px;color:#64748b;text-align:left;direction:ltr;">Connectez-vous via le lien ci-dessous avec l’identifiant ci-dessus (le mot de passe n’est pas envoyé par e-mail).</p>
      <p style="text-align:center;margin:16px 0;"><a href="${escapeHtml(link)}" style="display:inline-block;background:#0f766e;color:#fff;text-decoration:none;padding:12px 20px;border-radius:10px;font-weight:700;">${escapeHtml(link)}</a></p>`;
   const bodyText = [
     'تمت الموافقة على حساب مدرستك في Otoqol.',
     'Le compte de votre auto-école sur Otoqol a été approuvé.',
     '',
-    'رمز المدرسة / Code de l’école : ' + info.code,
-    '',
+    ...(username ? ['اسم المستخدم / Identifiant : ' + username, ''] : []),
     'رابط تسجيل الدخول / Lien de connexion :',
     link,
     '',
-    'سجّل الدخول باسم المستخدم الذي اخترته عند التسجيل. لا نرسل كلمة السر في البريد.',
-    'Connectez-vous avec l’identifiant choisi à l’inscription. Le mot de passe n’est pas envoyé par e-mail.',
+    'سجّل الدخول باسم المستخدم أعلاه. لا نرسل كلمة السر في البريد.',
+    'Connectez-vous avec l’identifiant ci-dessus. Le mot de passe n’est pas envoyé par e-mail.',
   ].join('\n');
   return wrapEmail({
     titleAr: 'تمت الموافقة على حساب مدرستك',
@@ -344,8 +345,8 @@ async function sendOwnerSignupNotice(info) {
   return sendMail({ to: ownerEmail(), subject, text, html, kind: 'owner signup notice' });
 }
 
-async function sendSchoolApprovedEmail({ to, code, name }) {
-  const { subject, text, html } = buildApprovedEmail({ code, name });
+async function sendSchoolApprovedEmail({ to, name, username }) {
+  const { subject, text, html } = buildApprovedEmail({ name, username });
   return sendMail({ to, subject, text, html, kind: 'school approved email' });
 }
 

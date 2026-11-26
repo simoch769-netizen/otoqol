@@ -243,6 +243,72 @@ function checkPassword(school, password) {
 const getData = schoolId => db.prepare('SELECT version,data,updated_at FROM school_data WHERE school_id=?').get(schoolId);
 const getVersion = schoolId => db.prepare('SELECT version,updated_at,data IS NULL AS empty FROM school_data WHERE school_id=?').get(schoolId);
 
+const normUsername = v => String(v == null ? '' : v).trim()
+  .replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d))
+  .replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
+  .toLowerCase();
+
+function parseSchoolJson(schoolId) {
+  const d = getData(schoolId);
+  if (!d || d.data == null) return null;
+  try { return JSON.parse(d.data); } catch (e) { return null; }
+}
+function accountsInSchoolData(data, school) {
+  const out = [];
+  if (!data) return out;
+  const add = (list, fallbackRole) => {
+    for (const x of (list || [])) {
+      if (!x || typeof x !== 'object') continue;
+      const username = normUsername(x.username);
+      if (!username) continue;
+      out.push({
+        school, schoolId: school && school.id, code: school && school.code,
+        id: x.id, role: fallbackRole || x.role || 'secretary',
+        rec: x, username, disabled: !!(x.active === false || x.disabled === true),
+      });
+    }
+  };
+  add(data.users);
+  add(data.monitors, 'monitor');
+  return out;
+}
+function findAccountsByUsername(username) {
+  const un = normUsername(username);
+  if (!un) return [];
+  const hits = [];
+  for (const s of listSchools()) {
+    for (const a of accountsInSchoolData(parseSchoolJson(s.id), s)) {
+      if (a.username === un) hits.push(a);
+    }
+  }
+  return hits;
+}
+function usernameTaken(username, except = {}) {
+  const un = normUsername(username);
+  if (!un) return false;
+  return findAccountsByUsername(un).some(a => a.schoolId !== except.schoolId);
+}
+/** True if `data` has a duplicate username inside itself, or one already used by another school. */
+function usernameConflict(data, schoolId) {
+  const seen = new Set();
+  for (const a of accountsInSchoolData(data, { id: schoolId })) {
+    if (seen.has(a.username)) return true;
+    seen.add(a.username);
+  }
+  for (const un of seen) if (usernameTaken(un, { schoolId })) return true;
+  return false;
+}
+function listDuplicateUsernames() {
+  const map = new Map();
+  for (const s of listSchools()) {
+    for (const a of accountsInSchoolData(parseSchoolJson(s.id), s)) {
+      if (!map.has(a.username)) map.set(a.username, []);
+      map.get(a.username).push({ code: s.code, schoolId: s.id, name: s.name, role: a.role, id: a.id, disabled: a.disabled });
+    }
+  }
+  return [...map.entries()].filter(([, acc]) => acc.length > 1).map(([username, accounts]) => ({ username, accounts }));
+}
+
 // server-side sessions (so logout really ends a token)
 const addSession = (id, schoolId, expiresAt) => db.prepare('INSERT INTO sessions(id,school_id,expires_at) VALUES (?,?,?)').run(id, schoolId, expiresAt);
 const hasSession = id => !!db.prepare('SELECT 1 FROM sessions WHERE id=? AND expires_at>?').get(id, Date.now());
@@ -284,4 +350,5 @@ async function backupFile(dest) { await db.backup(dest); return dest; }
 module.exports = { db, DB_FILE, DATA_DIR, createSchool, findSchool, getSchoolById, listSchools, findByEmail, setPassword, setActive, setStatus, schoolStatus,
   checkPassword, getData, getVersion, putData, addSession, hasSession, delSession, purgeSessions, snapshot, listHistory, getHistory, backupFile, normCode,
   allocateCode, slugFromName, isValidCode, RESERVED_CODES, STATUSES,
-  getOwnerAccount, setOwnerAccount, hashSetupToken, createSetupToken, peekSetupToken, consumeSetupToken, armSetupTokenFromEnv };
+  getOwnerAccount, setOwnerAccount, hashSetupToken, createSetupToken, peekSetupToken, consumeSetupToken, armSetupTokenFromEnv,
+  normUsername, parseSchoolJson, accountsInSchoolData, findAccountsByUsername, usernameTaken, usernameConflict, listDuplicateUsernames };

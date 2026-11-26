@@ -46,7 +46,6 @@ function validateSignup(body, store) {
   const phone = normPhone(b.phone);
   const username = nz(b.username);
   const password = String(b.password == null ? '' : b.password);
-  const wanted = b.code == null ? '' : String(b.code);
 
   if (!validName(name, 2, 80)) return { error: 'invalid_name' };
   if (!validName(city, 2, 80)) return { error: 'invalid_city' };
@@ -55,12 +54,12 @@ function validateSignup(body, store) {
   if (!validPhone(phone)) return { error: 'invalid_phone' };
   if (!validUsername(username)) return { error: 'invalid_username' };
   if (password.length < 6 || password.length > 200) return { error: 'weak_password' };
-  if (wanted.length > 40) return { error: 'invalid_code' };
 
   if (store.findByEmail(email)) return { error: 'email_used' };
+  if (store.usernameTaken(username)) return { error: 'username_taken' };
 
   let code;
-  try { code = store.allocateCode(name, wanted); }
+  try { code = store.allocateCode(name, ''); }
   catch (e) {
     if (e.message === 'code_taken') return { error: 'code_taken' };
     if (e.message === 'invalid_code') return { error: 'invalid_code' };
@@ -334,7 +333,6 @@ function install(app, ctx) {
   app.post('/api/owner/schools', ownerAuth, (req, res) => {
     const b = req.body || {};
     const name = String(b.name == null ? '' : b.name).trim();
-    const wanted = b.code == null ? '' : String(b.code);
     const managerName = String(b.managerName == null ? b.manager_name || '' : b.managerName).trim() || 'المدير';
     const username = nz(b.managerUsername != null ? b.managerUsername : (b.username != null ? b.username : ''));
     const password = String(b.managerPassword != null ? b.managerPassword : (b.password != null ? b.password : ''));
@@ -348,8 +346,9 @@ function install(app, ctx) {
     if (email && !validEmailReq(email)) return res.status(400).json({ error: 'invalid_email' });
     if (phone && !validPhone(phone)) return res.status(400).json({ error: 'invalid_phone' });
     if (email && store.findByEmail(email)) return res.status(400).json({ error: 'email_used' });
+    if (store.usernameTaken(username)) return res.status(400).json({ error: 'username_taken' });
     let code;
-    try { code = store.allocateCode(name, wanted); }
+    try { code = store.allocateCode(name, ''); }
     catch (e) {
       if (e.message === 'code_taken') return res.status(400).json({ error: 'code_taken' });
       if (e.message === 'invalid_code') return res.status(400).json({ error: 'invalid_code' });
@@ -385,7 +384,10 @@ function install(app, ctx) {
     const out = store.setStatus(s.code, 'active');
     const email = s.contact_email;
     if (email) {
-      void mail.sendSchoolApprovedEmail({ to: email, code: s.code, name: s.name }).catch((e) => {
+      const data = parseSchoolData(s, store).data;
+      const mgr = ((data && data.users) || []).find(u => u && u.role === 'manager' && u.username);
+      const username = mgr ? mgr.username : '';
+      void mail.sendSchoolApprovedEmail({ to: email, name: s.name, username }).catch((e) => {
         console.error('[mail] school approved email error:', e && e.message);
       });
     }

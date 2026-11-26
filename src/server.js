@@ -71,7 +71,7 @@ const loginLimiter = rateLimit({ windowMs: 15 * 60_000, skipSuccessfulRequests: 
   message: { error: 'too_many_attempts' } });
 // second limiter per account (username), across all IPs: slows distributed guessing of short in-app passwords
 const accountLimiter = rateLimit({ windowMs: 15 * 60_000, skipSuccessfulRequests: true, limit: Number(process.env.LOGIN_PER_ACCOUNT_15MIN || 30), standardHeaders: false, legacyHeaders: false,
-  keyGenerator: req => 'acct:' + String((req.body && req.body.school) || '').trim().toLowerCase().slice(0, 40) + ':' + String((req.body && (req.body.username || req.body.school)) || '').trim().toLowerCase().slice(0, 100),
+  keyGenerator: req => 'acct:' + String((req.body && req.body.username) || '').trim().toLowerCase().slice(0, 100),
   validate: { keyGeneratorIpFallback: false }, message: { error: 'too_many_attempts' } });
 app.use('/api', apiLimiter);
 
@@ -129,7 +129,7 @@ app.post('/api/login', loginLimiter, (req, res) => {
   res.cookie(COOKIE, token, cookieOpts);
   res.json({ school: pub(s), token: req.body.wantToken ? token : undefined });
 });
-// ---------- single sign-in: school code + in-app username/password ----------
+// ---------- single sign-in: username + password (school is resolved automatically) ----------
 // Same normalisation as the app's own login(): trim, Arabic-Indic digits -> 0-9, username case-insensitive.
 const nz = v => String(v == null ? '' : v).trim().replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
 const pwTag = stored => crypto.createHash('sha256').update('otq:' + String(stored == null ? '' : stored)).digest('base64url').slice(0, 12);
@@ -214,35 +214,79 @@ function defaultSchool() {
 }
 const pubUser = u => u && ({ id: u.id, name: u.name, role: u.role });
 
-app.post('/api/signin', loginLimiter, accountLimiter, (req, res) => {
-  const { school, username, password } = req.body || {};
-  // `school` is optional: empty / omitted uses this deployment's default school (DEFAULT_SCHOOL_CODE / first active).
-  if ((school !== undefined && school !== null && typeof school !== 'string') || typeof username !== 'string' || typeof password !== 'string' ||
-      !username.trim() || !password || (school && school.length > 100) || username.length > 100 || password.length > 200)
-    return res.status(400).json({ error: 'bad_request' });
-  const s = school && school.trim() ? store.findSchool(school) : defaultSchool();
-  if (!s) { store.checkPassword({ password_hash: DUMMY_HASH }, password); return res.status(401).json({ error: 'bad_credentials' }); }
-  const blocked = onboard.statusError(s, store);
-  if (blocked) { store.checkPassword({ password_hash: DUMMY_HASH }, password); return res.status(403).json({ error: blocked }); }
-  let data = parseData(s.id);
-  let user = findAppUser(data, username, password), setup = false;
-  // one-time migration: plain-text in-app passwords -> bcrypt (the app keeps working, passwords are no longer readable)
-  if (user && !isHash(user.rec.password)) {
-    const cur = store.getData(s.id);
-    if (securePasswords(data, JSON.parse(cur.data))) store.putData(s.id, null, JSON.stringify(data), 'before-password-hashing');
-    data = parseData(s.id); user = findAppUser(data, username, password);
-    if (!user) return res.status(500).json({ error: 'server_error' });
-  }
-  if (user) user = { id: user.id, name: user.name, role: user.role, tag: pwTag(user.rec.password) };
-  // Owner fallback: username "admin" + the SCHOOL password, only while no in-app account is called "admin"
-  // (fresh school, or the admin account was renamed/deleted). Logs in as the first manager (or the default u1 on a fresh school).
-  if (!user && nz(username).toLowerCase() === 'admin' && !hasUsername(data, 'admin') && store.checkPassword(s, password)) {
-    if (!data) { user = { id: 'u1', name: 'المدير', role: 'manager', owner: true }; setup = true; }
-    else { const m = (data.users || []).find(x => x && x.role === 'manager' && !isOff(x)); if (m) user = { id: m.id, name: m.name, role: 'manager', owner: true }; }
-  }
-  if (!user) return res.status(401).json({ error: 'bad_credentials' });
+function finishSignin(res, s, user, setup) {
   res.cookie(COOKIE, sign(s, user), cookieOpts);
-  res.json({ school: pub(s), user: pubUser(user), setup });
+  res.json({ school: pub(s), user: pubUser(user), setup: !!setup });
+}
+function migratePlainPasswords(s, data, username, password) {
+  const user = findAppUser(data, username, password);
+  if (!user || isHash(user.rec.password)) return { data, user };
+  const cur = store.getData(s.id);
+  if (securePasswords(data, JSON.parse(cur.data))) store.putData(s.id, null, JSON.stringify(data), 'before-password-hashing');
+  data = parseData(s.id);
+  return { data, user: findAppUser(data, username, password) };
+}
+function sessionUser(found) {
+  return { id: found.id, name: found.name, role: found.role, tag: pwTag(found.rec.password) };
+}
+
+app.post('/api/signin', loginLimiter, accountLimiter, (req, res) => {
+  const { username, password } = req.body || {};
+  if (typeof username !== 'string' || typeof password !== 'string' ||
+      !username.trim() || !password || username.length > 100 || password.length > 200)
+    return res.status(400).json({ error: 'bad_request' });
+  const hits = store.findAccountsByUsername(username).filter(a => !a.disabled);
+  if (hits.length) {
+    const schools = [...new Map(hits.map(h => [h.schoolId, h.school])).values()];
+    if (schools.length === 1) {
+      const blocked = onboard.statusError(schools[0], store);
+      if (blocked) { store.checkPassword({ password_hash: DUMMY_HASH }, password); return res.status(403).json({ error: blocked }); }
+    }
+    const matched = hits.filter(h => pwMatches(h.rec.password, password));
+    if (matched.length > 1) return res.status(400).json({ error: 'ambiguous_login' });
+    if (matched.length === 1) {
+      const s = store.getSchoolById(matched[0].schoolId);
+      const blocked = onboard.statusError(s, store);
+      if (blocked) return res.status(403).json({ error: blocked });
+      let data = parseData(s.id);
+      const mig = migratePlainPasswords(s, data, username, password);
+      if (!mig.user) return res.status(500).json({ error: 'server_error' });
+      return finishSignin(res, s, sessionUser(mig.user), false);
+    }
+    // wrong password for the in-app username: still allow the "admin" + school-password fallback on other schools
+    if (nz(username).toLowerCase() !== 'admin') {
+      bcrypt.compareSync(nz(password), DUMMY_HASH);
+      return res.status(401).json({ error: 'bad_credentials' });
+    }
+  }
+  // Owner fallback: username "admin" + a school's password, only while no in-app account is called "admin"
+  // (fresh school, or the admin account was renamed/deleted). Logs in as the first manager (or u1 on a fresh school).
+  if (nz(username).toLowerCase() === 'admin') {
+    const matches = [];
+    for (const row of store.listSchools()) {
+      const s = store.getSchoolById(row.id);
+      const data = parseData(s.id);
+      if (hasUsername(data, 'admin')) continue;
+      if (store.checkPassword(s, password)) matches.push({ s, data });
+    }
+    if (matches.length > 1) return res.status(400).json({ error: 'ambiguous_login' });
+    if (matches.length === 1) {
+      const { s, data } = matches[0];
+      const blocked = onboard.statusError(s, store);
+      if (blocked) return res.status(403).json({ error: blocked });
+      let user, setup = false;
+      if (!data) { user = { id: 'u1', name: 'المدير', role: 'manager', owner: true }; setup = true; }
+      else {
+        const m = (data.users || []).find(x => x && x.role === 'manager' && !isOff(x));
+        if (m) user = { id: m.id, name: m.name, role: 'manager', owner: true };
+      }
+      if (user) return finishSignin(res, s, user, setup);
+    }
+    if (!matches.length) store.checkPassword({ password_hash: DUMMY_HASH }, password);
+    return res.status(401).json({ error: 'bad_credentials' });
+  }
+  store.checkPassword({ password_hash: DUMMY_HASH }, password);
+  return res.status(401).json({ error: 'bad_credentials' });
 });
 
 
@@ -336,7 +380,7 @@ const forgotIpLimiter = rateLimit({
 });
 const forgotAccountLimiter = rateLimit({
   windowMs: 15 * 60_000, limit: Number(process.env.FORGOT_PER_ACCOUNT_15MIN || 3),
-  keyGenerator: req => 'fp:' + String((req.body && req.body.school) || '').trim().toLowerCase().slice(0, 40) + ':' + String((req.body && req.body.username) || '').trim().toLowerCase().slice(0, 100),
+  keyGenerator: req => 'fp:' + String((req.body && req.body.username) || '').trim().toLowerCase().slice(0, 100),
   validate: { keyGeneratorIpFallback: false },
   standardHeaders: false, legacyHeaders: false, message: { error: 'too_many_attempts' },
 });
@@ -348,24 +392,24 @@ const resetIpLimiter = rateLimit({
 const forgotGeneric = (res) => res.json({ ok: true });
 
 app.post('/api/forgot-password', forgotIpLimiter, forgotAccountLimiter, async (req, res) => {
-  const { school, username } = req.body || {};
-  if ((school !== undefined && school !== null && typeof school !== 'string') || typeof username !== 'string' ||
-      !username.trim() || (school && school.length > 100) || username.length > 100)
+  const { username } = req.body || {};
+  if (typeof username !== 'string' || !username.trim() || username.length > 100)
     return res.status(400).json({ error: 'bad_request' });
-  const s = school && school.trim() ? store.findSchool(school) : defaultSchool();
   // Always spend a comparable amount of work, then return the same payload.
   const dummy = hashResetCode(genResetCode());
   void dummy;
+  const hits = store.findAccountsByUsername(username).filter(a => !a.disabled);
+  if (hits.length !== 1) return forgotGeneric(res);
+  const acc = hits[0];
+  const s = acc.school;
   if (!s || !s.active) return forgotGeneric(res);
-  const data = parseData(s.id);
-  const acc = findAccountByUsername(data, username);
-  const email = acc ? normEmail(acc.rec.email) : '';
-  if (!acc || !email || !validEmail(email) || email === '') return forgotGeneric(res);
+  const email = acc.rec ? normEmail(acc.rec.email) : '';
+  if (!email || !validEmail(email) || email === '') return forgotGeneric(res);
   if (!mail.isConfigured()) {
     console.warn('[mail] mail not configured — password reset email not sent');
     return forgotGeneric(res);
   }
-  const code = storeResetCode(s.id, username, { userId: acc.rec.id, role: acc.role });
+  const code = storeResetCode(s.id, username, { userId: acc.id, role: acc.role });
   // Respond immediately; a blocked SMTP/API must not stall the login screen.
   // sendResetEmail itself has a ~10s timeout so background work cannot hang forever.
   void mail.sendResetEmail({ to: email, code }).catch((e) => {
@@ -374,18 +418,27 @@ app.post('/api/forgot-password', forgotIpLimiter, forgotAccountLimiter, async (r
   return forgotGeneric(res);
 });
 
+function takeResetCodeForUsername(username, code) {
+  purgeResetCodes();
+  const suffix = ':' + nz(username).toLowerCase();
+  const keys = [...resetCodes.keys()].filter(k => k.endsWith(suffix));
+  if (keys.length !== 1) return { ok: false };
+  const schoolId = Number(keys[0].slice(0, keys[0].length - suffix.length));
+  const got = takeResetCode(schoolId, username, code);
+  return got.ok ? { ...got, schoolId } : got;
+}
+
 app.post('/api/reset-password', resetIpLimiter, (req, res) => {
-  const { school, username, code, password } = req.body || {};
-  if ((school !== undefined && school !== null && typeof school !== 'string') || typeof username !== 'string' ||
-      typeof code !== 'string' || typeof password !== 'string' ||
-      !username.trim() || (school && school.length > 100) || username.length > 100 || code.length > 20 || password.length > 200)
+  const { username, code, password } = req.body || {};
+  if (typeof username !== 'string' || typeof code !== 'string' || typeof password !== 'string' ||
+      !username.trim() || username.length > 100 || code.length > 20 || password.length > 200)
     return res.status(400).json({ error: 'bad_request' });
   const pw = nz(password);
   if (pw.length < 4) return res.status(400).json({ error: 'weak_password' });
-  const s = school && school.trim() ? store.findSchool(school) : defaultSchool();
-  if (!s || !s.active) return res.status(400).json({ error: 'invalid_code' });
-  const got = takeResetCode(s.id, username, code);
+  const got = takeResetCodeForUsername(username, code);
   if (!got.ok) return res.status(400).json({ error: 'invalid_code' });
+  const s = store.getSchoolById(got.schoolId);
+  if (!s || !s.active) return res.status(400).json({ error: 'invalid_code' });
   const hashed = hashPw(pw);
   if (!updateAccountPassword(s.id, got.role, got.userId, hashed))
     return res.status(400).json({ error: 'invalid_code' });
@@ -451,6 +504,7 @@ app.put('/api/db', auth, (req, res) => {
   }
   securePasswords(data, stored);
   if (!sanitizeEmails(data)) return res.status(400).json({ error: 'invalid_email' });
+  if (store.usernameConflict(data, req.school.id)) return res.status(400).json({ error: 'username_taken' });
   const r = store.putData(req.school.id, version, JSON.stringify(data), 'auto');
   if (!r.ok) return res.status(409).json({ error: 'version_conflict', version: r.version });
   // the signed-in user changed their own password: keep them signed in with a fresh session
