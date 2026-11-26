@@ -244,6 +244,50 @@ const signupBody = (over = {}) => ({
     const takenPut = await req('PUT', '/api/db', { version: cur.j.version, data }, {}, manalLogin.ck);
     t('manager cannot add a monitor username used in another school', takenPut.s === 400 && takenPut.j.error === 'username_taken');
 
+    // --- permanent delete ---
+    const listed = await req('GET', '/api/owner/schools', undefined, {}, ock);
+    const demoRow = (listed.j.schools || []).find(s => s.code === 'demo');
+    t('demo is marked protected on the owner list', !!(demoRow && demoRow.protected && demoRow.id));
+    t('owner cannot delete the default school', (await req('DELETE', '/api/owner/schools/' + demoRow.id, { name: demoRow.name }, {}, ock)).s === 403
+      && (await req('DELETE', '/api/owner/schools/' + demoRow.id, { name: demoRow.name }, {}, ock)).j.error === 'protected_school');
+    t('admin cannot delete the default school', (await req('DELETE', '/api/admin/schools/demo', { name: 'Otoqol Demo' }, AH)).s === 403
+      && (await req('DELETE', '/api/admin/schools/demo', { name: 'Otoqol Demo' }, AH)).j.error === 'protected_school');
+    t('demo still present after protected delete attempts', (await req('GET', '/api/admin/schools/demo/export', undefined, AH)).s === 200);
+
+    t('owner delete unauthenticated -> 401', (await req('DELETE', '/api/owner/schools/' + demoRow.id, { name: demoRow.name })).s === 401);
+    t('admin delete without token -> 401', (await req('DELETE', '/api/admin/schools/demo', { name: 'Otoqol Demo' })).s === 401);
+    t('owner delete unknown id -> 404', (await req('DELETE', '/api/owner/schools/999999', { name: 'Nope' }, {}, ock)).s === 404);
+    t('admin delete unknown code -> 404', (await req('DELETE', '/api/admin/schools/no-such-school', { name: 'Nope' }, AH)).s === 404);
+
+    const toDel = await req('POST', '/api/owner/schools', { name: 'Ecole Delete', managerUsername: 'delmgr', managerPassword: 'DeletePw1' }, {}, ock);
+    t('owner created school to delete', toDel.s === 200 && toDel.j.school && toDel.j.school.id);
+    const delId = toDel.j.school.id, delCode = toDel.j.school.code;
+    t('delete without the school name -> name_mismatch', (await req('DELETE', '/api/owner/schools/' + delId, {}, {}, ock)).s === 400
+      && (await req('DELETE', '/api/owner/schools/' + delId, { name: '' }, {}, ock)).j.error === 'name_mismatch');
+    t('delete with the wrong name -> name_mismatch', (await req('DELETE', '/api/owner/schools/' + delId, { name: 'Wrong Name' }, {}, ock)).s === 400
+      && (await req('DELETE', '/api/owner/schools/' + delId, { name: 'Wrong Name' }, {}, ock)).j.error === 'name_mismatch');
+    const liveSess = await req('POST', '/api/signin', { username: 'delmgr', password: 'DeletePw1' });
+    t('manager session before delete', liveSess.s === 200 && !!liveSess.ck);
+    const wiped = await req('DELETE', '/api/owner/schools/' + delId, { name: '  ecole delete  ' }, {}, ock);
+    t('owner delete school with matching name (case/space insensitive)', wiped.s === 200 && wiped.j.ok && wiped.j.deleted && wiped.j.deleted.id === delId);
+    const afterList = await req('GET', '/api/owner/schools', undefined, {}, ock);
+    t('deleted school is gone from the owner list', afterList.s === 200 && !(afterList.j.schools || []).some(s => s.id === delId || s.code === delCode));
+    const expGone = await req('GET', '/api/admin/schools/' + delCode + '/export', undefined, AH);
+    t('admin cannot export a deleted school', expGone.s === 400 || expGone.s === 404);
+    t('deleted school session is revoked', (await req('GET', '/api/me', undefined, {}, liveSess.ck)).s === 401);
+    t('deleted manager cannot sign in', (await req('POST', '/api/signin', { username: 'delmgr', password: 'DeletePw1' })).s === 401);
+    const reuse = await req('POST', '/api/owner/schools', { name: 'Ecole Delete Reuse', managerUsername: 'delmgr', managerPassword: 'DeletePw2' }, {}, ock);
+    t('username is free after the school is deleted', reuse.s === 200 && reuse.j.school && reuse.j.school.status === 'active', JSON.stringify(reuse.j));
+
+    const ad = await req('POST', '/api/admin/schools', { code: 'admdel', name: 'Admin Del School', password: 'AdmDel1!' }, AH);
+    t('admin created school to delete', ad.s === 200);
+    t('admin import manager for delete fixture', (await req('PUT', '/api/admin/schools/admdel/import', { data: staff('admuser', 'AdmUser1!') }, AH)).s === 200);
+    t('admin delete requires the school name', (await req('DELETE', '/api/admin/schools/admdel', {}, AH)).s === 400);
+    const adWiped = await req('DELETE', '/api/admin/schools/admdel', { name: 'Admin Del School' }, AH);
+    t('admin delete school', adWiped.s === 200 && adWiped.j.deleted && adWiped.j.deleted.code === 'admdel');
+    t('admin-deleted manager cannot sign in', (await req('POST', '/api/signin', { username: 'admuser', password: 'AdmUser1!' })).s === 401);
+    t('admin-deleted username is free', (await req('POST', '/api/owner/schools', { name: 'After Admin Del', managerUsername: 'admuser', managerPassword: 'AdmUser2!' }, {}, ock)).s === 200);
+
     const lo = await req('POST', '/api/owner/logout', {}, {}, ock);
     t('owner logout', lo.s === 200);
     t('owner session ended', (await req('GET', '/api/owner/schools', undefined, {}, ock)).s === 401);
@@ -307,6 +351,26 @@ const signupBody = (over = {}) => ({
         await page.waitForSelector('[data-oq-school="'+nourCode+'"][data-oq-status=active]', { timeout: 10000 });
         t('owner can approve from the UI', (await page.locator('[data-oq-school="'+nourCode+'"][data-oq-status=active]').count()) === 1);
         await page.screenshot({ path: path.join(SHOTS, 'owner-approved-ar.png'), fullPage: true });
+        t('default school has no delete button', (await page.locator('[data-oq-school=demo] [data-oq-delete]').count()) === 0);
+        await page.fill('#add-form input[name=name]', 'مدرسة للمسح');
+        await page.fill('#add-form input[name=managerUsername]', 'delui');
+        await page.fill('#add-form input[name=managerPassword]', 'DelUiPass1');
+        await page.click('#add-go');
+        await page.waitForSelector('.sch:has-text("مدرسة للمسح")', { timeout: 10000 });
+        const delCard = page.locator('.sch', { hasText: 'مدرسة للمسح' });
+        t('new school shows a delete button', (await delCard.locator('[data-oq-delete]').count()) === 1);
+        await delCard.locator('[data-oq-delete]').click();
+        await page.waitForSelector('[data-oq-delete-modal]:not([hidden]) #del-title', { timeout: 5000 });
+        t('delete confirm dialog is in MSA and asks for the school name', /مسح المدرسة/.test(await page.locator('#del-title').innerText()) && (await page.locator('[data-oq-delete-input]').count()) === 1);
+        await page.fill('[data-oq-delete-input]', 'اسم غلط');
+        await page.click('#del-go');
+        await page.waitForSelector('#del-err:not([hidden])', { timeout: 5000 });
+        t('wrong school name is rejected in the confirm dialog', /غير مطابق/.test(await page.locator('#del-err').innerText()));
+        await page.screenshot({ path: path.join(SHOTS, 'owner-delete-confirm-ar.png'), fullPage: true });
+        await page.fill('[data-oq-delete-input]', 'مدرسة للمسح');
+        await page.click('#del-go');
+        await page.waitForSelector('.sch:has-text("مدرسة للمسح")', { state: 'detached', timeout: 10000 });
+        t('owner can delete a school from the UI after typing its name', (await page.locator('.sch', { hasText: 'مدرسة للمسح' }).count()) === 0 && (await page.locator('[data-oq-delete-modal]').evaluate(el => el.hidden)));
       } finally { await browser.close(); }
     }
   } finally {
