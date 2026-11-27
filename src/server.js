@@ -17,6 +17,7 @@ const templates = require('./templates');
 const tasks = require('./tasks');
 const hours = require('./hours');
 const caisse = require('./caisse');
+const docs = require('./docs');
 
 const PORT = Number(process.env.PORT || 3000);
 const HOST = process.env.HOST || '0.0.0.0';
@@ -691,6 +692,7 @@ caisse.install(app, {
   store, auth, cachedData,
   bump: schoolId => { dataCache.delete(schoolId); bodyCache.delete(schoolId); },
 });
+docs.install(app, { store, auth, cachedData });
 
 app.use('/api', (req, res) => res.status(404).json({ error: 'not_found' }));
 const PUBLIC = path.join(__dirname, '..', 'public');
