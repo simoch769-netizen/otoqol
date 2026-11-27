@@ -361,8 +361,9 @@ function formatExams(c, lang) {
   })).sort((a, b) => (a.date || '').localeCompare(b.date || ''));
 }
 
-function formatExamsText(exams) {
-  return (exams || []).map(e => [e.typeLabel, e.date, e.resultLabel].filter(Boolean).join(' ')).join('؛ ');
+function formatExamsText(exams, lang) {
+  const sep = (lang === 'fr' || lang === 'en') ? '; ' : '؛ ';
+  return (exams || []).map(e => [e.typeLabel, e.date, e.resultLabel].filter(Boolean).join(' ')).join(sep);
 }
 
 function sessionRows(data, cid, lang) {
@@ -455,7 +456,7 @@ function buildRegistre(data, period, lang) {
   })).sort(compareEnrolment).map((row, i) => {
     const pub = candidatePublic(row.cand, data, lang);
     const exams = formatExams(row.cand, lang);
-    return Object.assign({ order: i + 1, exams, examsText: formatExamsText(exams) }, pub);
+    return Object.assign({ order: i + 1, exams, examsText: formatExamsText(exams, lang) }, pub);
   });
   const rows = all.filter(r => {
     if (!from && !to) return true;
@@ -490,7 +491,7 @@ function buildLivret(data, cid, lang) {
 
 function canReadLivret(user, data, cid) {
   const role = user && user.role;
-  if (role === 'manager' || role === 'secretary') return true;
+  if (role === 'manager' || role === 'secretary' || role === 'owner') return true;
   if (role === 'student') return user.cid === cid;
   if (role === 'monitor') {
     const c = (data.candidates || []).find(x => x && x.id === cid);

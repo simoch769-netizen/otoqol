@@ -519,8 +519,17 @@ app.get('/api/db/version', auth, (req, res) => {
   res.set('Cache-Control', 'no-store');
   res.json({ version: d.version, updated_at: d.updated_at });
 });
+function hasDangerousKeys(o, depth) {
+  if (!o || typeof o !== 'object' || depth > 8) return false;
+  if (Object.prototype.hasOwnProperty.call(o, '__proto__') ||
+      Object.prototype.hasOwnProperty.call(o, 'prototype') ||
+      Object.prototype.hasOwnProperty.call(o, 'constructor')) return true;
+  if (Array.isArray(o)) return o.some(x => hasDangerousKeys(x, depth + 1));
+  return Object.keys(o).some(k => hasDangerousKeys(o[k], depth + 1));
+}
 function validDB(o) {
   if (!o || typeof o !== 'object' || Array.isArray(o)) return false;
+  if (hasDangerousKeys(o, 0)) return false;
   for (const k of ['users', 'monitors', 'vehicles', 'candidates', 'sessions', 'payments', 'expenses', 'notifs', 'requests', 'notes', 'log', 'portalUsers', 'bookings', 'portalInvites', 'reminders', 'tasks', 'hoursOverrides', 'caisseEntries', 'caisseCloses'])
     if (o[k] !== undefined && !Array.isArray(o[k])) return false;
   if (o.settings !== undefined && (!o.settings || typeof o.settings !== 'object' || Array.isArray(o.settings))) return false;
