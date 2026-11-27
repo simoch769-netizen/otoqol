@@ -587,7 +587,46 @@ Object.assign(DICT.fr,{
   "لا يمكن حجز حصة جديدة: لم تبقَ ساعات مدفوعة":"Impossible de réserver une nouvelle séance : plus d’heures payées",
   "السماح بهذا الحجز رغم نفاد الساعات المدفوعة؟":"Autoriser cette réservation malgré l’épuisement des heures payées ?",
   "ساعات مدفوعة على وشك النفاد":"Heures payées bientôt épuisées",
-  "نفدت الساعات المدفوعة":"Heures payées épuisées"
+  "نفدت الساعات المدفوعة":"Heures payées épuisées",
+  "الصندوق":"Caisse",
+  "رصيد الافتتاح":"Solde d’ouverture",
+  "رصيد الإقفال":"Solde de clôture",
+  "الرصيد الجاري":"Solde courant",
+  "وارد":"Entrée",
+  "صادر":"Sortie",
+  "قيد يدوي":"Écriture manuelle",
+  "دفعة مترشح":"Paiement élève",
+  "مصروف":"Dépense",
+  "طريقة الأداء":"Mode de paiement",
+  "نقدا":"Espèces",
+  "تحويل بنكي":"Virement",
+  "شيك":"Chèque",
+  "بطاقة":"Carte",
+  "الكل":"Tous",
+  "من تاريخ":"Du",
+  "إلى تاريخ":"Au",
+  "هذا الشهر":"Ce mois",
+  "إضافة قيد":"Ajouter une écriture",
+  "إقفال اليوم":"Clôturer le jour",
+  "اليوم مقفل":"Jour clôturé",
+  "المبلغ المحصي":"Montant compté",
+  "المبلغ المتوقع":"Montant attendu",
+  "الفرق":"Écart",
+  "إقفال صندوق اليوم":"Clôture de caisse du jour",
+  "تصدير CSV":"Exporter CSV",
+  "تصدير Excel":"Exporter Excel",
+  "رقم الوصل":"N° de reçu",
+  "لا يمكن تعديل يوم مقفل. يُرجى التواصل مع المدير.":"Impossible de modifier un jour clôturé. Veuillez contacter le directeur.",
+  "هذا اليوم مقفل":"Ce jour est clôturé",
+  "حيد القيد؟":"Supprimer cette écriture ?",
+  "ما كاين حتى حركة":"Aucun mouvement",
+  "مجموع الدخول":"Total entrées",
+  "مجموع الخروج":"Total sorties",
+  "ملاحظة الإقفال":"Note de clôture",
+  "أقفله":"Clôturer",
+  "تعذر تحميل الصندوق":"Impossible de charger la caisse",
+  "تعذر تصدير الحسابات":"Impossible d’exporter la comptabilité",
+  "دخل وصفا ومبلغا صحيحين":"Saisissez un libellé et un montant valides"
 });
 Object.assign(DICT.en,{
   "الساعات المدفوعة المتبقية":"Paid hours remaining",
@@ -597,7 +636,46 @@ Object.assign(DICT.en,{
   "لا يمكن حجز حصة جديدة: لم تبقَ ساعات مدفوعة":"Cannot book a new lesson: no paid hours left",
   "السماح بهذا الحجز رغم نفاد الساعات المدفوعة؟":"Allow this booking even though paid hours have run out?",
   "ساعات مدفوعة على وشك النفاد":"Paid hours almost used up",
-  "نفدت الساعات المدفوعة":"Paid hours used up"
+  "نفدت الساعات المدفوعة":"Paid hours used up",
+  "الصندوق":"Cash journal",
+  "رصيد الافتتاح":"Opening balance",
+  "رصيد الإقفال":"Closing balance",
+  "الرصيد الجاري":"Running balance",
+  "وارد":"In",
+  "صادر":"Out",
+  "قيد يدوي":"Manual entry",
+  "دفعة مترشح":"Student payment",
+  "مصروف":"Expense",
+  "طريقة الأداء":"Payment method",
+  "نقدا":"Cash",
+  "تحويل بنكي":"Transfer",
+  "شيك":"Cheque",
+  "بطاقة":"Card",
+  "الكل":"All",
+  "من تاريخ":"From",
+  "إلى تاريخ":"To",
+  "هذا الشهر":"This month",
+  "إضافة قيد":"Add entry",
+  "إقفال اليوم":"Close the day",
+  "اليوم مقفل":"Day closed",
+  "المبلغ المحصي":"Counted amount",
+  "المبلغ المتوقع":"Expected amount",
+  "الفرق":"Difference",
+  "إقفال صندوق اليوم":"Close today’s cash journal",
+  "تصدير CSV":"Export CSV",
+  "تصدير Excel":"Export Excel",
+  "رقم الوصل":"Receipt no.",
+  "لا يمكن تعديل يوم مقفل. يُرجى التواصل مع المدير.":"A closed day cannot be changed. Please contact the manager.",
+  "هذا اليوم مقفل":"This day is closed",
+  "حيد القيد؟":"Delete this entry?",
+  "ما كاين حتى حركة":"No movements",
+  "مجموع الدخول":"Total in",
+  "مجموع الخروج":"Total out",
+  "ملاحظة الإقفال":"Closing note",
+  "أقفله":"Close",
+  "تعذر تحميل الصندوق":"Could not load the cash journal",
+  "تعذر تصدير الحسابات":"Could not export the accounts",
+  "دخل وصفا ومبلغا صحيحين":"Enter a valid label and amount"
 });
 const _t=s=>{if(typeof s!=='string')return s;if(LANG==='ar'){if(DICT_AR[s]!==undefined)return DICT_AR[s];const a=s.match(/^(\s*)([\s\S]*?)(\s*)$/);return a[2]&&DICT_AR[a[2]]!==undefined?a[1]+DICT_AR[a[2]]+a[3]:s;}const d=DICT[LANG];if(d[s]!==undefined)return d[s];const m=s.match(/^(\s*)([\s\S]*?)(\s*)$/);if(m[2]&&d[m[2]]!==undefined)return m[1]+d[m[2]]+m[3];return s;};
 const lbl=o=>new Proxy(o,{get:(o2,k)=>(typeof k==='string'&&Object.prototype.hasOwnProperty.call(o2,k))?_t(o2[k]):o2[k]});
@@ -1185,6 +1263,140 @@ function DuesList(){
 function DuesPage(){
   return <div><div className="pgh"><h2>{_t('المستحقات')}</h2><p className="muted">{_t('ترتيب حسب أطول صمت')}</p></div><DuesList/></div>;
 }
+
+function cazToday(){
+  const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Africa/Casablanca',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
+  const g=ty=>(parts.find(p=>p.type===ty)||{}).value||'';
+  return g('year')+'-'+g('month')+'-'+g('day');
+}
+function cazMonthStart(d){return String(d||cazToday()).slice(0,7)+'-01';}
+function methodLbl(m){return ({cash:_t('نقدا'),transfer:_t('تحويل بنكي'),cheque:_t('شيك'),card:_t('بطاقة')}[m])||m;}
+function sourceLbl(s){return s==='payment'?_t('دفعة مترشح'):s==='expense'?_t('مصروف'):_t('قيد يدوي');}
+
+function Caisse(){
+  const {user}=useC();
+  const mgr=user.role==='manager'||user.role==='owner';
+  const today=cazToday();
+  const [from,setFrom]=useState(today);
+  const [to,setTo]=useState(today);
+  const [method,setMethod]=useState('all');
+  const [box,setBox]=useState(null);
+  const [err,setErr]=useState('');
+  const [busy,setBusy]=useState('');
+  const [form,setForm]=useState({date:today,direction:'in',label:'',amount:'',method:'cash',note:''});
+  const [closeFor,setCloseFor]=useState(null);
+  const [counted,setCounted]=useState('');
+  const [closeNote,setCloseNote]=useState('');
+  const q=()=>'from='+encodeURIComponent(from)+'&to='+encodeURIComponent(to)+'&method='+encodeURIComponent(method)+'&lang='+(LANG||'ar');
+  const load=()=>OQ.api('GET','/api/caisse?'+q()).then(r=>{setBox(r);setErr('');}).catch(()=>setErr(_t('تعذر تحميل الصندوق')));
+  useEffect(()=>{load();},[from,to,method]);
+  const run=async(k,p)=>{
+    setBusy(k);setErr('');
+    try{const r=await p;try{if(window.OQ&&OQ.pull)await OQ.pull();}catch(e){}await load();return r;}
+    catch(e){if(e.body&&e.body.error==='caisse_day_closed')setErr(_t('لا يمكن تعديل يوم مقفل. يُرجى التواصل مع المدير.'));else setErr(_t('تعذر تحميل الصندوق'));}
+    finally{setBusy('');}
+  };
+  const add=()=>{
+    if(!form.label.trim()||!(Number(form.amount)>0))return alert(_t('دخل وصفا ومبلغا صحيحين'));
+    run('add',OQ.api('POST','/api/caisse/entries',{date:form.date,direction:form.direction,label:form.label.trim(),amount:Number(form.amount),method:form.method,note:form.note})).then(r=>{if(r&&r.ok)setForm({date:form.date,direction:'in',label:'',amount:'',method:'cash',note:''});});
+  };
+  const del=(id)=>{if(!confirm(_t('حيد القيد؟')))return;run('del:'+id,OQ.api('DELETE','/api/caisse/entries/'+encodeURIComponent(id),{}));};
+  const doClose=()=>{
+    const day=closeFor;if(!day)return;
+    const n=Number(counted);
+    if(!Number.isFinite(n)||n<0)return alert(_t('دخل مبلغ صحيح'));
+    run('close',OQ.api('POST','/api/caisse/close',{date:day,countedCash:n,note:closeNote})).then(r=>{if(r&&r.ok){setCloseFor(null);setCounted('');setCloseNote('');}});
+  };
+  const exp=async(fmt)=>{
+    setBusy('exp:'+fmt);
+    try{
+      const r=await fetch('/api/caisse/export?'+q()+'&format='+fmt,{credentials:'same-origin',headers:{'X-Otoqol':'1'}});
+      if(!r.ok)throw new Error('export');
+      const blob=await r.blob();
+      const dis=r.headers.get('content-disposition')||'';
+      const m=dis.match(/filename="([^"]+)"/);
+      const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=(m&&m[1])||('otoqol-caisse.'+(fmt==='xlsx'?'xlsx':'csv'));a.click();
+      setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+    }catch(e){setErr(_t('تعذر تصدير الحسابات'));}
+    finally{setBusy('');}
+  };
+  const dayOf=d=>(box&&box.days||[]).find(x=>x.date===d);
+  const expectedOf=d=>{const x=dayOf(d);return x?x.expectedCash:0;};
+  const locked=d=>{const x=dayOf(d);return !!(x&&x.close)&&!mgr;};
+  const fmtN=n=>fmt(n);
+  return <div data-oq-caisse="">
+    <h2>{_t('الصندوق')}</h2>
+    {err&&<div className="al bad">{err}</div>}
+    <div className="card">
+      <div className="fg">
+        <F l={_t('من تاريخ')}><input type="date" data-oq-caisse-from="" value={from} onChange={e=>setFrom(e.target.value||today)}/></F>
+        <F l={_t('إلى تاريخ')}><input type="date" data-oq-caisse-to="" value={to} onChange={e=>setTo(e.target.value||today)}/></F>
+        <F l={_t('طريقة الأداء')}><select data-oq-caisse-method="" value={method} onChange={e=>setMethod(e.target.value)}><option value="all">{_t('الكل')}</option><option value="cash">{_t('نقدا')}</option><option value="transfer">{_t('تحويل بنكي')}</option><option value="cheque">{_t('شيك')}</option><option value="card">{_t('بطاقة')}</option></select></F>
+      </div>
+      <div className="row">
+        <button type="button" className="b" onClick={()=>{setFrom(today);setTo(today);}}>{_t('اليوم')}</button>
+        <button type="button" className="b" onClick={()=>{setFrom(cazMonthStart(today));setTo(today);}}>{_t('هذا الشهر')}</button>
+        <button type="button" className="b" data-oq-caisse-export-csv="" disabled={!!busy} onClick={()=>exp('csv')}>{_t('تصدير CSV')}</button>
+        <button type="button" className="b" data-oq-caisse-export-xlsx="" disabled={!!busy} onClick={()=>exp('xlsx')}>{_t('تصدير Excel')}</button>
+      </div>
+    </div>
+    {box&&<div className="grid" style={{marginBottom:12}}>
+      <div className="stat" data-oq-caisse-opening=""><small>{_t('رصيد الافتتاح')}</small><b>{fmtN(box.opening)}</b></div>
+      <div className="stat"><small>{_t('مجموع الدخول')}</small><b>{fmtN(box.totals&&box.totals.in)}</b></div>
+      <div className="stat"><small>{_t('مجموع الخروج')}</small><b>{fmtN(box.totals&&box.totals.out)}</b></div>
+      <div className="stat" data-oq-caisse-balance=""><small>{_t('رصيد الإقفال')}</small><b>{fmtN(box.closing)}</b></div>
+    </div>}
+    <div className="card">
+      <h3>{_t('إضافة قيد')}</h3>
+      <div className="fg">
+        <F l={_t('التاريخ')}><input type="date" value={form.date} onChange={e=>setForm(Object.assign({},form,{date:e.target.value}))}/></F>
+        <F l={_t('النوع')}><select value={form.direction} onChange={e=>setForm(Object.assign({},form,{direction:e.target.value}))}><option value="in">{_t('وارد')}</option><option value="out">{_t('صادر')}</option></select></F>
+        <F l={_t('الوصف')}><input value={form.label} onChange={e=>setForm(Object.assign({},form,{label:e.target.value}))}/></F>
+        <F l={_t('المبلغ')}><input type="number" value={form.amount} onChange={e=>setForm(Object.assign({},form,{amount:e.target.value}))}/></F>
+        <F l={_t('طريقة الأداء')}><select value={form.method} onChange={e=>setForm(Object.assign({},form,{method:e.target.value}))}><option value="cash">{_t('نقدا')}</option><option value="transfer">{_t('تحويل بنكي')}</option><option value="cheque">{_t('شيك')}</option><option value="card">{_t('بطاقة')}</option></select></F>
+        <F l={_t('ملاحظة')}><input value={form.note} onChange={e=>setForm(Object.assign({},form,{note:e.target.value}))}/></F>
+      </div>
+      <button type="button" className="b pri" data-oq-caisse-add="" disabled={!!busy||locked(form.date)} onClick={add}>{_t('تسجيل')}</button>
+      {locked(form.date)&&<div className="al warn" style={{marginTop:8}}>{_t('لا يمكن تعديل يوم مقفل. يُرجى التواصل مع المدير.')}</div>}
+    </div>
+    {!box&&!err&&<div className="meta">{_t('كنحملو…')}</div>}
+    {box&&!(box.days||[]).length&&<div className="empty">{_t('ما كاين حتى حركة')}</div>}
+    {(box&&box.days||[]).map(day=><div key={day.date} className="card" data-oq-caisse-day={day.date} style={{marginTop:10}}>
+      <div className="row" style={{justifyContent:'space-between',alignItems:'center',gap:8,flexWrap:'wrap'}}>
+        <h3 style={{margin:0}}>{day.date}{day.close&&<span className="bd ok" style={{marginInlineStart:8}}>{_t('اليوم مقفل')}</span>}</h3>
+        <div className="row">
+          <span className="meta">{_t('رصيد الافتتاح')}: {fmtN(day.opening)}</span>
+          <span className="meta">{_t('رصيد الإقفال')}: {fmtN(day.closing)}</span>
+          {!day.close&&<button type="button" className="b" data-oq-caisse-close={day.date} onClick={()=>{setCloseFor(day.date);setCounted(String(day.expectedCash!=null?day.expectedCash:''));setCloseNote('');}}>{_t('إقفال اليوم')}</button>}
+          {day.close&&mgr&&<button type="button" className="b" data-oq-caisse-close={day.date} onClick={()=>{setCloseFor(day.date);setCounted(String(day.close.countedCash));setCloseNote(day.close.note||'');}}>{_t('إقفال اليوم')}</button>}
+        </div>
+      </div>
+      {day.close&&<div className="al info" style={{marginTop:8}}>{_t('المبلغ المتوقع')}: {fmtN(day.close.expectedCash)} · {_t('المبلغ المحصي')}: {fmtN(day.close.countedCash)} · {_t('الفرق')}: {fmtN(day.close.difference)}{day.close.note?(' · '+day.close.note):''}</div>}
+      <div className="tw" style={{marginTop:8}}><table><thead><tr><th>{_t('النوع')}</th><th>{_t('الوصف')}</th><th>{_t('طريقة الأداء')}</th><th>{_t('وارد')}</th><th>{_t('صادر')}</th><th>{_t('الرصيد الجاري')}</th><th></th></tr></thead><tbody>
+        {!day.lines.length&&<tr><td colSpan="7" className="empty">{_t('ما كاين حتى حركة')}</td></tr>}
+        {day.lines.map(l=><tr key={l.id} data-oq-caisse-line={l.id}>
+          <td>{sourceLbl(l.source)}</td>
+          <td>{l.label}{l.receiptNo!=null&&<small className="meta"> · {_t('رقم الوصل')} {l.receiptNo}</small>}{l.category?(' · '+_t(l.category)):''}{l.vehicle?(' · '+l.vehicle):''}</td>
+          <td>{methodLbl(l.method)}</td>
+          <td>{l.direction==='in'?fmtN(l.amount):''}</td>
+          <td>{l.direction==='out'?fmtN(l.amount):''}</td>
+          <td>{fmtN(l.balance)}</td>
+          <td>{l.source==='manual'&&(mgr||!day.close)&&<button type="button" className="b del" data-oq-caisse-del={l.entryId} disabled={!!busy} onClick={()=>del(l.entryId)}>✕</button>}</td>
+        </tr>)}
+      </tbody></table></div>
+    </div>)}
+    {closeFor&&<Modal title={_t('إقفال صندوق اليوم')+' — '+closeFor} onClose={()=>setCloseFor(null)}>
+      <div data-oq-caisse-close-modal="">
+        <p className="meta">{_t('المبلغ المتوقع')}: {fmtN(expectedOf(closeFor))}</p>
+        <F l={_t('المبلغ المحصي')}><input type="number" data-oq-caisse-counted="" value={counted} onChange={e=>setCounted(e.target.value)}/></F>
+        <p className="meta">{_t('الفرق')}: {fmtN((Number(counted)||0)-expectedOf(closeFor))}</p>
+        <F l={_t('ملاحظة الإقفال')}><input data-oq-caisse-close-note="" value={closeNote} onChange={e=>setCloseNote(e.target.value)}/></F>
+        <div className="row"><button type="button" className="b pri" data-oq-caisse-close-save="" disabled={!!busy} onClick={doClose}>{_t('أقفله')}</button><button type="button" className="b" onClick={()=>setCloseFor(null)}>{_t('إلغاء')}</button></div>
+      </div>
+    </Modal>}
+  </div>;
+}
+
 function Finance(){
   const {db,upd,user,L}=useC();
   const mgr=user.role==='manager';
@@ -1874,13 +2086,13 @@ function App(){
   const unread=db.notifs.filter(n=>!n.read&&visibleNotif(user,n)).length;
   const pend=db.requests.filter(r=>r.status==='pending').length;
   const NAV={
-    manager:[['home',_t('🏠 لوحة القيادة')],['tasks','✅ '+_t('المهام')],['candidates',_t('👥 المترشحون')],['sessions',_t('📅 الحصص')],['monitors',_t('🧑‍🏫 المونيتورات')],['vehicles',_t('🚗 السيارات')],['finance',_t('💰 المالية')],['dues','💳 '+_t('المستحقات')],['requests',_t('🔁 الطلبات')],['bookings','📥 '+_t('طلبات الحجز')],['notifs',_t('🔔 الإشعارات')],['settings',_t('⚙️ الإعدادات')]],
-    secretary:[['home',_t('🏠 لوحة القيادة')],['tasks','✅ '+_t('المهام')],['candidates',_t('👥 المترشحون')],['sessions',_t('📅 الحصص')],['vehicles',_t('🚗 السيارات')],['finance',_t('💰 المالية')],['dues','💳 '+_t('المستحقات')],['requests',_t('🔁 الطلبات')],['bookings','📥 '+_t('طلبات الحجز')],['notifs',_t('🔔 الإشعارات')],['settings',_t('⚙️ الإعدادات')]],
+    manager:[['home',_t('🏠 لوحة القيادة')],['tasks','✅ '+_t('المهام')],['candidates',_t('👥 المترشحون')],['sessions',_t('📅 الحصص')],['monitors',_t('🧑‍🏫 المونيتورات')],['vehicles',_t('🚗 السيارات')],['finance',_t('💰 المالية')],['caisse','📒 '+_t('الصندوق')],['dues','💳 '+_t('المستحقات')],['requests',_t('🔁 الطلبات')],['bookings','📥 '+_t('طلبات الحجز')],['notifs',_t('🔔 الإشعارات')],['settings',_t('⚙️ الإعدادات')]],
+    secretary:[['home',_t('🏠 لوحة القيادة')],['tasks','✅ '+_t('المهام')],['candidates',_t('👥 المترشحون')],['sessions',_t('📅 الحصص')],['vehicles',_t('🚗 السيارات')],['finance',_t('💰 المالية')],['caisse','📒 '+_t('الصندوق')],['dues','💳 '+_t('المستحقات')],['requests',_t('🔁 الطلبات')],['bookings','📥 '+_t('طلبات الحجز')],['notifs',_t('🔔 الإشعارات')],['settings',_t('⚙️ الإعدادات')]],
     monitor:[['home',_t('📅 برنامجي')],['tasks','✅ '+_t('المهام')],['mycands',_t('👥 مترشحيني')],['mystats',_t('📊 إحصائياتي')],['notifs',_t('🔔 الإشعارات')],['settings',_t('⚙️ الإعدادات')]]
   }[user.role];
   const mon=user.role==='monitor';
   const PAGES={
-    home:mon?<MySchedule/>:<Dashboard/>,tasks:<TasksInbox/>,candidates:<Candidates/>,sessions:<Sessions/>,monitors:<Monitors/>,vehicles:<Vehicles/>,finance:<Finance/>,dues:<DuesPage/>,requests:<Requests/>,bookings:<BookingsInbox/>,notifs:<Notifs/>,settings:<Settings/>,mycands:<MyCands/>,mystats:<MyStats/>
+    home:mon?<MySchedule/>:<Dashboard/>,tasks:<TasksInbox/>,candidates:<Candidates/>,sessions:<Sessions/>,monitors:<Monitors/>,vehicles:<Vehicles/>,finance:<Finance/>,caisse:<Caisse/>,dues:<DuesPage/>,requests:<Requests/>,bookings:<BookingsInbox/>,notifs:<Notifs/>,settings:<Settings/>,mycands:<MyCands/>,mystats:<MyStats/>
   };
   const allowed=NAV.some(x=>x[0]===page)?page:'home';
   return <Ctx.Provider value={{db:db,upd:upd,user:user,L:L,notify:notify,mark:mark,replace:setDb,openSend:setSend,lang:lang,setLang:setLang,logout:logout}}>
@@ -1964,6 +2176,10 @@ const OQ=(()=>{
           const left=b&&window.OQHours?OQHours.formatHours(b.left):'';
           alert(_t('لا يمكن حجز حصة جديدة: لم تبقَ ساعات مدفوعة')+(left?(' ('+_t('تبقّى')+' '+left+' '+_t('ساعة')+')'):''));
         }catch(x){}
+        if(base){last=base;dirty=false;persist();try{if(setter)setter(JSON.parse(base));}catch(x){}}
+      }else if(e.body&&e.body.error==='caisse_day_closed'){
+        setStatus('ok');blocked=true;
+        try{alert(_t('لا يمكن تعديل يوم مقفل. يُرجى التواصل مع المدير.'));}catch(x){}
         if(base){last=base;dirty=false;persist();try{if(setter)setter(JSON.parse(base));}catch(x){}}
       }else if(e.status===401||e.status===403)setStatus('auth');
       else{setStatus('offline');schedule(10000);}
