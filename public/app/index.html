@@ -626,7 +626,11 @@ Object.assign(DICT.fr,{
   "أقفله":"Clôturer",
   "تعذر تحميل الصندوق":"Impossible de charger la caisse",
   "تعذر تصدير الحسابات":"Impossible d’exporter la comptabilité",
-  "دخل وصفا ومبلغا صحيحين":"Saisissez un libellé et un montant valides"
+  "دخل وصفا ومبلغا صحيحين":"Saisissez un libellé et un montant valides",
+  "تم إنشاء حساب المدرسة.":"Le compte de l’école a été créé.",
+  "اسم المستخدم للمدير":"Nom d’utilisateur du directeur",
+  "اسم المستخدم للسكرتيرة":"Nom d’utilisateur de la secrétaire",
+  "احفظ هذين الاسمين لتسجيل الدخول في المرات القادمة.":"Conservez ces identifiants pour les prochaines connexions."
 });
 Object.assign(DICT.en,{
   "الساعات المدفوعة المتبقية":"Paid hours remaining",
@@ -675,7 +679,11 @@ Object.assign(DICT.en,{
   "أقفله":"Close",
   "تعذر تحميل الصندوق":"Could not load the cash journal",
   "تعذر تصدير الحسابات":"Could not export the accounts",
-  "دخل وصفا ومبلغا صحيحين":"Enter a valid label and amount"
+  "دخل وصفا ومبلغا صحيحين":"Enter a valid label and amount",
+  "تم إنشاء حساب المدرسة.":"The school account has been created.",
+  "اسم المستخدم للمدير":"Manager username",
+  "اسم المستخدم للسكرتيرة":"Secretary username",
+  "احفظ هذين الاسمين لتسجيل الدخول في المرات القادمة.":"Save these usernames for the next time you sign in."
 });
 const _t=s=>{if(typeof s!=='string')return s;if(LANG==='ar'){if(DICT_AR[s]!==undefined)return DICT_AR[s];const a=s.match(/^(\s*)([\s\S]*?)(\s*)$/);return a[2]&&DICT_AR[a[2]]!==undefined?a[1]+DICT_AR[a[2]]+a[3]:s;}const d=DICT[LANG];if(d[s]!==undefined)return d[s];const m=s.match(/^(\s*)([\s\S]*?)(\s*)$/);if(m[2]&&d[m[2]]!==undefined)return m[1]+d[m[2]]+m[3];return s;};
 const lbl=o=>new Proxy(o,{get:(o2,k)=>(typeof k==='string'&&Object.prototype.hasOwnProperty.call(o2,k))?_t(o2[k]):o2[k]});
@@ -2284,7 +2292,9 @@ function SchoolGate(){
       const n=o.candidates.length+(o.sessions||[]).length+(o.monitors||[]).length+(o.payments||[]).length;return n>0?o:null;}catch(e){return null;}
   };
   // first-time setup of a fresh school: the default DB, with the owner's admin password = the password just typed
-  const setupDB=()=>{const d=defaultDB();const pwd=pend.current.setupPw;if(pwd){const a=d.users.find(x=>x.id==='u1');if(a)a.password=pwd;}return d;};
+  const setupUsernames=code=>{const raw=String(code||'').toLowerCase().replace(/[^a-z0-9-]/g,'').slice(0,20);const suffix=raw||('s'+Date.now().toString(36).slice(-6));return {mgr:'admin_'+suffix,sec:'sec_'+suffix};};
+  const setupDB=()=>{const d=defaultDB();const pwd=pend.current.setupPw;const names=setupUsernames(pend.current.setupCode);pend.current.setupNames=names;const a=d.users.find(x=>x.id==='u1');if(a){if(pwd)a.password=pwd;a.username=names.mgr;}const s=d.users.find(x=>x.id==='u2');if(s)s.username=names.sec;return d;};
+  const announceSetup=()=>{const n=pend.current.setupNames;if(!n)return;pend.current.setupNames=null;try{alert(_t('تم إنشاء حساب المدرسة.')+'\n'+_t('اسم المستخدم للمدير')+': '+n.mgr+'\n'+_t('اسم المستخدم للسكرتيرة')+': '+n.sec+'\n'+_t('احفظ هذين الاسمين لتسجيل الدخول في المرات القادمة.'));}catch(x){}};
   const setAppUser=(u,data)=>{ // log the app user in (what the app's own Login screen used to do)
     if(u&&data&&u.role!=='monitor'&&!(data.users||[]).some(x=>x.id===u.id)){const m=(data.users||[]).find(x=>x.role==='manager');if(m)u={id:m.id,name:m.name,role:m.role};}
     try{sessionStorage.removeItem('ae_user');if(u)localStorage.setItem('ae_user',JSON.stringify(u));}catch(e){}
@@ -2312,8 +2322,8 @@ function SchoolGate(){
     setBusy(true);
     try{
       const r=await OQ.api('POST','/api/signin',{username:un.trim(),password:pw});
-      pend.current.setupPw=r.setup?pw:null;setPw('');
-      await enter(r.school,r.user);}
+      pend.current.setupPw=r.setup?pw:null;pend.current.setupCode=r.setup&&r.school?r.school.code:'';setPw('');
+      await enter(r.school,r.user);announceSetup();}
     catch(e){const code=e.body&&e.body.error;
       setErr(e.status===401?_t('اسم المستخدم أو كلمة السر غالطين'):
       code==='school_pending'?_t('طلبك قيد المراجعة. ستتمكن من الدخول بعد الموافقة.'):
@@ -2357,7 +2367,7 @@ function SchoolGate(){
         OQ.start(school,{version:r.version,data:data});}
       else{try{localStorage.removeItem(KEY);}catch(e){}data=OQ.start(school,server,pend.current.setupPw?setupDB():undefined);}
       if(pend.current.user)setAppUser(pend.current.user,data);
-      pend.current.setupPw=null;setPhase('app');
+      pend.current.setupPw=null;setPhase('app');announceSetup();
     }catch(e){setErr(_t('ما قدرناش نرفعو الداتا، عاود جرب')+' ('+e.message+')');}
     finally{setBusy(false);}
   };
