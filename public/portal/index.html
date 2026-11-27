@@ -271,6 +271,14 @@ Object.assign(DICT.en,{
   "تبقّت لك ساعتان أو أقل من الساعات المدفوعة. يُرجى التواصل مع مدرستك.":"You have two or fewer paid hours left. Please contact your school.",
   "لا يمكن طلب حجز جديد: لم تبقَ ساعات مدفوعة. يُرجى التواصل مع مدرستك.":"You cannot request a new booking: no paid hours left. Please contact your school."
 });
+Object.assign(DICT.fr,{
+  "طباعة كناش التكوين":"Imprimer le livret de formation",
+  "كناش التكوين":"Livret de formation"
+});
+Object.assign(DICT.en,{
+  "طباعة كناش التكوين":"Print the training booklet",
+  "كناش التكوين":"Training booklet"
+});
 const _t=s=>{if(typeof s!=='string')return s;if(LANG==='ar')return s;const d=DICT[LANG];if(d&&d[s]!==undefined)return d[s];return s;};
 const setLang=(l)=>{LANG=l;try{localStorage.setItem('ae_lang',l);}catch(e){}document.documentElement.lang=l;document.documentElement.dir=l==='ar'?'rtl':'ltr';};
 const fmt=n=>(Number(n)||0).toLocaleString(LANG==='en'?'en-US':'fr-FR')+_t(' د.م');
@@ -314,7 +322,8 @@ function Dashboard({me,onGo}){
     <div className="card">
       <h3>{_t('الحصة القادمة')}</h3>
       {n?<div><b>{n.date} · {n.time}</b> <span className="bd info">{typeLbl[n.type]||n.type}</span> <span className="meta">{n.monitorName}</span></div>:<div className="meta">{_t('ما كاين حتى حصة قادمة')}</div>}
-      <div className="row" style={{marginTop:10}}><button className="b pri" onClick={()=>onGo('schedule')}>{_t('الجدول')}</button></div>
+      <div className="row" style={{marginTop:10}}><button className="b pri" onClick={()=>onGo('schedule')}>{_t('الجدول')}</button>
+        <button type="button" className="b" data-oq-portal-livret="" onClick={()=>{const w=window.open('/api/portal/livret/print?lang='+(LANG||'ar'),'_blank');if(!w)alert(_t('يُرجى السماح بالنوافذ المنبثقة للطباعة'));}}>{_t('طباعة كناش التكوين')}</button></div>
     </div>
   </div>;
 }
