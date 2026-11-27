@@ -685,6 +685,52 @@ Object.assign(DICT.en,{
   "اسم المستخدم للسكرتيرة":"Secretary username",
   "احفظ هذين الاسمين لتسجيل الدخول في المرات القادمة.":"Save these usernames for the next time you sign in."
 });
+Object.assign(DICT.fr,{
+  "سجل التسجيل":"Registre des inscriptions",
+  "كناش التكوين":"Livret de formation",
+  "تعذر تحميل السجل":"Impossible de charger le registre",
+  "تعذر تصدير السجل":"Impossible d’exporter le registre",
+  "رقم الترتيب":"N°",
+  "الاسم والنسب":"Nom et prénom",
+  "رقم البطاقة الوطنية":"N° de CIN",
+  "رقم التسجيل الإداري":"N° d’inscription administrative",
+  "مراجع العقد":"Références du contrat",
+  "عدد ساعات التكوين":"Heures de formation",
+  "تاريخ بداية التكوين":"Début de la formation",
+  "تاريخ نهاية التكوين":"Fin de la formation",
+  "صنف الرخصة":"Catégorie de permis",
+  "رقم الرخصة الحالية":"N° du permis actuel",
+  "الامتحانات":"Examens",
+  "لا يوجد مترشحون في هذه الفترة":"Aucun candidat pour cette période",
+  "من تاريخ":"Du",
+  "إلى تاريخ":"Au",
+  "عرض":"Afficher",
+  "طباعة السجل":"Imprimer le registre",
+  "يستند السجل إلى المادة 22 من دفتر التحملات المرفق بقرار 271-13.":"Ce registre s’appuie sur l’article 22 du cahier des charges annexé à l’arrêté 271-13."
+});
+Object.assign(DICT.en,{
+  "سجل التسجيل":"Enrolment register",
+  "كناش التكوين":"Training booklet",
+  "تعذر تحميل السجل":"Could not load the register",
+  "تعذر تصدير السجل":"Could not export the register",
+  "رقم الترتيب":"No.",
+  "الاسم والنسب":"Full name",
+  "رقم البطاقة الوطنية":"National ID (CIN)",
+  "رقم التسجيل الإداري":"Administration registration number",
+  "مراجع العقد":"Contract references",
+  "عدد ساعات التكوين":"Training hours",
+  "تاريخ بداية التكوين":"Training start date",
+  "تاريخ نهاية التكوين":"Training end date",
+  "صنف الرخصة":"Licence category",
+  "رقم الرخصة الحالية":"Current licence number",
+  "الامتحانات":"Exams",
+  "لا يوجد مترشحون في هذه الفترة":"No candidates in this period",
+  "من تاريخ":"From",
+  "إلى تاريخ":"To",
+  "عرض":"Show",
+  "طباعة السجل":"Print the register",
+  "يستند السجل إلى المادة 22 من دفتر التحملات المرفق بقرار 271-13.":"This register follows article 22 of the specifications annexed to order 271-13."
+});
 const _t=s=>{if(typeof s!=='string')return s;if(LANG==='ar'){if(DICT_AR[s]!==undefined)return DICT_AR[s];const a=s.match(/^(\s*)([\s\S]*?)(\s*)$/);return a[2]&&DICT_AR[a[2]]!==undefined?a[1]+DICT_AR[a[2]]+a[3]:s;}const d=DICT[LANG];if(d[s]!==undefined)return d[s];const m=s.match(/^(\s*)([\s\S]*?)(\s*)$/);if(m[2]&&d[m[2]]!==undefined)return m[1]+d[m[2]]+m[3];return s;};
 const lbl=o=>new Proxy(o,{get:(o2,k)=>(typeof k==='string'&&Object.prototype.hasOwnProperty.call(o2,k))?_t(o2[k]):o2[k]});
 const KEY='autoecole_db_v1';
@@ -1026,8 +1072,9 @@ function CandidateModal({id,onClose,startNarsa}){
   const tabs=c?[['info',_t('البيانات')],['exams',_t('الامتحانات')],['ses',_t('الحصص والغياب')],['pay',_t('الدفعات')],['notes',_t('ملاحظات المدربين')]]:[['info',_t('البيانات')]];
   const sess=c?db.sessions.filter(s=>s.att.some(a=>a.cid===c.id)).sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time)):[];
   return <Modal title={c?c.name:_t('مترشح جديد')} onClose={onClose} wide>
-    {c&&user.role!=='monitor'&&<div className="row narsa-actions" style={{marginTop:0,marginBottom:10}}>
-      <button type="button" className="b pri" data-oq-narsa-open="" onClick={()=>setNarsaOpen(true)}>{_t("طباعة الوثائق")}</button>
+    {c&&<div className="row narsa-actions" style={{marginTop:0,marginBottom:10}}>
+      {user.role!=='monitor'&&<button type="button" className="b pri" data-oq-narsa-open="" onClick={()=>setNarsaOpen(true)}>{_t("طباعة الوثائق")}</button>}
+      <button type="button" className="b" data-oq-livret="" onClick={()=>{const w=window.open('/api/docs/livret/'+encodeURIComponent(c.id)+'/print?lang='+(LANG||'ar'),'_blank');if(!w)alert(_t('يُرجى السماح بالنوافذ المنبثقة للطباعة'));}}>{_t("كناش التكوين")}</button>
       <button type="button" className="b" data-oq-portal-invite="" disabled={inviting} onClick={async()=>{
         setInviting(true);setCopied(false);
         try{const r=await OQ.api('POST','/api/portal/invite',{cid:c.id,email:(f.email||c.email||'')});setInvite(r);}
@@ -1140,7 +1187,7 @@ function Candidates(){
         <td><b>{c.name}</b></td><td>{c.phone}</td><td>{c.license}</td><td><span className="bd info">{stageLbl[c.stage]}</span></td>
         <td>{hoursDone(db,c.id,'code')}/{c.codeHours}</td><td>{hoursDone(db,c.id,'conduite')}/{c.driveHours}</td>
         <td>{left>0?<span className="bd warn">{fmt(left)}</span>:<span className="bd ok">{_t("خالص")}</span>}</td>
-        <td>{ab>0?<span className={'bd '+(ab>=db.settings.absLimit?'bad':'warn')}>{ab}</span>:'—'}</td>{user.role!=='monitor'&&<td><button type="button" className="b pri" data-oq-narsa-list={c.id} onClick={e=>{e.stopPropagation();setStartNarsa(true);setSel(c.id);}}>{_t("طباعة الوثائق")}</button></td>}</tr>;})}
+        <td>{ab>0?<span className={'bd '+(ab>=db.settings.absLimit?'bad':'warn')}>{ab}</span>:'—'}</td>{user.role!=='monitor'&&<td><button type="button" className="b pri" data-oq-narsa-list={c.id} onClick={e=>{e.stopPropagation();setStartNarsa(true);setSel(c.id);}}>{_t("طباعة الوثائق")}</button> <button type="button" className="b" data-oq-livret-list={c.id} onClick={e=>{e.stopPropagation();const w=window.open('/api/docs/livret/'+encodeURIComponent(c.id)+'/print?lang='+(LANG||'ar'),'_blank');if(!w)alert(_t('يُرجى السماح بالنوافذ المنبثقة للطباعة'));}}>{_t("كناش التكوين")}</button></td>}</tr>;})}
       {!list.length&&<tr><td colSpan="8" className="empty">{_t("ما كاين حتى مترشح")}</td></tr>}
     </tbody></table></div>
     {sel!==undefined&&<CandidateModal id={sel} startNarsa={startNarsa} onClose={()=>{setSel(undefined);setStartNarsa(false);}}/>}
@@ -1405,6 +1452,60 @@ function Caisse(){
   </div>;
 }
 
+function Registre(){
+  const [from,setFrom]=useState('');
+  const [to,setTo]=useState('');
+  const [box,setBox]=useState(null);
+  const [err,setErr]=useState('');
+  const [busy,setBusy]=useState('');
+  const q=()=>'from='+encodeURIComponent(from)+'&to='+encodeURIComponent(to)+'&lang='+(LANG||'ar');
+  const load=()=>OQ.api('GET','/api/docs/registre?'+q()).then(r=>{setBox(r);setErr('');}).catch(()=>setErr(_t('تعذر تحميل السجل')));
+  useEffect(()=>{load();},[]);
+  const openPrint=()=>{const w=window.open('/api/docs/registre/print?'+q(),'_blank');if(!w)alert(_t('يُرجى السماح بالنوافذ المنبثقة للطباعة'));};
+  const exp=async(fmt)=>{
+    setBusy('exp:'+fmt);
+    try{
+      const r=await fetch('/api/docs/registre/export?'+q()+'&format='+fmt,{credentials:'same-origin',headers:{'X-Otoqol':'1'}});
+      if(!r.ok)throw new Error('export');
+      const blob=await r.blob();
+      const dis=r.headers.get('content-disposition')||'';
+      const m=dis.match(/filename="([^"]+)"/);
+      const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=(m&&m[1])||('otoqol-registre.'+(fmt==='xlsx'?'xlsx':'csv'));a.click();
+      setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+    }catch(e){setErr(_t('تعذر تصدير السجل'));}
+    finally{setBusy('');}
+  };
+  const rows=(box&&box.rows)||[];
+  return <div data-oq-registre="">
+    <div className="bar">
+      <F l={_t('من تاريخ')}><input type="date" data-oq-registre-from="" value={from} onChange={e=>setFrom(e.target.value)}/></F>
+      <F l={_t('إلى تاريخ')}><input type="date" data-oq-registre-to="" value={to} onChange={e=>setTo(e.target.value)}/></F>
+      <button type="button" className="b pri" data-oq-registre-load="" disabled={!!busy} onClick={load}>{_t('عرض')}</button>
+      <button type="button" className="b" data-oq-registre-print="" onClick={openPrint}>{_t('طباعة السجل')}</button>
+      <button type="button" className="b" data-oq-registre-csv="" disabled={!!busy} onClick={()=>exp('csv')}>CSV</button>
+      <button type="button" className="b" data-oq-registre-xlsx="" disabled={!!busy} onClick={()=>exp('xlsx')}>Excel</button>
+    </div>
+    {err&&<div className="al bad">{err}</div>}
+    <p className="meta">{_t('يستند السجل إلى المادة 22 من دفتر التحملات المرفق بقرار 271-13.')}</p>
+    <div className="tw"><table><thead><tr>
+      <th>{_t('رقم الترتيب')}</th><th>{_t('الاسم والنسب')}</th><th>{_t('رقم البطاقة الوطنية')}</th>
+      <th>{_t('تاريخ الازدياد')}</th><th>{_t('مكان الازدياد')}</th><th>{_t('العنوان')}</th>
+      <th>{_t('رقم التسجيل الإداري')}</th><th>{_t('مراجع العقد')}</th><th>{_t('عدد ساعات التكوين')}</th>
+      <th>{_t('تاريخ بداية التكوين')}</th><th>{_t('تاريخ نهاية التكوين')}</th><th>{_t('صنف الرخصة')}</th>
+      <th>{_t('رقم الرخصة الحالية')}</th><th>{_t('الامتحانات')}</th>
+    </tr></thead><tbody>
+      {rows.map(r=><tr key={r.id}>
+        <td>{r.order}</td><td>{r.name||'—'}</td><td>{r.cin||'—'}</td><td>{r.birthDate||'—'}</td>
+        <td>{r.birthPlace||'—'}</td><td>{r.address||'—'}</td><td>{r.narsaRef||'—'}</td>
+        <td>{r.contractRef||'—'}</td><td>{(r.hours&&r.hours.totalPlanned)||'—'}</td>
+        <td>{r.trainingStart||'—'}</td><td>{r.trainingEnd||'—'}</td><td>{r.license||'—'}</td>
+        <td>{r.permitNo||'—'}</td><td>{r.examsText||'—'}</td>
+      </tr>)}
+      {!rows.length&&<tr><td colSpan="14" className="empty">{_t('لا يوجد مترشحون في هذه الفترة')}</td></tr>}
+    </tbody></table></div>
+  </div>;
+}
+
 function Finance(){
   const {db,upd,user,L}=useC();
   const mgr=user.role==='manager';
@@ -1575,7 +1676,7 @@ function MyCands(){
   const list=db.candidates.filter(c=>st.cids.includes(c.id));
   return <div>
     <div className="tw"><table><thead><tr><th>{_t("المترشح")}</th><th>{_t("الهاتف")}</th><th>{_t("الرخصة")}</th><th>{_t("الساعات")}</th><th>{_t("غيابات")}</th><th>{_t("آخر ملاحظة")}</th><th></th></tr></thead><tbody>
-      {list.map(c=>{const n=db.notes.find(x=>x.cid===c.id&&x.monitorId===user.id);return <tr key={c.id}><td><b>{c.name}</b></td><td>{c.phone}</td><td>{c.license}</td><td>{hoursDone(db,c.id)}/{Number(c.codeHours)+Number(c.driveHours)}</td><td>{absCount(db,c.id)||'—'}</td><td>{n?n.text:'—'}</td><td><button className="b" onClick={()=>setNoteFor(c.id)}>📝</button></td></tr>;})}
+      {list.map(c=>{const n=db.notes.find(x=>x.cid===c.id&&x.monitorId===user.id);return <tr key={c.id}><td><b>{c.name}</b></td><td>{c.phone}</td><td>{c.license}</td><td>{hoursDone(db,c.id)}/{Number(c.codeHours)+Number(c.driveHours)}</td><td>{absCount(db,c.id)||'—'}</td><td>{n?n.text:'—'}</td><td><button className="b" onClick={()=>setNoteFor(c.id)}>📝</button> <button type="button" className="b" data-oq-livret-mon={c.id} onClick={()=>{const w=window.open('/api/docs/livret/'+encodeURIComponent(c.id)+'/print?lang='+(LANG||'ar'),'_blank');if(!w)alert(_t('يُرجى السماح بالنوافذ المنبثقة للطباعة'));}}>{_t("كناش التكوين")}</button></td></tr>;})}
       {!list.length&&<tr><td colSpan="7" className="empty">{_t("ما عندك حتى مترشح دابا")}</td></tr>}
     </tbody></table></div>
     {noteFor&&<Prompt title={_t('ملاحظة على ')+nm(db.candidates,noteFor)} label={_t("الملاحظة / التقييم")} required onOk={v=>upd(n=>{n.notes.unshift({id:uid(),cid:noteFor,monitorId:user.id,text:v,date:today()});})} onClose={()=>setNoteFor(null)}/>}
@@ -1825,9 +1926,6 @@ function AdminSettings(){
       <p className="meta">{_t("الداتا كتتحفظ أوتوماتيكيا فهاد المتصفح. دير نسخة احتياطية بشكل منتظم (مرة فالأسبوع على الأقل).")}</p>
       <div className="row"><button className="b pri" onClick={exp} data-oq-backup-download="">{_t("⬇ تحميل نسخة احتياطية")}</button><label className="b" data-oq-backup-restore-file="">{_t("⬆ استرجاع من ملف")}<input type="file" accept=".json" onChange={imp} style={{display:'none'}}/></label><button className="b del" onClick={()=>{if(confirm(_t('غادي تمسح كل الداتا نهائيا!'))&&confirm(_t('متأكد؟')))replace(defaultDB());}}>{_t("مسح كل شيء")}</button></div>
       <DriveBackup db={db} replace={replace}/></div>
-    <div className="card"><h3>{_t("سجل العمليات (آخر 50)")}</h3>
-      {db.log.slice(0,50).map(l=><div key={l.id} className="nt"><span className="meta">{new Date(l.date).toLocaleString(LOC())} · {l.user}</span><br/>{l.text}</div>)}
-      {!db.log.length&&<div className="empty">{_t("فارغ")}</div>}</div>
   </div>;
 }
 
@@ -2094,13 +2192,13 @@ function App(){
   const unread=db.notifs.filter(n=>!n.read&&visibleNotif(user,n)).length;
   const pend=db.requests.filter(r=>r.status==='pending').length;
   const NAV={
-    manager:[['home',_t('🏠 لوحة القيادة')],['tasks','✅ '+_t('المهام')],['candidates',_t('👥 المترشحون')],['sessions',_t('📅 الحصص')],['monitors',_t('🧑‍🏫 المونيتورات')],['vehicles',_t('🚗 السيارات')],['finance',_t('💰 المالية')],['caisse','📒 '+_t('الصندوق')],['dues','💳 '+_t('المستحقات')],['requests',_t('🔁 الطلبات')],['bookings','📥 '+_t('طلبات الحجز')],['notifs',_t('🔔 الإشعارات')],['settings',_t('⚙️ الإعدادات')]],
-    secretary:[['home',_t('🏠 لوحة القيادة')],['tasks','✅ '+_t('المهام')],['candidates',_t('👥 المترشحون')],['sessions',_t('📅 الحصص')],['vehicles',_t('🚗 السيارات')],['finance',_t('💰 المالية')],['caisse','📒 '+_t('الصندوق')],['dues','💳 '+_t('المستحقات')],['requests',_t('🔁 الطلبات')],['bookings','📥 '+_t('طلبات الحجز')],['notifs',_t('🔔 الإشعارات')],['settings',_t('⚙️ الإعدادات')]],
+    manager:[['home',_t('🏠 لوحة القيادة')],['tasks','✅ '+_t('المهام')],['candidates',_t('👥 المترشحون')],['sessions',_t('📅 الحصص')],['monitors',_t('🧑‍🏫 المونيتورات')],['vehicles',_t('🚗 السيارات')],['finance',_t('💰 المالية')],['caisse','📒 '+_t('الصندوق')],['registre','📋 '+_t('سجل التسجيل')],['dues','💳 '+_t('المستحقات')],['requests',_t('🔁 الطلبات')],['bookings','📥 '+_t('طلبات الحجز')],['notifs',_t('🔔 الإشعارات')],['settings',_t('⚙️ الإعدادات')]],
+    secretary:[['home',_t('🏠 لوحة القيادة')],['tasks','✅ '+_t('المهام')],['candidates',_t('👥 المترشحون')],['sessions',_t('📅 الحصص')],['vehicles',_t('🚗 السيارات')],['finance',_t('💰 المالية')],['caisse','📒 '+_t('الصندوق')],['registre','📋 '+_t('سجل التسجيل')],['dues','💳 '+_t('المستحقات')],['requests',_t('🔁 الطلبات')],['bookings','📥 '+_t('طلبات الحجز')],['notifs',_t('🔔 الإشعارات')],['settings',_t('⚙️ الإعدادات')]],
     monitor:[['home',_t('📅 برنامجي')],['tasks','✅ '+_t('المهام')],['mycands',_t('👥 مترشحيني')],['mystats',_t('📊 إحصائياتي')],['notifs',_t('🔔 الإشعارات')],['settings',_t('⚙️ الإعدادات')]]
   }[user.role];
   const mon=user.role==='monitor';
   const PAGES={
-    home:mon?<MySchedule/>:<Dashboard/>,tasks:<TasksInbox/>,candidates:<Candidates/>,sessions:<Sessions/>,monitors:<Monitors/>,vehicles:<Vehicles/>,finance:<Finance/>,caisse:<Caisse/>,dues:<DuesPage/>,requests:<Requests/>,bookings:<BookingsInbox/>,notifs:<Notifs/>,settings:<Settings/>,mycands:<MyCands/>,mystats:<MyStats/>
+    home:mon?<MySchedule/>:<Dashboard/>,tasks:<TasksInbox/>,candidates:<Candidates/>,sessions:<Sessions/>,monitors:<Monitors/>,vehicles:<Vehicles/>,finance:<Finance/>,caisse:<Caisse/>,registre:<Registre/>,dues:<DuesPage/>,requests:<Requests/>,bookings:<BookingsInbox/>,notifs:<Notifs/>,settings:<Settings/>,mycands:<MyCands/>,mystats:<MyStats/>
   };
   const allowed=NAV.some(x=>x[0]===page)?page:'home';
   return <Ctx.Provider value={{db:db,upd:upd,user:user,L:L,notify:notify,mark:mark,replace:setDb,openSend:setSend,lang:lang,setLang:setLang,logout:logout}}>
