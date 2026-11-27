@@ -12,7 +12,7 @@
 - `public/signup.html` و `public/owner.html` : صفحة التسجيل للمدارس وصفحة موافقة المالك.
 - `scripts/admin.js` : أوامر الإدارة (إنشاء مدرسة، تبديل كلمة السر، توقيف، export/import، backup).
 - `public/index.html` : نسخة من التطبيق، تبدل فيها غير الحفظ (sync مع السيرفر + cache فالجهاز).
-- `scripts/api-test.js` و `scripts/browser-test.js` و `scripts/responsive-test.js` و `scripts/student-portal-test.js` و `scripts/dues-test.js` و `scripts/templates-test.js` و `scripts/drawer-fix-test.js` و `scripts/tasks-inbox-test.js` و `scripts/paid-hours-test.js` و `scripts/caisse-test.js` : تيستات.
+- `scripts/api-test.js` و `scripts/browser-test.js` و `scripts/responsive-test.js` و `scripts/student-portal-test.js` و `scripts/dues-test.js` و `scripts/templates-test.js` و `scripts/drawer-fix-test.js` و `scripts/tasks-inbox-test.js` و `scripts/paid-hours-test.js` و `scripts/caisse-test.js` و `scripts/setup-usernames-test.js` : تيستات.
 - `Dockerfile`, `docker-compose.yml`, `ecosystem.config.js` (pm2), `render.yaml` (Render), `.env.example`.
 
 ## التشغيل (4 أوامر)
@@ -101,6 +101,7 @@ node scripts/admin.js backup [dir]                         # نسخة كاملة
 - إلا كانت المدرسة `pending` الجواب 403 `school_pending` (الطلب مازال كيتراجع). إلا كانت `rejected` → `school_rejected`. إلا كانت موقوفة → `school_inactive`.
 - إلا صح → كوكي httpOnly (JWT، 30 يوم) فيه المدرسة + المستخدم، والتطبيق كيدخل نيشان للصفحة ديال داك المستخدم. الصلاحيات (مدير، سكريتيرة، مونيتور) باقين كيف ما كانو.
 - **أول مرة** (مدرسة جديدة ما فيها حتى داتا): دخل بـ`admin` + **كلمة السر ديال المدرسة** (لي عطيتيها فـadmin API). التطبيق كيصاوب الداتا الأولى، وكلمة السر ديال `admin` فالتطبيق كتولي هي نفس كلمة السر ديال المدرسة (ماشي 1234).
+- أول إعداد لمدرسة جديدة كيسمّي حساب المدير `admin_<كود_المدرسة>` وحساب السكرتيرة `sec_<كود_المدرسة>`، حيت اسم المستخدم فريد فكل المنصة (ما يمكنش جوج مدارس يستعملو `admin`). التطبيق كيعرض هاد الأسماء بعد أول دخول.
 - **دخول المالك الاحتياطي**: `admin` + كلمة السر ديال المدرسة كيخدم **غير إلا ما كاينش** حساب سميتو `admin` فالتطبيق (مثلا تمسح ولا تبدلات السمية). كيدخلك بأول مدير. إلا كان `admin` موجود، خاصك كلمة السر ديالو لي فالتطبيق.
 - **تسجيل الخروج**: بوطونة "تسجيل الخروج" فالفوق (كاينة فكل صفحة)، ولا من الإعدادات، ولا من "● محفوظ" لتحت → كيرجع لنفس الشاشة.
 - إلا تمسح المستخدم ولا تبدلات كلمة السر ديالو فالتطبيق، الجلسة ديالو كتسالى ملي يعاود يحل التطبيق (`/api/me` كيرد 401).
