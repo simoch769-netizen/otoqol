@@ -122,7 +122,7 @@ const plainDB = () => ({ settings: { school: 'Sec', absLimit: 3 },
     g = await req('GET', '/api/db', undefined, {}, mg);
     const proto = JSON.parse(JSON.stringify(g.j.data)); proto.settings = JSON.parse('{"school":"x","__proto__":{"polluted":true}}');
     t('settings must be an object', (await req('PUT', '/api/db', { version: g.j.version, data: { ...g.j.data, settings: [1] } }, {}, mg)).s === 400);
-    await req('PUT', '/api/db', { version: g.j.version, data: proto }, {}, mg);
+    t('__proto__ payload is rejected', (await req('PUT', '/api/db', { version: g.j.version, data: proto }, {}, mg)).s === 400);
     t('__proto__ payload does not break the server', (await req('GET', '/healthz')).s === 200 && (await req('GET', '/api/me', undefined, {}, mg)).j.user.role === 'manager');
     t('body over 15MB -> 413', (await req('PUT', '/api/db', { version: 0, data: { users: [], candidates: [], x: 'x'.repeat(16 << 20) } }, {}, mg)).s === 413);
     for (const u of ['/../src/server.js', '/%2e%2e/package.json', '/..%2fsrc/db.js', '/.env', '/data/otoqol.sqlite'])

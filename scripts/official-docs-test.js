@@ -139,6 +139,9 @@ function seed() {
     all.rows[0].address === 'حي السلام');
 
   t('exam results appear on the registre', /نجح/.test(all.rows[0].examsText) && /رسب/.test(all.rows[1].examsText));
+  const frReg = docs.buildRegistre(data, {}, 'fr');
+  t('French registre joins exams with a Latin semicolon',
+    frReg.rows[1].examsText.indexOf('; ') !== -1 && frReg.rows.every(r => r.examsText.indexOf('؛') === -1));
 
   const liv = docs.buildLivret(data, 'c1', 'ar');
   t('livret hours and session journal',
@@ -176,6 +179,10 @@ function seed() {
   t('student can read only own livret',
     docs.canReadLivret({ role: 'student', cid: 'c1' }, data, 'c1') === true &&
     docs.canReadLivret({ role: 'student', cid: 'c1' }, data, 'c2') === false);
+  t('owner and office staff can read any livret',
+    docs.canReadLivret({ role: 'owner' }, data, 'c1') === true &&
+    docs.canReadLivret({ role: 'manager' }, data, 'c2') === true &&
+    docs.canReadLivret({ role: 'secretary' }, data, 'c2') === true);
 
   const swapped = docs.parsePeriod({ from: '2026-03-01', to: '2026-01-01' });
   t('period from/to is swapped when reversed', swapped.from === '2026-01-01' && swapped.to === '2026-03-01');
