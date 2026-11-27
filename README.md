@@ -11,8 +11,8 @@
 - `src/db.js` : SQLite (better-sqlite3): جداول `schools` و`school_data` و`history` (نسخ تلقائية). حالة المدرسة: pending / active / rejected / inactive.
 - `public/signup.html` و `public/owner.html` : صفحة التسجيل للمدارس وصفحة موافقة المالك.
 - `scripts/admin.js` : أوامر الإدارة (إنشاء مدرسة، تبديل كلمة السر، توقيف، export/import، backup).
-- `public/index.html` : نسخة من التطبيق، تبدل فيها غير الحفظ (sync مع السيرفر + cache فالجهاز).
-- `scripts/api-test.js` و `scripts/browser-test.js` و `scripts/responsive-test.js` و `scripts/student-portal-test.js` و `scripts/dues-test.js` و `scripts/templates-test.js` و `scripts/drawer-fix-test.js` و `scripts/tasks-inbox-test.js` و `scripts/paid-hours-test.js` و `scripts/caisse-test.js` و `scripts/setup-usernames-test.js` : تيستات.
+- `public/index.html` : الصفحة الرئيسية (التسويق). التطبيق كاين فـ`public/app/index.html`، وبوابة التلميذ فـ`public/portal/index.html`.
+- `scripts/*-test.js` : تيستات محلية (API، واجهة، حماية، ترجمة، وثائق رسمية). أغلبها كتشعل سيرفر مؤقت بوحدها. `api-test.js` و `browser-test.js` و `i18n-test.js` كيحتاجو سيرفر محلي شغال؛ **ما تشيرهمش لسيرفر الإنتاج**. `load-test.js` للضغط المحلي فقط، ما يتفرّش على السيت الحي.
 - `Dockerfile`, `docker-compose.yml`, `ecosystem.config.js` (pm2), `render.yaml` (Render), `.env.example`.
 
 ## التشغيل (4 أوامر)
@@ -213,10 +213,18 @@ curl -H "Authorization: Bearer ADMIN_TOKEN" https://YOUR-APP.onrender.com/api/ad
 كيبقاو آخر 30 ملف فـ`data/backups/`. نقلهم حتى لبلاصة أخرى (rclone / scp) باش إلا طاح السيرفر ما تضيعش الداتا.
 
 ## التيست
+أغلب `scripts/*-test.js` كتشعل سيرفر مؤقت وداتا مؤقتة بوحدها. هادو اللي كيحتاجو سيرفر محلي من قبل (`api-test.js`، `browser-test.js`، `i18n-test.js`) **ما يشيروش لـ https://otoqol.com** ولا لأي مدرسة حقيقية: كيبذّلو الداتا (و`browser-test` كيحتاج مدرسة `demo` خاوية). `load-test.js` محلي فقط، ماشي تيست على السيت الحي.
+
+بعد أول دخول (`admin` + كلمة سر المدرسة)، التطبيق كيسمّي الحسابات `admin_<code>` و`sec_<code>` باش ما يتصادموش مع مدرسة الديمو.
+
 ```bash
+# سيرفر محلي لمدرسة demo خاوية (مثال):
+# SEED_SCHOOL_CODE=demo SEED_SCHOOL_PASSWORD='Demo2026!' DEFAULT_SCHOOL_CODE=demo node src/server.js
+
 ADMIN_TOKEN=... node scripts/api-test.js http://localhost:3000 demo 'Demo2026!'   # بلا ADMIN_TOKEN كيتخطاو تيستات المدرسة الجديدة
-npm i playwright-core && ADMIN_TOKEN=... node scripts/browser-test.js http://localhost:3000   # كيحتاج Chrome، و demo خاوية (كيشعل سيرفر تاني فـport+1 لتيست الاستيراد)
+npm i playwright-core && node scripts/browser-test.js http://localhost:3000       # كيحتاج Chrome، و demo خاوية (كيشعل سيرفر تاني فـport+1 لتيست الاستيراد)
 node scripts/security-test.js                                              # تيستات الحماية (كيشعل سيرفر بوحدو فـ4100)
+node scripts/official-docs-test.js                                         # كناش التكوين وسجل التسجيل
 node scripts/load-test.js 10                                               # تيست الضغط محليا (كيشعل سيرفر بوحدو فـ4200، ما تديروش على السيت)
 node scripts/i18n-test.js http://localhost:3000 demo 'Demo2026!'           # كيدوز على كل الصفحات ف3 لغات (كيبدل الداتا ديال demo بداتا تجريبية)
 node scripts/forgot-password-test.js                                         # تيست نسيت كلمة السر (SMTP وهمي، كيشعل سيرفر بوحدو فـ4300)
@@ -225,6 +233,12 @@ node scripts/dues-test.js                                                    # �
 node scripts/templates-test.js                                               # تيست قوالب الرسائل (كيشعل سيرفر بوحدو فـ4380)
 node scripts/drawer-fix-test.js                                              # تيست عرض القائمة فالهاتف وقفل التمرير (كيشعل سيرفر بوحدو فـ4360)
 ```
+
+## الحماية (ملخص)
+- الجلسة: كوكي `httpOnly` و`SameSite=Strict`، و`Secure` فالإنتاج. الطلبات اللي كتبدّل البيانات على `/api` خاصها هيدر `X-Otoqol: 1` (أو Authorization).
+- العزل: كل جلسة مربوطة بمدرسة واحدة (`sid` فالتوكن). التلميذ ما يقدرش يقرأ `/api/db`. المونيتور كيقرا كناش غير لمترشحيه.
+- الرؤوس: Helmet (CSP، HSTS فالإنتاج، `X-Frame-Options: DENY`، `nosniff`)، وPermissions-Policy مقفول.
+- حد معروف ومقبول: الواجهة كتستعمل Babel فالنتصفح، لذلك CSP فيها `'unsafe-inline'` و`'unsafe-eval'`. ما نجمّعوش الواجهة مسبقاً فهاد النسخة.
 
 ## حدود خاص تعرفها
 - الداتا ديال المدرسة كتتحفظ بلوك JSON واحد. مزيان لمدرسة (حتى آلاف المترشحين)، ولكن ماشي قاعدة بيانات بجداول.
